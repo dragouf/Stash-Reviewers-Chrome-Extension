@@ -2,7 +2,7 @@ Stash Reviewers chrome extension
 ==================
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/dragouf/StashReviewersChromeExtension/master/docs/launch.png" alt="extension art" />
+<img src="https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/master/docs/launch.png" alt="extension art" />
 </p>
 
 This chrome extension allow to define groups of reviewers in Atlassian Stash to bulk add them when creating or updating pull request.
