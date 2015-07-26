@@ -1,0 +1,42 @@
+{
+	"manifest_version": 2,
+	"name": "Stash Reviewers",
+	"description": "Allow to add group of reviewers for pull request in stash",
+	"version": "1.2",
+	"permissions": [
+		"storage"
+	],
+	"icons": { 
+		"16": "img/stash19.png",
+		"48": "img/stash48.png",
+		"128": "img/stash148.png" 
+	},
+	"browser_action": {
+		"default_icon": {                    
+			"19": "img/stash48.png",          
+			"38": "img/stash48.png"          
+		},
+		"default_popup": "popup.html"
+	},
+	"content_scripts": [
+    {
+      "all_frames": true,
+      "js": [
+      	"js/jquery-2.0.3.min.js",
+      	"js/storage.js",
+      	"js/injector_loader.js"
+      ],
+      "matches": [
+        "http://*/*/pull-requests?create*",
+        "https://*/*/pull-requests?create*",
+
+        "http://*/*/pull-requests/*/overview*",
+        "https://*/*/pull-requests/*/overview*"
+      ]
+    }
+  ],
+	"web_accessible_resources": [
+		"js/stash_page_injector.js",
+		"js/default.json"
+	]
+}
