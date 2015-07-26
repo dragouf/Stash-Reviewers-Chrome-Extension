@@ -1,4 +1,4 @@
-Stash Reviewers chrome extension
+Stash Reviewers - Chrome Extension
 ==================
 
 <p align="center">
