@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Stash Reviewers Groups">
+  <meta name="author" content="David LAURENT">
+  
+  <title>Stash Reviewers Groups</title>
+  
+  <!-- Scripts -->
+  <script src="js/jquery-2.0.3.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  
+  <!-- Cascading Style Sheets -->
+  <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="css/custom.css" rel="stylesheet" media="screen">	
+</head>
+
+<body>
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <img src="img/stash148.png" class="logo" alt="" style="width:48px;height:48px;" />
+            <span class="title">Stash Reviewers Groups</span>
+          </div>          
+        </div>
+      </nav>
+      <div class="container content">
+
+      <div class="alert alert-info" role="alert">
+        <span class="block">Json format:</span>          
+        <code>{ "groups": [{ "groupName":"group name", "reviewers": ["reviewer 1 name or email", "reviewer 2 name or email"] } ] }</code>
+      </div>
+      
+      <div>
+          <div class="form-group">
+            <label for="json">json:</label>
+            <textarea class="form-control" rows="5" id="text_json"></textarea>
+          </div>
+          
+          <span class="pull-left" style="font-size:xx-small">source: <a href="https://goo.gl/xfvvxF">https://goo.gl/xfvvxF</a></span>
+          <button type="button" class="btn btn-primary pull-right" id="bt_save">save</button>
+      </div>   
+
+    </div> <!-- /container --> 
+    
+    <script src="js/storage.js"></script>
+    <script src="js/popup.js"></script>
+</body>
+</html>

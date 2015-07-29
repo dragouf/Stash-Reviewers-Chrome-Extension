@@ -1,0 +1,25 @@
+{ "groups": [ { 
+    "groupName":"desktop reviewers", 
+    "reviewers": ["chunya.yang@rakuten.com", 
+                "emmylia.lee@rakuten.com", 
+                "indra.wicaksono@rakuten.com", 
+                "seinan.shu@rakuten.com", 
+                "tarun.kurapati@rakuten.com",
+                "ts-maya.nitadori@rakuten.com",
+                "ts-kiju.saijo@rakuten.com",
+                "ts-satoshi.moriwaki@rakuten.com",
+                "thomas.brennetot@rakuten.com" ] 
+  },
+  { 
+    "groupName":"mobile reviewers", 
+    "reviewers": ["chunya.yang@rakuten.com", 
+                "emmylia.lee@rakuten.com", 
+                "indra.wicaksono@rakuten.com", 
+                "seinan.shu@rakuten.com", 
+                "tarun.kurapati@rakuten.com",
+                "ts-maya.nitadori@rakuten.com",
+                "ts-kiju.saijo@rakuten.com",
+                "ts-satoshi.moriwaki@rakuten.com",
+                "thomas.brennetot@rakuten.com",
+                "Cortland Klein" ] 
+  } ] }

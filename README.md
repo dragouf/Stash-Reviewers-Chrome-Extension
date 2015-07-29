@@ -1,19 +1,25 @@
-Stash Reviewers - Chrome Extension
+Stash Reviewers Groups - Extension
 ==================
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/master/docs/launch.png" alt="extension art" />
 </p>
 
-This chrome extension allow to define groups of reviewers in Atlassian Stash to bulk add them when creating or updating pull request.
+This chrome/firefox extension allow to define groups of reviewers in Atlassian Stash to bulk add them when creating or updating pull request.
 
 ### Installation
 
+#### Chrome
 In chrome extensions manager check the "Developer Mode" checkbox and then click on "Load unpacked extension" button.
 
-From there choose the extension/src folder of this repository.
+From there choose the extension/chrome/src folder of this repository.
 
 Extension will be loaded.
+
+#### Firefox
+Go to extensions panel and click on the tools icon on the right next to the search field and select : Install add-on from file.
+
+Then browse extension/firefox/dist and select the xpi file.
 
 ### Configuration
 
