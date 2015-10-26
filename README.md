@@ -35,7 +35,7 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian S
 
 #### Chrome
 - clone this repository
-- search for <your_stash_domain_here> and replace with the correct stash url
+- search for &lt;your_stash_domain_here&gt; and replace with the correct stash url
 - Go to chrome settings->extensions (extension manager) 
 - Check the "Developer Mode" checkbox
 - Click on "Load unpacked extension" button.
@@ -43,7 +43,7 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian S
 
 #### Firefox
 - download last .xpi according to version number
-- open .xpi file with a zip tool like 7zip and replace <your_stash_domain_here> in main.js with the correct stash url
+- open .xpi file with a zip tool like 7zip and replace &lt;your_stash_domain_here&gt; in main.js with the correct stash url
 - go to extensions panel and click on the tools icon on the right next to the search field and select : Install add-on from file.
 - then browse extension/firefox/dist and select the xpi file.
 
