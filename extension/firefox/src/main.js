@@ -15,27 +15,35 @@ var button = ToggleButton({
   });
 
 pageMod.PageMod({
-  include: /.*pull-requests.*/,
+  include: [/.*<yourstashsubdomain>\.<your_stash_domain_here>\.<your_stash_extension>.*/], // TODO : ADD YOUR STASH DOMAIN HERE. REPLACE <your_stash_domain_here> and <yourstashsubdomain> and <your_stash_extension>
   contentScriptWhen: "ready",
   contentScriptOptions: {
-    injectorUrl: self.data.url("js/stash_page_injector.js")
+    injectorUrl: self.data.url("js/stash_page_injector.js"),
+    cssUrl: self.data.url("css/page_injection.css"),
   },
-  contentScript: "console.log('hee');",
   contentScriptFile: [self.data.url("js/jquery-2.0.3.min.js"), self.data.url("js/storage.js"),self.data.url("js/injector_loader.js")],
   onAttach: function(worker) {
-      worker.port.on('storageSave', function(data) {
-        storage.save(data);
+      worker.port.on('storageGroupsSave', function(data) {
+        storage.saveGroups(data);
       });
 
-      worker.port.on('storageLoad', function() {
-        worker.port.emit('storageLoaded', storage.load());
+      worker.port.on('storageGroupsLoad', function() {
+        worker.port.emit('storageGroupsLoaded', storage.loadGroups());
+      }, false);
+
+      worker.port.on('storageHipchatSave', function(data) {
+        storage.saveHipchat(data);
+      });
+
+      worker.port.on('storageHipchatLoad', function() {
+        worker.port.emit('storageHipchatLoaded', storage.loadHipchat());
       }, false);
   }
 });
 
 var panel = panels.Panel({
   width: 400,
-  height: 435,
+  height: 500,
   contentScriptWhen: "ready",  
   contentStyleFile:[self.data.url("css/bootstrap.min.css"),self.data.url("css/custom.css")],
   contentScriptFile:[self.data.url("js/jquery-2.0.3.min.js"),self.data.url("js/bootstrap.min.js"),self.data.url("js/storage.js"),self.data.url("js/popup.js")],
@@ -58,35 +66,44 @@ function handleHide() {
 
 var storage = (function() { 
     const REVIEWERS_KEY = 'stashplugin.groups_reviewers';
+    const HIPCHAT_KEY = 'stashplugin.hipchat';
 
-    /**
-        @method
-        @memberof storage
-        @see {@link https://developer.chrome.com/apps/storage#type-StorageArea|StorageArea.set}
-    */
-    function save(string) {
+    function saveGroups(string) {
         ffStorage.storage[REVIEWERS_KEY] = string
     }
 
-    /**
-        @method
-        @memberof storage
-        @see {@link https://developer.chrome.com/apps/storage#type-StorageArea|StorageArea.get}
-    */
-    function load() {
+    function loadGroups() {
         return ffStorage.storage[REVIEWERS_KEY];
     }
 
+    function saveHipchat(string) {
+        ffStorage.storage[HIPCHAT_KEY] = string
+    }
+
+    function loadHipchat() {
+        return ffStorage.storage[HIPCHAT_KEY];
+    }
+
     return {
-        save: save,
-        load: load
+        saveGroups: saveGroups,
+        loadGroups: loadGroups,
+        saveHipchat: saveHipchat,
+        loadHipchat: loadHipchat
     };
 })();
 
-panel.port.on('storageSave', function(data) {
-  storage.save(data);
+panel.port.on('storageGroupsSave', function(data) {
+  storage.saveGroups(data);
 });
 
-panel.port.on('storageLoad', function() {
-  panel.port.emit('storageLoaded', storage.load());
+panel.port.on('storageGroupsLoad', function() {
+  panel.port.emit('storageGroupsLoaded', storage.loadGroups());
+}, false);
+
+panel.port.on('storageHipchatSave', function(data) {
+  storage.saveHipchat(data);
+});
+
+panel.port.on('storageHipchatLoad', function() {
+  panel.port.emit('storageHipchatLoaded', storage.loadHipchat());
 }, false);

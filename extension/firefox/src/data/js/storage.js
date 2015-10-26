@@ -1,13 +1,11 @@
-window.storage = (function() { 
-    const REVIEWERS_KEY = 'stashplugin.groups_reviewers';
-
+window.storage = (function() {
     /**
         @method
         @memberof storage
         @see {@link https://developer.chrome.com/apps/storage#type-StorageArea|StorageArea.set}
     */
-    function save(string, callback) {
-        self.port.emit("storageSave", string);
+    function saveGroups(string, callback) {
+        self.port.emit("storageGroupsSave", string);
         if(callback)
             callback();
     }
@@ -17,17 +15,34 @@ window.storage = (function() {
         @memberof storage
         @see {@link https://developer.chrome.com/apps/storage#type-StorageArea|StorageArea.get}
     */
-    function load(callback) {
+    function loadGroups(callback) {
         if (callback) {             
-            self.port.emit("storageLoad");
-            self.port.on('storageLoaded', function(data) {
+            self.port.emit("storageGroupsLoad");
+            self.port.on('storageGroupsLoaded', function(data) {
+                callback(data);
+            });
+        }
+    }
+
+    function saveHipChatUsername(string, callback) {
+        self.port.emit("storageHipchatSave", string);
+        if(callback)
+            callback();
+    }
+
+    function loadHipChatUsername(callback) {
+        if (callback) {             
+            self.port.emit("storageHipchatLoad");
+            self.port.on('storageHipchatLoaded', function(data) {
                 callback(data);
             });
         }
     }
 
     return {
-        save: save,
-        load: load
+        saveGroups: saveGroups,
+        loadGroups: loadGroups,
+        loadHipChatUsername: loadHipChatUsername,
+        saveHipChatUsername: saveHipChatUsername
     };
 })();
