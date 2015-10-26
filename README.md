@@ -49,6 +49,11 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian S
 
 ### Configuration
 
+##### Enable/Disable features
+If you want to enable/disable feature in code go to file js/stash_page_injector.js from line 1458 and comment out features you don't want. 
+All features are called from this line to the end. Begining of the file should not be edited.
+
+##### Configure reviewers groups
 A "Stash" icon will appear on the top right corner of chrome window. Click on it. It will ask you to add a json to describe which group you want to create with which reviewers.
 
 ![GitHub Logo](/docs/configuration_resized.png)
@@ -69,9 +74,6 @@ Json format is as follow :
 After that when you will go to pull request creation page or update page a dropdown will appear after reviewers list with a list of groups you defined.
 
 ![GitHub Logo](/docs/add_group.png)
-
-**- If you want to enable/disable feature in code go to file js/stash_page_injector.js from line 1458 and comment out features you don't want. 
-All features are called from this line to the end. Begining of the file should not be edited.**
 
 **Note**: the extension will make a stash api request to find reviewers. It will simply send the string you added in the reviewers array as search term. Normally if you add email or username as recommanded API should return only one user. You can also enter a name but in this case if the API return more than one user, only the first one will be added.
 
