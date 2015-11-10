@@ -411,6 +411,10 @@
 	  	function addCheckoutLink() {
 			var pr = pageState.getPullRequest();
 
+			if (!pr.fromRef.repository.project.owner) {
+				return;
+			}
+			
 			var cloneUrl;
 			var repoName = pr.fromRef.repository.name;			
 			var branchOrigin = pr.fromRef.displayId;

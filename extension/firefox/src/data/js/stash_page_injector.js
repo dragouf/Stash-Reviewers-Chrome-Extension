@@ -411,6 +411,10 @@
 	  	function addCheckoutLink() {
 			var pr = pageState.getPullRequest();
 
+			if (!pr.fromRef.repository.project.owner) {
+				return;
+			}
+			
 			var cloneUrl;
 			var repoName = pr.fromRef.repository.name;			
 			var branchOrigin = pr.fromRef.displayId;
@@ -1449,79 +1453,94 @@
 		if(typeof require === 'undefined')
 			return;
 
-		var pageState = require('stash/api/util/state');
-		var user = pageState.getCurrentUser();
-		var project = pageState.getProject();
-		var repository = pageState.getRepository();
-		var pullRequest = pageState.getPullRequest();
+		var pageState;
+		var loadRequirement = jQuery.Deferred();
 
-		if(user) {
-			require(['stash-plugin/header-notification'], function(notification) {
-				notification.addMessagesToolbarIcon();
+		try {
+			pageState = require('stash/api/util/state');
+			loadRequirement.resolve();
+		}
+		catch (ex) {
+			WRM.require("wr!" + 'com.atlassian.stash.stash-web-api:state').then(function(){
+				pageState = require('stash/api/util/state');
+				loadRequirement.resolve();
+			});
+		}
+		
+		jQuery.when(loadRequirement).done(function(){		
+			var user = pageState.getCurrentUser();
+			var project = pageState.getProject();
+			var repository = pageState.getRepository();
+			var pullRequest = pageState.getPullRequest();
 
-				if(!project) {
-					// main page
-				}
-				else if(project && !repository) {
-					// project page
-				}
-				else if(project && repository && !pullRequest) {
-					// repository page
-					
-					// PR sticker on branch details page
-					require(['stash-plugin/branch-details-page', 'stash/api/util/events'], function(branchUtils, events){
-						branchUtils.addForkOriginLink();
-						branchUtils.loadPRStickers();
-					    events.on('stash.layout.branch.revisionRefChanged', function(e) {
-					      jQuery('#pr-status-wrapper').remove();
-					      var branchId = e.attributes.id;
-					      branchUtils.loadPRStickers(branchId);
-						});
-					});
+			if(user) {
+				require(['stash-plugin/header-notification'], function(notification) {
+					notification.addMessagesToolbarIcon();
 
-					// PR Reviewers groups (create page)
-					require(['stash-plugin/pullrequest-create-page', 'aui'], function(prCreateUtil, AJS){ 
-						prCreateUtil.injectReviewersDropdown(jsonGroups);						
-					});
-
-					// PR Filter
-					try {
-						// are we on the pull request list page ? raise exception if not
-				    	require('feature/pull-request/pull-request-table'); 
-
-				    	// load missing resources
-				    	var selectorRes = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:searchable-multi-selector');
-						var userRes = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:user-multi-selector');
-						var branchSelector = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:repository-branch-selector');
-
-						jQuery.when(selectorRes, userRes, branchSelector).done(function() {	
-							require(['stash-plugin/pullrequest-list-page'], function(prListUtil){
-								prListUtil.addPrFilters();
+					if(!project) {
+						// main page
+					}
+					else if(project && !repository) {
+						// project page
+					}
+					else if(project && repository && !pullRequest) {
+						// repository page
+						
+						// PR sticker on branch details page
+						require(['stash-plugin/branch-details-page', 'stash/api/util/events'], function(branchUtils, events){
+							branchUtils.addForkOriginLink();
+							branchUtils.loadPRStickers();
+						    events.on('stash.layout.branch.revisionRefChanged', function(e) {
+						      jQuery('#pr-status-wrapper').remove();
+						      var branchId = e.attributes.id;
+						      branchUtils.loadPRStickers(branchId);
 							});
 						});
-				 	}
-				 	catch(e) {}
-				}
-				else if (pullRequest) {
-					require(['stash-plugin/pullrequest-details-page', 'stash-plugin/pullrequest-create-page'], function(prDetailsPage, prCreateUtil){
-						// Jenkins build link
-						//prDetailsPage.addBuildLink();
-						// Clickable branch info
-						prDetailsPage.attachNavigateToBranchLink();
-						// Add checkout command link
-						prDetailsPage.addCheckoutLink();
-						// add conflict warning message
-						prDetailsPage.displayConflicts();
-						// Change notification read state
-						notification.markActivitiesAsReadWhenPullRequestOpened();
-						// Reviewers groups (edit page)
-						AJS.bind("show.dialog", function() {
-						  	prCreateUtil.injectReviewersDropdown(jsonGroups);
+
+						// PR Reviewers groups (create page)
+						require(['stash-plugin/pullrequest-create-page', 'aui'], function(prCreateUtil, AJS){ 
+							prCreateUtil.injectReviewersDropdown(jsonGroups);						
 						});
-					});
-				}
-			});
-		}	
+
+						// PR Filter
+						try {
+							// are we on the pull request list page ? raise exception if not
+					    	require('feature/pull-request/pull-request-table'); 
+
+					    	// load missing resources
+					    	var selectorRes = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:searchable-multi-selector');
+							var userRes = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:user-multi-selector');
+							var branchSelector = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:repository-branch-selector');
+
+							jQuery.when(selectorRes, userRes, branchSelector).done(function() {	
+								require(['stash-plugin/pullrequest-list-page'], function(prListUtil){
+									prListUtil.addPrFilters();
+								});
+							});
+					 	}
+					 	catch(e) {}
+					}
+					else if (pullRequest) {
+						require(['stash-plugin/pullrequest-details-page', 'stash-plugin/pullrequest-create-page'], function(prDetailsPage, prCreateUtil){
+							// Jenkins build link
+							//prDetailsPage.addBuildLink();
+							// Clickable branch info
+							prDetailsPage.attachNavigateToBranchLink();
+							// Add checkout command link
+							prDetailsPage.addCheckoutLink();
+							// add conflict warning message
+							prDetailsPage.displayConflicts();
+							// Change notification read state
+							notification.markActivitiesAsReadWhenPullRequestOpened();
+							// Reviewers groups (edit page)
+							AJS.bind("show.dialog", function() {
+							  	prCreateUtil.injectReviewersDropdown(jsonGroups);
+							});
+						});
+					}
+				});
+			}
+		});	
 	//});
 }());
 // Note: to see all stash events add ?eve=* to URL
