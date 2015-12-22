@@ -47,6 +47,8 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian S
 - go to extensions panel and click on the tools icon on the right next to the search field and select : Install add-on from file.
 - then browse extension/firefox/dist and select the xpi file.
 
+Note: if ff version is greater than 41 you will have to change xpinstall.signatures.required value to false in about:config page.
+
 ### Configuration
 
 ##### Enable/Disable features
