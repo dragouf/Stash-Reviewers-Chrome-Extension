@@ -1,8 +1,8 @@
 {
 	"manifest_version": 2,
-	"name": "Stash Reviewers",
-	"description": "Allow to add group of reviewers for pull request in stash",
-	"version": "1.5.6",
+	"name": "Bitbucket Server Reviewers",
+	"description": "Allow to add group of reviewers for pull request in bitbucker server",
+	"version": "1.6.0",
 	"permissions": [
 		"storage",
     	"alarms",

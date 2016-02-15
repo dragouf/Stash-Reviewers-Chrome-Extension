@@ -2,20 +2,41 @@
 	if(typeof define === 'undefined')
 		return;
 	
-	define('stash-plugin/branch-details-page', [
+	define('bitbucket-plugin/url', function(){
+		function getSiteBaseURl() {
+	  		return location.protocol + '//' + location.host;
+	  	}
+
+	  	function buildSlug(pageState) {
+	  		if(pageState.links && pageState.links.self) {
+	  			return pageState.links.self[0].href.replace(getSiteBaseURl(), '');
+	  		}
+	  		else return '';
+	  		
+	  	}
+
+	  	return {
+			getSiteBaseURl: getSiteBaseURl,
+			buildSlug: buildSlug
+		}
+	});
+
+	define('bitbucket-plugin/branch-details-page', [
 	    'aui',
 	    'aui/flag',
 	    'jquery',
 	    'lodash',
-	    'util/events',
-	    'stash/api/util/state'
+	    'bitbucket/util/events',
+	    'bitbucket/util/state',
+	    'bitbucket-plugin/url'
 	], function (
 	    AJS,
 	    auiFlag,
 	    jQuery,
 	    _,
 	    events,
-	    pageState
+	    pageState,
+	    urlUtil
 	) {
 		'use strict';
 		//////////////////////////////////////////////////// Display PRs status on branch page
@@ -24,18 +45,20 @@
 		    var repository = pageState.getRepository();
 		    var ref = pageState.getRef();
 		    var branchId = branchRefId || ref.id;
-		    if(!project || !project.link) {
+		    if(!project || !project.links) {
+		    	console.info('no project link');
 		    	return;
 		    }
-		    var projectUrl = project.link.url;
+		    var projectUrl = urlUtil.buildSlug(project);
 		    var repoUrl = "repos/" + repository.slug;
 
 		    if(!ref || !ref.repository || !ref.repository.origin) {
+		    	console.info('no repository origin');
 		    	return;
 		    }
 
 		    // get project origin from ref and get PR with branch name
-		    var projectOriginUrl = ref.repository.origin.link.url.replace('/browse', '');
+		    var projectOriginUrl = urlUtil.buildSlug(ref.repository.origin).replace('/browse', '');
 		    projectOriginUrl = projectUrl + '/' + repoUrl;
 
 		    var getPRs = function(from, size, projectOriginUrl, fqBranchName) {
@@ -77,16 +100,16 @@
 			  jQuery('.aui-toolbar2-secondary').prepend($wrapper);
 			  
 		      prs.forEach(function(pr){
-		        var commentsCount = pr.attributes.commentCount ? pr.attributes.commentCount[0] : 0;
-		        var resolvedTaskCount = pr.attributes.resolvedTaskCount ? pr.attributes.resolvedTaskCount[0] : 0;
-		        var openTaskCount = pr.attributes.openTaskCount ? parseInt(pr.attributes.openTaskCount[0]) + parseInt(resolvedTaskCount) : 0;
+		        var commentsCount = (pr.properties && pr.properties.commentCount) ? pr.properties.commentCount : 0;
+		        var resolvedTaskCount = (pr.properties && pr.properties.resolvedTaskCount) ? pr.properties.resolvedTaskCount : 0;
+		        var openTaskCount = (pr.properties && pr.properties.openTaskCount) ? parseInt(pr.properties.openTaskCount) + parseInt(resolvedTaskCount) : 0;
 		        var dest = pr.toRef ? pr.toRef.displayId : '';
 
 		        var title = 'branch: ' + dest + ' | comments: ' + commentsCount + ' | tasks: ' + resolvedTaskCount + ' / ' + openTaskCount + ' | PR: ' + pr.title;
 		        var $a = jQuery('<a>',{
 		            text: pr.state,
 		            title: title,
-		            href: pr.link.url,
+		            href: urlUtil.buildSlug(pr),
 		            class: 'aui-lozenge declined aui-lozenge-subtle pull-request-list-trigger pull-request-state-lozenge'
 		        });
 		        if(pr.state === 'OPEN'){
@@ -110,8 +133,8 @@
 
 		function addForkOriginLink(branchRefId) {
 		    var repository = pageState.getRepository();
-		    if(repository && repository.origin && repository.origin.link && repository.origin.link.url) {
-			    var $link = jQuery('<a style="font-size: small;margin-left:10px;">forked from '+repository.origin.project.key+ '/' +repository.origin.name+'</a>').attr('href', repository.origin.link.url);
+		    if(repository && repository.origin && repository.origin.links && urlUtil.buildSlug(repository.origin)) {
+			    var $link = jQuery('<a style="font-size: small;margin-left:10px;">forked from '+repository.origin.project.key+ '/' +repository.origin.name+'</a>').attr('href', urlUtil.buildSlug(repository.origin));
 			    jQuery('h2.page-panel-content-header').append($link);
 			}
 		}
@@ -122,13 +145,13 @@
 		}
 	});
 
-	define('stash-plugin/pullrequest-create-page', [
+	define('bitbucket-plugin/pullrequest-create-page', [
 	    'aui',
 	    'aui/flag',
 	    'jquery',
 	    'lodash',
-	    'util/events',
-	    'stash/api/util/state'
+	    'bitbucket/util/events',
+	    'bitbucket/util/state'
 	], function (
 	    AJS,
 	    auiFlag,
@@ -306,20 +329,22 @@
 		}
 	});
 
-	define('stash-plugin/pullrequest-details-page', [
+	define('bitbucket-plugin/pullrequest-details-page', [
 	    'aui',
 	    'aui/flag',
 	    'jquery',
 	    'lodash',
-	    'util/events',
-	    'stash/api/util/state'
+	    'bitbucket/util/events',
+	    'bitbucket/util/state',
+	    'bitbucket-plugin/url'
 	], function (
 	    AJS,
 	    auiFlag,
 	    jQuery,
 	    _,
 	    events,
-	    pageState
+	    pageState,
+	    urlUtil
 	) {
 		'use strict';
 		//////////////////////////////////////////////////// Build with jenkins link
@@ -394,14 +419,14 @@
 
 	  		var $branchOriginSpan = jQuery('.source-branch');  		
 	  		if ($branchOriginSpan.length) {	  		
-				var urlFrom = pr.fromRef.repository.link.url;
+				var urlFrom = urlUtil.buildSlug(pr.fromRef.repository);
 				urlFrom += '?at=' + pr.fromRef.id;
 				$branchOriginSpan.css('cursor', 'pointer').click(function(){ window.location.href = urlFrom; }).data('url', urlFrom);
 			}
 
 			var $branchDestinationSpan = jQuery('.target-branch');
 	  		if ($branchDestinationSpan.length) {
-				var urlTo = pr.toRef.repository.link.url;
+				var urlTo = urlUtil.buildSlug(pr.toRef.repository);
 				urlTo += '?at=' + pr.toRef.id;
 				$branchDestinationSpan.css('cursor', 'pointer').click(function(){ window.location.href = urlTo; }).data('url', urlTo);
 			}
@@ -412,6 +437,7 @@
 			var pr = pageState.getPullRequest();
 
 			if (!pr.fromRef.repository.project.owner) {
+				console.info('no rights to display checkout dropdown');
 				return;
 			}
 			
@@ -515,7 +541,7 @@
 	  		var pr = pageState.getPullRequest();
 
 	  		// get pr changes details
-	  		var url = '/rest/api/1.0' +  pr.link.url + '/changes'
+	  		var url = '/rest/api/1.0' +  urlUtil.buildSlug(pr) + '/changes'
 
 	  		jQuery.get(url).done(function(prDetails) {
 	  			var conflictsCount = 0;
@@ -545,16 +571,17 @@
 	  	}
 	});
 
-	define('stash-plugin/header-notification', [
+	define('bitbucket-plugin/header-notification', [
 	    'aui',
 	    'aui/flag',
 	    'jquery',
 	    'lodash',
-	    'util/events',
-	    'stash/api/util/state',
-	    'stash/api/util/navbuilder',
-	    'util/ajax',
-	    'moment'
+	    'bitbucket/util/events',
+	    'bitbucket/util/state',
+	    'bitbucket/util/navbuilder',
+	    'bitbucket/util/server',
+	    'moment',
+	    'bitbucket-plugin/url'
 	], function (
 	    AJS,
 	    auiFlag,
@@ -564,7 +591,8 @@
 	    pageState,
 	    nav,
 	    ajax,
-	    moment
+	    moment,
+	    urlUtil
 	) {
 		'use strict';
 		String.prototype.toBool = function(){
@@ -574,7 +602,7 @@
 		var NotificationType = { badge:'badge_', panel: 'panel_' };
 
 	  	//////////////////////////////////////////////////// Toolbar icon functions
-	  	var deferredPrRequest;
+	  	var deferredPrRequest;	  	
 
 	  	function filterAnOrderActivities(activities) {
 	  		var user = pageState.getCurrentUser();
@@ -623,7 +651,7 @@
 			  var requests = [];
 			  // loop through PRs and request activities
 			  allPR.forEach(function(pr){
-			    requests.push(jQuery.get('/rest/api/1.0' + pr.link.url + '/activities?avatarSize=96').done(function(activityList){
+			    requests.push(jQuery.get('/rest/api/1.0' + urlUtil.buildSlug(pr) + '/activities?avatarSize=96').done(function(activityList){
 			    	// get comments after PR was updated
 			    	jQuery.each(activityList.values, function(index, activity){
 						jQuery.extend(activity, { pullrequest: pr });
@@ -813,7 +841,7 @@
 				var $msgRow = jQuery('<td class="comment message markup">'+activity.comment.text+'</td>');
 				var $userRow = jQuery('<td class="author">'+activity.comment.author.name+'</td>');
 				var $countRow = jQuery('<td class="comment-count"></td>');
-				var $prRow = jQuery('<td class="title"><a href="'+activity.pullrequest.link.url+'/overview?commentId='+activity.comment.id+'" title="{'+activity.pullrequest.author.user.name+'} '+activity.pullrequest.title+'">'+activity.pullrequest.title+'</a></td>');
+				var $prRow = jQuery('<td class="title"><a href="'+ urlUtil.buildSlug(activity.pullrequest) +'/overview?commentId='+activity.comment.id+'" title="{'+activity.pullrequest.author.user.name+'} '+activity.pullrequest.title+'">'+activity.pullrequest.title+'</a></td>');
 				var $updatedRow = jQuery('<td class="comment-count"></td>').html(moment(activity.activityDate).fromNow());
 
 				var isLineUnread = hasUnreadActivities(activity, NotificationType.panel);
@@ -825,7 +853,7 @@
 				});
 				
 				// avatar
-				var $avatar = jQuery(stash.widget.avatar({
+				var $avatar = jQuery(bitbucket.internal.widget.avatar({
 	                size: 'small',
 	                person: activity.comment.author,
 	                tooltip: activity.comment.author.displayName
@@ -1020,11 +1048,7 @@
 	        }
 
 	        return inlineDialog;
-	  	}
-	  	
-	  	function getSiteBaseURl() {
-	  		return location.protocol + '//' + location.host;
-	  	}
+	  	}	
 
 	  	function displayDesktopNotification(activities) {
 	  		if(Notification.permission !== "granted") {
@@ -1048,7 +1072,7 @@
 				    });
 
 				    notification.onclick = function () {
-				      window.open(getSiteBaseURl() + activity.pullrequest.link.url + '/overview?commentId=' + activity.comment.id);
+				      window.open(urlUtil.getSiteBaseURl() + urlUtil.buildSlug(activity.pullrequest) + '/overview?commentId=' + activity.comment.id);
 				    };				    
 				}
 
@@ -1071,7 +1095,7 @@
 					    });
 
 					    notification.onclick = function () {
-					      window.open(getSiteBaseURl() + activity.pullrequest.link.url + '/overview?commentId=' + activity.comment.id);    
+					      window.open(urlUtil.getSiteBaseURl() + urlUtil.buildSlug(activity.pullrequest) + '/overview?commentId=' + activity.comment.id);    
 					    };
 					}
 				    
@@ -1101,7 +1125,7 @@
 			// periodically poll server for update
 			if (typeof chromeExtId !== 'undefined') {
 				// use background worker to centralized request and avoid to much server queries				
-				chrome.runtime.sendMessage(chromeExtId, { action: 'setUrl', url: getSiteBaseURl() });
+				chrome.runtime.sendMessage(chromeExtId, { action: 'setUrl', url: urlUtil.getSiteBaseURl() });
 				document.addEventListener('ActivitiesRetrieved', function (eventArgs) {			
 					var activities = filterAnOrderActivities(eventArgs.detail.activities);
 					if (deferredPrRequest.state() !== 'pending') {
@@ -1137,15 +1161,15 @@
 	  	}
 	});
 
-	define('stash-plugin/pullrequest-list-page', [
+	define('bitbucket-plugin/pullrequest-list-page', [
 	    'aui',
 	    'aui/flag',
 	    'jquery',
 	    'lodash',
-	    'util/events',
-	    'util/ajax',
-	    'stash/api/util/state',
-	    'stash/api/util/navbuilder',
+	    'bitbucket/util/events',
+	    'bitbucket/util/server',
+	    'bitbucket/util/state',
+	    'bitbucket/util/navbuilder',
 	    'feature/pull-request/pull-request-table',
 	    'widget/searchable-multi-selector',
 	    'feature/user/user-multi-selector',
@@ -1185,7 +1209,7 @@
 		            .withParams({
 		                start: start,
 		                limit: limit,
-		                avatarSize: stash.widget.avatarSizeInPx({ size: 'medium' }),
+		                avatarSize: bitbucket.internal.widget.avatarSizeInPx({ size: 'medium' }),
 		                withAttributes: true
 		            });
 
@@ -1297,7 +1321,7 @@
 
 		    // inject filter UI
 		    var urlParams = {
-		        avatarSize: stash.widget.avatarSizeInPx({ size: 'xsmall' }),
+		        avatarSize: bitbucket.internal.widget.avatarSizeInPx({ size: 'xsmall' }),
 		        permission: 'LICENSED_USER' // filter out non-licensed users
 		    };
 		    var dataSource = new SearchableMultiSelector.PagedDataSource(nav.rest().users().build(), urlParams);
@@ -1394,12 +1418,12 @@
 		        pullRequestTable.update();
 		    });
 
-		    events.on('stash.feature.repository.revisionReferenceSelector.revisionRefChanged', function(e) {
+		    events.on('bitbucket.internal.feature.repository.revisionReferenceSelector.revisionRefChanged', function(e) {
 		    	pullRequestTable.prSource = e.id;
 		        pullRequestTable.update();
 		    });
 
-		    events.on('stash.feature.pullRequestsTable.contentAdded', function(data) {
+		    events.on('bitbucket.internal.feature.pullRequestsTable.contentAdded', function(data) {
 		    	var $previousStickers = jQuery('#totalResultStamp');
 		    	
 		    	var previousSize = 0;
@@ -1416,7 +1440,7 @@
 		    	jQuery('#prSourceSelector').after($stamps);
 		    });
 		    
-		    events.on('stash.widget.pagedscrollable.dataLoaded', function(start, limit, data) {
+		    events.on('bitbucket.internal.widget.pagedscrollable.dataLoaded', function(start, limit, data) {
 		    	if (start !== 0) {
 		    		return;
 		    	}
@@ -1457,12 +1481,12 @@
 		var loadRequirement = jQuery.Deferred();
 
 		try {
-			pageState = require('stash/api/util/state');
+			pageState = require('bitbucket/util/state');
 			loadRequirement.resolve();
 		}
 		catch (ex) {
-			WRM.require("wr!" + 'com.atlassian.stash.stash-web-api:state').then(function(){
-				pageState = require('stash/api/util/state');
+			WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web-api:state').then(function(){
+				pageState = require('bitbucket/util/state');
 				loadRequirement.resolve();
 			});
 		}
@@ -1474,7 +1498,7 @@
 			var pullRequest = pageState.getPullRequest();
 
 			if(user) {
-				require(['stash-plugin/header-notification'], function(notification) {
+				require(['bitbucket-plugin/header-notification'], function(notification) {
 					notification.addMessagesToolbarIcon();
 
 					if(!project) {
@@ -1487,10 +1511,10 @@
 						// repository page
 						
 						// PR sticker on branch details page
-						require(['stash-plugin/branch-details-page', 'stash/api/util/events'], function(branchUtils, events){
+						require(['bitbucket-plugin/branch-details-page', 'bitbucket/util/events'], function(branchUtils, events){
 							branchUtils.addForkOriginLink();
 							branchUtils.loadPRStickers();
-						    events.on('stash.layout.branch.revisionRefChanged', function(e) {
+						    events.on('bitbucket.internal.layout.branch.revisionRefChanged', function(e) {
 						      jQuery('#pr-status-wrapper').remove();
 						      var branchId = e.attributes.id;
 						      branchUtils.loadPRStickers(branchId);
@@ -1498,7 +1522,7 @@
 						});
 
 						// PR Reviewers groups (create page)
-						require(['stash-plugin/pullrequest-create-page', 'aui'], function(prCreateUtil, AJS){ 
+						require(['bitbucket-plugin/pullrequest-create-page', 'aui'], function(prCreateUtil, AJS){ 
 							prCreateUtil.injectReviewersDropdown(jsonGroups);						
 						});
 
@@ -1508,12 +1532,12 @@
 					    	require('feature/pull-request/pull-request-table'); 
 
 					    	// load missing resources
-					    	var selectorRes = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:searchable-multi-selector');
-							var userRes = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:user-multi-selector');
-							var branchSelector = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:repository-branch-selector');
+					    	var selectorRes = WRM.require("wr!" + 'com.atlassian.bitbucket.bitbucket-web-plugin:searchable-multi-selector');
+							var userRes = WRM.require("wr!" + 'com.atlassian.bitbucket.bitbucket-web-plugin:user-multi-selector');
+							var branchSelector = WRM.require("wr!" + 'com.atlassian.bitbucket.bitbucket-web-plugin:repository-branch-selector');
 
 							jQuery.when(selectorRes, userRes, branchSelector).done(function() {	
-								require(['stash-plugin/pullrequest-list-page'], function(prListUtil){
+								require(['bitbucket-plugin/pullrequest-list-page'], function(prListUtil){
 									prListUtil.addPrFilters();
 								});
 							});
@@ -1521,7 +1545,7 @@
 					 	catch(e) {}
 					}
 					else if (pullRequest) {
-						require(['stash-plugin/pullrequest-details-page', 'stash-plugin/pullrequest-create-page'], function(prDetailsPage, prCreateUtil){
+						require(['bitbucket-plugin/pullrequest-details-page', 'bitbucket-plugin/pullrequest-create-page'], function(prDetailsPage, prCreateUtil){
 							// Jenkins build link
 							//prDetailsPage.addBuildLink();
 							// Clickable branch info
