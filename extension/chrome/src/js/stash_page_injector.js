@@ -633,6 +633,7 @@
 			    limit: 1000,
 			    avatarSize: 96,
 			    withAttributes:true,
+				withProperties:true,
 			    state: 'open',
 			    order: 'oldest',
 			    role: 'reviewer'
@@ -1210,7 +1211,8 @@
 		                start: start,
 		                limit: limit,
 		                avatarSize: bitbucket.internal.widget.avatarSizeInPx({ size: 'medium' }),
-		                withAttributes: true
+		                withAttributes: true,
+						withProperties: true
 		            });
 
 		        if (self.prDirection) {
@@ -1280,7 +1282,7 @@
 
 		    // recreate table to control it
 		    var state = getParameterByName('state') || 'OPEN';
-		    var order = state.toLowerCase() === 'open' ? 'oldest' : 'newest';
+		    var order = /*state.toLowerCase() === 'open' ? 'oldest' :*/ 'newest';
 
 		    var notFoundMsg = AJS.messages.info({
 		               title:"No Results",
