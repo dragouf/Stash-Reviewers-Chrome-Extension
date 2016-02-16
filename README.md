@@ -5,6 +5,8 @@ Bitbucket Server Reviewers Groups - Extension
 <img src="https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/master/docs/launch.png" alt="extension art" />
 </p>
 
+>:warning: if you have stash server (previous version of bitbucket) please switch to 'stash-server-version' branch
+
 This chrome/firefox extension allow to define groups of reviewers in Atlassian Bitbucket Server (previously stash) to bulk add them when creating or updating pull request.
 
 ### Features
