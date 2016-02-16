@@ -1,11 +1,11 @@
-Stash Reviewers Groups - Extension
+Bitbucket Server Reviewers Groups - Extension
 ==================
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/master/docs/launch.png" alt="extension art" />
 </p>
 
-This chrome/firefox extension allow to define groups of reviewers in Atlassian Stash to bulk add them when creating or updating pull request.
+This chrome/firefox extension allow to define groups of reviewers in Atlassian Bitbucket Server (previously stash) to bulk add them when creating or updating pull request.
 
 ### Features
 
@@ -35,7 +35,7 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian S
 
 #### Chrome
 - clone this repository
-- search for &lt;your_stash_domain_here&gt; and replace with the correct stash url
+- search for &lt;your_stash_domain_here&gt; and replace with the correct bitbucket server url
 - Go to chrome settings->extensions (extension manager) 
 - Check the "Developer Mode" checkbox
 - Click on "Load unpacked extension" button.
@@ -43,7 +43,7 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian S
 
 #### Firefox
 - download last .xpi according to version number
-- open .xpi file with a zip tool like 7zip and replace &lt;your_stash_domain_here&gt; in main.js with the correct stash url
+- open .xpi file with a zip tool like 7zip and replace &lt;your_stash_domain_here&gt; in main.js with the correct bitbucket server url
 - go to extensions panel and click on the tools icon on the right next to the search field and select : Install add-on from file.
 - then browse extension/firefox/dist and select the xpi file.
 
@@ -77,7 +77,7 @@ After that when you will go to pull request creation page or update page a dropd
 
 ![GitHub Logo](/docs/add_group.png)
 
-**Note**: the extension will make a stash api request to find reviewers. It will simply send the string you added in the reviewers array as search term. Normally if you add email or username as recommanded API should return only one user. You can also enter a name but in this case if the API return more than one user, only the first one will be added.
+**Note**: the extension will make a bitbucket server api request to find reviewers. It will simply send the string you added in the reviewers array as search term. Normally if you add email or username as recommanded API should return only one user. You can also enter a name but in this case if the API return more than one user, only the first one will be added.
 
 
 *If you like this extension you can buy it on chrome webstore at this address* :
