@@ -1,7 +1,7 @@
 {
   "title": "Stash Reviewers Groups",
   "name": "stash-reviewers-groups",
-  "version": "1.5.5",
+  "version": "1.5.7",
   "description": "Allow to add group of reviewers for pull request in stash and many other features",
   "main": "main.js",
   "author": "David LAURENT",

@@ -6,21 +6,24 @@ function createInlineScript(code) {
 	script.parentNode.removeChild(script);
 }
 
+
+
 storage.loadGroups(function(data) {
 	if(data) {
 		storage.loadHipChatUsername(function(username){
 	    	createInlineScript("var hipchatUsername = '" + (username || '') + "';");
 	    });
 
-		createInlineScript("var jsonGroups = " + data + "; var chromeExtId='" + chrome.runtime.id + "'; stashIcon='"+chrome.extension.getURL('img/stash128.png')+"';");
-		
+		createInlineScript("var jsonGroups = " + data + "; stashIcon='"+self.options.iconURl+"';");
+
 
 		// UI injector
 		var s = document.createElement('script');
-		s.src = chrome.extension.getURL('js/stash_page_injector.js');
+		s.src = self.options.injectorUrl;
 		s.onload = function() {
 		    this.parentNode.removeChild(this);
 		};
+
 		(document.head||document.documentElement).appendChild(s);
 
 		// css
@@ -28,7 +31,7 @@ storage.loadGroups(function(data) {
 		.attr('rel', 'stylesheet')
 		.attr('media', 'all')
 		.attr('type', 'text/css')
-		.attr('href', chrome.extension.getURL('css/page_injection.css'))
+		.attr('href', self.options.cssUrl)
 		.appendTo("head");
 	}
 	else {
@@ -40,21 +43,5 @@ storage.loadGroups(function(data) {
 						"close: 'auto'",
 					"});"].join('\n');
 		createInlineScript(code);
-	}
-});
-
-function getSiteBaseURl() {
-	return location.protocol + '//' + location.host;
-}
-
-// message sent from background.js
-chrome.runtime.onMessage.addListener(function(message) {
-	// transfert it to injected page script
-	if (message && message.action === 'ActivitiesRetrieved') {
-		var event = new CustomEvent('ActivitiesRetrieved', { 'detail': { activities: message.activities, desktopNotification: message.desktopNotification } });
-        document.dispatchEvent(event);
-	}
-	else if(message && message.action === 'ping') {
-		chrome.runtime.sendMessage({ action: 'pong', url: getSiteBaseURl()  });
 	}
 });
