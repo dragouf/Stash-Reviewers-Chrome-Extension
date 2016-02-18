@@ -20,6 +20,7 @@ pageMod.PageMod({
   contentScriptOptions: {
     injectorUrl: self.data.url("js/stash_page_injector.js"),
     cssUrl: self.data.url("css/page_injection.css"),
+    iconURl: self.data.url("img/stash128.png"),
   },
   contentScriptFile: [self.data.url("js/jquery-2.0.3.min.js"), self.data.url("js/storage.js"),self.data.url("js/injector_loader.js")],
   onAttach: function(worker) {

@@ -1,7 +1,7 @@
 {
   "title": "Bitbucket Server Reviewers Groups",
   "name": "stash-reviewers-groups",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Allow to add group of reviewers for pull request in bitbucket server and many other features",
   "main": "main.js",
   "author": "David LAURENT",
