@@ -1,7 +1,7 @@
 (function() {
 	if(typeof define === 'undefined')
 		return;
-	
+
 	define('stash-plugin/branch-details-page', [
 	    'aui',
 	    'aui/flag',
@@ -55,13 +55,13 @@
 		                jQuery.merge(prList, list);
 		              }
 
-		              deferred.resolve(prList);	    		
+		              deferred.resolve(prList);
 		            });
 		          }
 		          else {
-		            deferred.resolve(prList);	
+		            deferred.resolve(prList);
 		          }
-		        
+
 		      });
 
 		      return 	deferred.promise();
@@ -75,7 +75,7 @@
 		      var $wrapper = jQuery('<div id="pr-status-wrapper" style="display: inline-block"></div>');
 		      jQuery('#pr-status-wrapper').remove();
 			  jQuery('.aui-toolbar2-secondary').prepend($wrapper);
-			  
+
 		      prs.forEach(function(pr){
 		        var commentsCount = pr.attributes.commentCount ? pr.attributes.commentCount[0] : 0;
 		        var resolvedTaskCount = pr.attributes.resolvedTaskCount ? pr.attributes.resolvedTaskCount[0] : 0;
@@ -100,7 +100,7 @@
 		        }
 
 		        $a.css('margin-left', '6px');
-		        
+
 		        $wrapper.append($a);
 
 		        jQuery("#pr-status-wrapper").find('a').tooltip();
@@ -172,7 +172,7 @@
 				    deferred.resolve(select2Data);
 			  	}
 
-			  	deferred.resolve(null);	    
+			  	deferred.resolve(null);
 		  	})
 			.fail(function(){
 				// use resolve instead of reject to avoid prematured end with $.when
@@ -189,7 +189,7 @@
 				var differedList = [];
 				var select2DataArray = [];
 
-				// show loader 
+				// show loader
 				jQuery('#'+buttonIconId).replaceWith(getGroupIconLoader());
 
 				reviewers.forEach(function(reviewer){
@@ -208,21 +208,21 @@
 				jQuery.when.apply(jQuery, differedList).done(function() {
 					// redisplay icon and remove loader
 					jQuery('#'+buttonIconId).replaceWith(getGroupIcon());
-					
+
 					var replacePrevious = jQuery('#replaceGroups').is(':checked') || false;
 					//////////// update the user selector
 					// need this to reproduce the event triggered by select2 on a single selection. (change Event contain "added" or "removed" property set with an object and not an array)
 					// Without that the widget/searchable-multi-selector wrapper made by atlassian won't change his data internally corrrectly
-					
+
 					// clean (for atlassian wrapper)
-					var allUsers = AJS.$('#reviewers').auiSelect2("data");								
+					var allUsers = AJS.$('#reviewers').auiSelect2("data");
 					AJS.$('#reviewers').auiSelect2("data", null).trigger("change");
 					AJS.$('#reviewers').auiSelect2("val", null).trigger("change");
 					allUsers.forEach(function(item){
 						var e = new jQuery.Event("change");
 						e.removed = item;
 						AJS.$('#reviewers').trigger(e);
-					});				
+					});
 
 					if (!replacePrevious) {
 						jQuery.merge(select2DataArray, allUsers);
@@ -232,15 +232,15 @@
 					select2DataArray.forEach(function(select2Data){
 						var e = new jQuery.Event("change");
 						e.added = select2Data;
-						AJS.$('#reviewers').trigger(e);				
+						AJS.$('#reviewers').trigger(e);
 					});
 
 					// update displayed value (for select2)
-					AJS.$('#reviewers').auiSelect2("data", select2DataArray);			
+					AJS.$('#reviewers').auiSelect2("data", select2DataArray);
 				});
 			});
 		}
-		
+
 		function injectReviewersDropdown(jsonGroups) {
 			var $reviewersInput = jQuery('#s2id_reviewers');
 			if ($reviewersInput.length == 0) {
@@ -259,7 +259,7 @@
 			'</a>',
 			'<div id="reviewers_list" class="aui-style-default aui-dropdown2">',
 			    '<ul class="aui-list-truncate" id="'+ listId +'">',
-			    '</ul>', 
+			    '</ul>',
 			'</div>',
 			'<div class="checkbox" id="replaceGroupsDiv">',
 				'<input class="checkbox" type="checkbox" name="replaceGroups" id="replaceGroups"'+checkedProperty+'>',
@@ -278,7 +278,7 @@
 				$dropdown.find('#' + listId).append($li);
 			});
 
-			
+
 			// click event
 			attachDropdownClickEvent($dropdown);
 
@@ -293,11 +293,11 @@
 			    "aui-dropdown2-show": function() {
 			    	window.setTimeout(function(){
 			    		jQuery("#reviewers_list").css("z-index", "4000");
-			    	}, 50);		        
+			    	}, 50);
 			    }
 			});
 
-			// append to the page		
+			// append to the page
 			$reviewersInput.after($dropdown);
 		}
 
@@ -323,14 +323,14 @@
 	) {
 		'use strict';
 		//////////////////////////////////////////////////// Build with jenkins link
-		function addBuildLink() {		
+		function addBuildLink() {
 			var pr = pageState.getPullRequest();
 			var user = pageState.getCurrentUser();
 
 			if (!pr) {
 				return;
 			}
-			
+
 			if(pr.author.user.id === user.id) {
 			  //if(!jQuery('.build-status-summary').length) { }
 			    var $startWrapper = jQuery('<div class="plugin-item build-status-summary"></div>');
@@ -362,11 +362,11 @@
 						window.ajaxRequest({
 						    method: 'POST',
 						    url: url,
-						    data: { 
+						    data: {
 						      'PULLREQUEST_ID': pr.id,
 						      'HIPCHAT_USER': userName
 							}
-						}, 
+						},
 						function(location) {
 							auiFlag({
 								type: 'info',
@@ -379,10 +379,10 @@
 					        $startLink.find('span.label').text('See started job on jenkins!');
 						});
 					}
-			      
+
 			    	return false;
 			    });
-			    
+
 			    $startWrapper.append($startLink);
 			    jQuery('.plugin-section-primary').prepend($startWrapper);
 			}
@@ -392,8 +392,8 @@
 	  	function attachNavigateToBranchLink() {
 			var pr = pageState.getPullRequest();
 
-	  		var $branchOriginSpan = jQuery('.source-branch');  		
-	  		if ($branchOriginSpan.length) {	  		
+	  		var $branchOriginSpan = jQuery('.source-branch');
+	  		if ($branchOriginSpan.length) {
 				var urlFrom = pr.fromRef.repository.link.url;
 				urlFrom += '?at=' + pr.fromRef.id;
 				$branchOriginSpan.css('cursor', 'pointer').click(function(){ window.location.href = urlFrom; }).data('url', urlFrom);
@@ -414,16 +414,16 @@
 			if (!pr.fromRef.repository.project.owner) {
 				return;
 			}
-			
+
 			var cloneUrl;
-			var repoName = pr.fromRef.repository.name;			
+			var repoName = pr.fromRef.repository.name;
 			var branchOrigin = pr.fromRef.displayId;
 			var remoteName = pr.fromRef.repository.project.owner.slug;
 
 			if(!pr.fromRef.repository.links.clone) {
 				var $link =  jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger">',
 								' -- Checkout -- ',
-								'</a>',								
+								'</a>',
 								'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
 								'    <ul class="aui-list-truncate">',
 								'        <li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
@@ -445,7 +445,7 @@
 
 			var $link =  jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger">',
 								' -- Checkout -- ',
-								'</a>',								
+								'</a>',
 								'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
 								'    <ul class="aui-list-truncate">',
 								'        <li data-action="clone"><a href="javascript:void(0)" class="checkoutCommand_link" id="cloneCommand">Clone</a></li>',
@@ -492,22 +492,22 @@
 				        auiFlag({
 		                    type: 'info',
 		                    title: 'Command copied!',
-		                    body: 'just paste it in your terminal.', 
+		                    body: 'just paste it in your terminal.',
 		                    close: 'auto'
 		                });
-				    } 
+				    }
 				    else if (window.clipboardData) {
 				        auiFlag({
 		                    type: 'info',
 		                    title: 'Sorry copy api is not available!',
-		                    body: 'Try to update your browser.', 
+		                    body: 'Try to update your browser.',
 		                    close: 'auto'
 		                });
 				    }
-				    
+
 	                ddlClicked = false;
 				}
-			});			
+			});
 	  	}
 
 	  	//////////////////////////////////////////////////// display on overview page when there is conflicts
@@ -570,7 +570,7 @@
 		String.prototype.toBool = function(){
 			return this.toString().toLowerCase() === 'true';
 		};
-		
+
 		var NotificationType = { badge:'badge_', panel: 'panel_' };
 
 	  	//////////////////////////////////////////////////// Toolbar icon functions
@@ -600,9 +600,9 @@
 	  	function getLastPRCommentsAsync() {
 	  		var deferredResult = jQuery.Deferred();
 			// get lastest PR
-			var reqParams = { 
+			var reqParams = {
 			    start: 0,
-			    limit: 1000,    
+			    limit: 1000,
 			    avatarSize: 96,
 			    withAttributes:true,
 			    state: 'open',
@@ -636,22 +636,22 @@
 			  	activities = filterAnOrderActivities(activities);
 			    deferredResult.resolve(activities);
 			  });
-			});	
+			});
 
 			return deferredResult;
 	  	}
 
 	  	function getLastPRCommentsOnceAsync() {
-	  		if (!deferredPrRequest || deferredPrRequest.state() === 'rejected') {  					
+	  		if (!deferredPrRequest || deferredPrRequest.state() === 'rejected') {
 	  			deferredPrRequest = getLastPRCommentsAsync();
 	  		}
-	  		
+
 	  		// return previous retried activities
 			return deferredPrRequest.promise();
 	  	}
 
-	  	function getMostRecentActivityDate(comment) {		
-			var date = comment.createdDate;		
+	  	function getMostRecentActivityDate(comment) {
+			var date = comment.createdDate;
 
 			comment.tasks.forEach(function(task){
 				date = task.createdDate > date ? task.createdDate : date;
@@ -675,9 +675,9 @@
 			return _.filter(comment.tasks, function(t){ return t.author.name !== user.name && t.state === "OPEN"; });
 	  	}
 
-		function countSubComments(comment) {		
+		function countSubComments(comment) {
 			var count = { total: 0, unread: 0 };
-			var subCommentsFromOthers = filterSubcomments(comment);	
+			var subCommentsFromOthers = filterSubcomments(comment);
 			count.total += subCommentsFromOthers.length;
 			count.unread += _.filter(subCommentsFromOthers, function(c){ return !c.isPanelRead }).length;
 
@@ -707,16 +707,16 @@
 
 		function countUnreadActivities(activities, prefix) {
 			prefix = prefix || '';
-			var count = 0;		
+			var count = 0;
 			var user = pageState.getCurrentUser();
 
 			activities.forEach(function(activity){
 				// verify the comment itself
 				var isCommentRead = (localStorage.getItem(prefix + 'comment_' + activity.comment.id) || false).toString().toBool();
-				
+
 				if (prefix === NotificationType.panel) {
 					jQuery.extend(activity.comment, {isPanelRead: isCommentRead });
-				}  
+				}
 				else {
 					jQuery.extend(activity.comment, {isBadgeRead: isCommentRead });
 				}
@@ -734,7 +734,7 @@
 					var isTaskRead = (localStorage.getItem(prefix + 'task_' + task.id) || false).toString().toBool();
 					if (prefix === NotificationType.panel) {
 						jQuery.extend(task, {isPanelRead: isTaskRead });
-					}  
+					}
 					else {
 						jQuery.extend(task, {isBadgeRead: isTaskRead });
 					}
@@ -766,9 +766,9 @@
 	        	htmlComments[msgId] = result.html;
 	        	return result.html;
 	        });
-	  	} 	
+	  	}
 
-	  	function findUserBySlug(slug) { 
+	  	function findUserBySlug(slug) {
 			var url = nav.rest().users().addPathComponents(slug).withParams({avatarSize:64}).build();
 
 			return jQuery.ajax({
@@ -777,12 +777,12 @@
 			    dataType: 'json'
 			});
 		}
-	  	
+
 		function markActivitiesAsRead(activities, prefix) {
 			prefix = prefix || '';
 			activities.forEach(function(activity){
 				localStorage.setItem(prefix + 'comment_' + activity.comment.id, true);
-				
+
 				activity.comment.comments.forEach(function(subComment){
 					markActivitiesAsRead([{ comment:subComment }], prefix);
 				});
@@ -790,7 +790,7 @@
 				activity.comment.tasks.forEach(function(task){
 					localStorage.setItem(prefix + 'task_' + task.id, true);
 				});
-			});	
+			});
 		}
 
 		function generateCommentsTable(activities) {
@@ -798,7 +798,7 @@
 							.addClass('aui')
 							.addClass('paged-table')
 							.addClass('comments-table');
-					
+
 			// header
 			$table.append('<thead>').find('thead').append('<tr>').find('tr')
 				.append('<th class="author">Author</th>')
@@ -807,7 +807,7 @@
 				.append('<th class="updated">Updated</th>')
 				.append('<th class="comment-count">Activities</th>');
 
-			// body			
+			// body
 			var $tbody = $table.append('<tbody>').find('tbody');
 			activities.forEach(function(activity) {
 				var $msgRow = jQuery('<td class="comment message markup">'+activity.comment.text+'</td>');
@@ -823,7 +823,7 @@
 				markdownToHtml(activity.comment.text, activity.comment.id).done(function(msg) {
 					$msgRow.html(msg);
 				});
-				
+
 				// avatar
 				var $avatar = jQuery(stash.widget.avatar({
 	                size: 'small',
@@ -839,7 +839,7 @@
 	            $commentsCount.append(jQuery(aui.icons.icon({
 	                useIconFont: true,
 	        		icon: 'comment',
-	        		accessibilityText: 'comments'               
+	        		accessibilityText: 'comments'
 	            })));
 	            var $commentDigit = jQuery('<span>' + commentCount.total + '<span>');
 	            if(commentCount.unread > 0) {
@@ -854,7 +854,7 @@
 	            $tasksCount.append(jQuery(aui.icons.icon({
 	                useIconFont: true,
 	        		icon: 'editor-task',
-	        		accessibilityText: 'tasks'               
+	        		accessibilityText: 'tasks'
 	            })));
 	            var $taskDigit = jQuery('<span class="task-count">' + taskCount.total + '<span>');
 	            if(taskCount.unread > 0) {
@@ -862,7 +862,7 @@
 	            }
 	            $tasksCount.append($taskDigit);
 	            $tasksCount.tooltip();
-	            
+
 	            // append to cell
 	            $countRow
 	                .append($commentsCount)
@@ -883,7 +883,7 @@
 					.append($msgRow)
 					.append($prRow)
 					.append($updatedRow)
-					.append($countRow);				
+					.append($countRow);
 			});
 
 			if (activities.length === 0) {
@@ -949,9 +949,9 @@
 
 						updateChromeIconBadge(eventCount);
 					}
-				}			
+				}
 
-				// update panel	
+				// update panel
 				if($content) {
 					jQuery('#global-div-comments-notif').remove();
 					var $globalDiv = jQuery('<div id="global-div-comments-notif"></div>');
@@ -961,8 +961,8 @@
 					$globalDiv.append($wrapper);
 					$content.append($globalDiv);
 					// remove badge notification. Panel highlight notification are remove when PR is open
-					markActivitiesAsRead(activities, NotificationType.badge);			
-				}		
+					markActivitiesAsRead(activities, NotificationType.badge);
+				}
 			});
 	  	}
 
@@ -1008,7 +1008,7 @@
 	            inlineDialog = AJS.InlineDialog($inboxTrigger, 'inbox-messages-content', onShowDialog, {
 	                width: 870,
 	                hideCallback: onHideDialog
-	            });            
+	            });
 
 	            /*var _approvalHandler = function() {
 	                getLastPRCommentsAsync();
@@ -1021,7 +1021,7 @@
 
 	        return inlineDialog;
 	  	}
-	  	
+
 	  	function getSiteBaseURl() {
 	  		return location.protocol + '//' + location.host;
 	  	}
@@ -1029,14 +1029,14 @@
 	  	function displayDesktopNotification(activities) {
 	  		if(Notification.permission !== "granted") {
 	  			return;
-	  		} 
+	  		}
 	  		var user = pageState.getCurrentUser();
 			var prefix = "notif_";
 
 			activities.forEach(function(activity){
 				var commentKey = prefix + 'comment_' + activity.comment.id;
 				var state = localStorage.getItem(commentKey);
-				localStorage.setItem(commentKey, true);				
+				localStorage.setItem(commentKey, true);
 
 				if(Notification.permission === "granted" && activity.comment.author.name !== user.name && !(state || false).toString().toBool()) {
 					var commentNotifTitle = activity.comment.author.name +' commented on : "' + activity.pullrequest.title + '"';
@@ -1049,7 +1049,7 @@
 
 				    notification.onclick = function () {
 				      window.open(getSiteBaseURl() + activity.pullrequest.link.url + '/overview?commentId=' + activity.comment.id);
-				    };				    
+				    };
 				}
 
 				activity.comment.comments.forEach(function(subComment){
@@ -1060,9 +1060,9 @@
 					var taskKey = prefix + 'task_' + task.id;
 					var taskState = localStorage.getItem(taskKey);
 					localStorage.setItem(taskKey, true);
-					
+
 					if(Notification.permission === "granted" && task.author.name !== user.name && !(taskState || false).toString().toBool()) {
-						var taskNotifTitle = activity.comment.author.name +' created task on : "'+ activity.pullrequest.title +'"';				
+						var taskNotifTitle = activity.comment.author.name +' created task on : "'+ activity.pullrequest.title +'"';
 						var notification = new Notification(taskNotifTitle, {
 					      icon: task.author.avatarUrl || window.stashIcon,
 					      body: task.text,
@@ -1071,10 +1071,10 @@
 					    });
 
 					    notification.onclick = function () {
-					      window.open(getSiteBaseURl() + activity.pullrequest.link.url + '/overview?commentId=' + activity.comment.id);    
+					      window.open(getSiteBaseURl() + activity.pullrequest.link.url + '/overview?commentId=' + activity.comment.id);
 					    };
 					}
-				    
+
 				});
 			});
 	  	}
@@ -1089,7 +1089,7 @@
 
 
 			jQuery('.help-link').after(button);
-			
+
 			updateUI(false, false, true);
 			createCommentsDialog();
 
@@ -1100,9 +1100,9 @@
 
 			// periodically poll server for update
 			if (typeof chromeExtId !== 'undefined') {
-				// use background worker to centralized request and avoid to much server queries				
+				// use background worker to centralized request and avoid to much server queries
 				chrome.runtime.sendMessage(chromeExtId, { action: 'setUrl', url: getSiteBaseURl() });
-				document.addEventListener('ActivitiesRetrieved', function (eventArgs) {			
+				document.addEventListener('ActivitiesRetrieved', function (eventArgs) {
 					var activities = filterAnOrderActivities(eventArgs.detail.activities);
 					if (deferredPrRequest.state() !== 'pending') {
 						deferredPrRequest = jQuery.Deferred();
@@ -1112,10 +1112,10 @@
 				}, false);
 			}
 			else {
-				// firefox 
-				// TODO: add it into background worker to avoid multiple request per page  
-				/*setInterval(function(){ 
-	  				updateUI(false, true, true);	  									
+				// firefox
+				// TODO: add it into background worker to avoid multiple request per page
+				/*setInterval(function(){
+	  				updateUI(false, true, true);
 				}, 60000);*/
 			}
 	  	}
@@ -1127,7 +1127,7 @@
 	  				activities = _.filter(activities, function(a){ return a.pullrequest.id === pr.id; });
 	  				markActivitiesAsRead(activities, NotificationType.badge);
 	  				markActivitiesAsRead(activities, NotificationType.panel);
-	  			});  			
+	  			});
 	  		}
 	  	}
 
@@ -1176,7 +1176,7 @@
 	        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 	    }
 
-	  	function addPrFilters() { 
+	  	function addPrFilters() {
 	  		jQuery('.spinner').show();
 		    //redefined filter builder to include new parameters
 		    PullRequestsTable.prototype.buildUrl = function (start, limit) {
@@ -1210,41 +1210,41 @@
 		            });
 		        }
 
-		        if (self.prAuthors && self.prAuthors.length) {	
+		        if (self.prAuthors && self.prAuthors.length) {
 		            self.prAuthors.forEach(function(u, index){
 		                var params = {};
 		                params["username." + (index + 1)] = u.name;
-		                params["role." + (index + 1)] = "AUTHOR";            
-		                builder = builder.withParams(params); 
-		            });        
+		                params["role." + (index + 1)] = "AUTHOR";
+		                builder = builder.withParams(params);
+		            });
 		        }
 
-		        if (self.prReviewers && self.prReviewers.length) {    
+		        if (self.prReviewers && self.prReviewers.length) {
 		            self.prReviewers.forEach(function(u, index){
 		                var params = {};
 		                params["username." + (index + 1)] = u.name;
-		                params["role." + (index + 1)] = "REVIEWER";            
-		                builder = builder.withParams(params); 
-		            });        
+		                params["role." + (index + 1)] = "REVIEWER";
+		                builder = builder.withParams(params);
+		            });
 		        }
 
-		        if (self.prParticipants && self.prParticipants.length) {    
+		        if (self.prParticipants && self.prParticipants.length) {
 		            self.prParticipants.forEach(function(u, index){
 		                var params = {};
 		                params["username." + (index + 1)] = u.name;
-		                params["role." + (index + 1)] = "PARTICIPANT";            
-		                builder = builder.withParams(params); 
-		            });        
+		                params["role." + (index + 1)] = "PARTICIPANT";
+		                builder = builder.withParams(params);
+		            });
 		        }
 
-		        if (self.prApprovers && self.prApprovers.length) {    
+		        if (self.prApprovers && self.prApprovers.length) {
 		            self.prApprovers.forEach(function(u, index){
 		                var params = {};
 		                params["username." + (index + 1)] = u.name;
-		                params["approved." + (index + 1)] = true; 
-		                params["role." + (index + 1)] = "REVIEWER";          
-		                builder = builder.withParams(params); 
-		            });        
+		                params["approved." + (index + 1)] = true;
+		                params["role." + (index + 1)] = "REVIEWER";
+		                builder = builder.withParams(params);
+		            });
 		        }
 
 		        return builder.build();
@@ -1264,8 +1264,8 @@
 		               closeable: false
 		            });
 
-	        var fakeResult = {"size":0,"limit":0,"isLastPage":false,"values":[{"id":8,"version":2,"title":"loading...","description":"loading...","state":"OPEN","open":false,"closed":true,"createdDate":1373011695000,"updatedDate":1373012559000,"locked":false,"author":{"user":{"name":"none","emailAddress":"none","id":16777,"displayName":"none","active":true,"slug":"none","type":"NORMAL", "avatarUrl":"#"},"role":"AUTHOR","approved":false},"reviewers":[],"participants":[],"attributes":{"resolvedTaskCount":["0"],"openTaskCount":["0"]}, toRef:{id:0, displayId:'', repository:{id:0, slug:'', project:{key:''}}}, fromRef:{id:0, displayId:'', repository:{id:0, slug:'', project:{key:''}}}}],"start":0,"nextPageStart":0};        	
-	        
+	        var fakeResult = {"size":0,"limit":0,"isLastPage":false,"values":[{"id":8,"version":2,"title":"loading...","description":"loading...","state":"OPEN","open":false,"closed":true,"createdDate":1373011695000,"updatedDate":1373012559000,"locked":false,"author":{"user":{"name":"none","emailAddress":"none","id":16777,"displayName":"none","active":true,"slug":"none","type":"NORMAL", "avatarUrl":"#"},"role":"AUTHOR","approved":false},"reviewers":[],"participants":[],"attributes":{"resolvedTaskCount":["0"],"openTaskCount":["0"]}, toRef:{id:0, displayId:'', repository:{id:0, slug:'', project:{key:''}}}, fromRef:{id:0, displayId:'', repository:{id:0, slug:'', project:{key:''}}}}],"start":0,"nextPageStart":0};
+
 	        // remove previous
 	  		jQuery(window).off('scroll.paged-scrollable');
 		    jQuery('#pull-requests-table').remove();
@@ -1324,30 +1324,30 @@
 		    var $orderSelect = jQuery(['<select name="ddPrOrder" id="ddPrOrder">',
 		    	'<option value="oldest">Oldest first</option>',
 		    	'<option value="newest">Newest first</option>',
-		    	'</select>'].join('\n'));	    
+		    	'</select>'].join('\n'));
 		    $orderSelect.val(pullRequestTable.prOrder);
-		    $form.append($orderSelect);	
+		    $form.append($orderSelect);
 
 		    var $directionSelect = jQuery(['<select name="ddPrDirection" id="ddPrDirection">',
 		    	'<option value="INCOMING">Incoming</option>',
 		    	'<option value="OUTGOING">Outgoing</option>',
 		    	'</select>'].join('\n'));
 		    $directionSelect.val(pullRequestTable.prDirection || 'INCOMING');
-		    $form.append($directionSelect); 
+		    $form.append($directionSelect);
 
 		    var $branchDropdown = jQuery('<button></button>', {
 		    	id: 'prSourceSelector',
 		    	type: 'button',
 		    	class: 'aui-button searchable-selector-trigger revision-reference-selector-trigger sourceBranch',
 		    	title: 'Select branch'
-		    }); 
-		    $branchDropdown.append('<span class="placeholder">Select branch</span>');  
+		    });
+		    $branchDropdown.append('<span class="placeholder">Select branch</span>');
 		    var branchSelector = new BranchSelector($branchDropdown, {
 			    id: 'prSourceBranchSelector',
 			    show: { branches: true, tags: false },
 			    paginationContext: 'branch-filter-selector'
 			});
-			$form.append($branchDropdown); 
+			$form.append($branchDropdown);
 
 		    new UserMultiSelector($authorsInput, {
 		        initialItems: [],
@@ -1355,7 +1355,7 @@
 		        placeholder: "Authors filter"
 		    }).on("change", function() {
 		        pullRequestTable.prAuthors = this.getSelectedItems();
-		        pullRequestTable.update();       
+		        pullRequestTable.update();
 		    });
 
 		    new UserMultiSelector($reviewersInput, {
@@ -1364,7 +1364,7 @@
 		        placeholder: "Reviewers filter"
 		    }).on("change", function() {
 		        pullRequestTable.prReviewers = this.getSelectedItems();
-		        pullRequestTable.update();                 
+		        pullRequestTable.update();
 		    });
 
 		    new UserMultiSelector($participantsInput, {
@@ -1373,7 +1373,7 @@
 		        placeholder: "Participants filter"
 		    }).on("change", function() {
 		        pullRequestTable.prParticipants = this.getSelectedItems();
-		        pullRequestTable.update();                 
+		        pullRequestTable.update();
 		    });
 
 		    new UserMultiSelector($approversInput, {
@@ -1382,14 +1382,14 @@
 		        placeholder: "Approvers filter"
 		    }).on("change", function() {
 		        pullRequestTable.prApprovers = this.getSelectedItems();
-		        pullRequestTable.update();                
+		        pullRequestTable.update();
 		    });
 
 		    $orderSelect.auiSelect2({minimumResultsForSearch: Infinity, width: 'auto' }).on('change', function(e){
 		    	pullRequestTable.prOrder = e.val;
 		        pullRequestTable.update();
-		    });	    
-		    $directionSelect.auiSelect2({minimumResultsForSearch: Infinity, width: 'auto'}).on('change', function(e){	  
+		    });
+		    $directionSelect.auiSelect2({minimumResultsForSearch: Infinity, width: 'auto'}).on('change', function(e){
 		    	pullRequestTable.prDirection = e.val;
 		        pullRequestTable.update();
 		    });
@@ -1401,7 +1401,7 @@
 
 		    events.on('stash.feature.pullRequestsTable.contentAdded', function(data) {
 		    	var $previousStickers = jQuery('#totalResultStamp');
-		    	
+
 		    	var previousSize = 0;
 		    	if (data && data.start > 0) {
 		    		previousSize = parseInt($previousStickers.data('size') || 0);
@@ -1415,7 +1415,7 @@
 						    	.data('size', size);
 		    	jQuery('#prSourceSelector').after($stamps);
 		    });
-		    
+
 		    events.on('stash.widget.pagedscrollable.dataLoaded', function(start, limit, data) {
 		    	if (start !== 0) {
 		    		return;
@@ -1440,7 +1440,7 @@
 		    $authorsInput.data('select2').blur();
 		    $reviewersInput.data('select2').blur();
 		    $participantsInput.data('select2').blur();
-		    $approversInput.data('select2').blur();   
+		    $approversInput.data('select2').blur();
 	  	}
 
 	  	return {
@@ -1466,8 +1466,8 @@
 				loadRequirement.resolve();
 			});
 		}
-		
-		jQuery.when(loadRequirement).done(function(){		
+
+		jQuery.when(loadRequirement).done(function(){
 			var user = pageState.getCurrentUser();
 			var project = pageState.getProject();
 			var repository = pageState.getRepository();
@@ -1485,7 +1485,7 @@
 					}
 					else if(project && repository && !pullRequest) {
 						// repository page
-						
+
 						// PR sticker on branch details page
 						require(['stash-plugin/branch-details-page', 'stash/api/util/events'], function(branchUtils, events){
 							branchUtils.addForkOriginLink();
@@ -1498,21 +1498,21 @@
 						});
 
 						// PR Reviewers groups (create page)
-						require(['stash-plugin/pullrequest-create-page', 'aui'], function(prCreateUtil, AJS){ 
-							prCreateUtil.injectReviewersDropdown(jsonGroups);						
+						require(['stash-plugin/pullrequest-create-page', 'aui'], function(prCreateUtil, AJS){
+							prCreateUtil.injectReviewersDropdown(jsonGroups);
 						});
 
 						// PR Filter
 						try {
 							// are we on the pull request list page ? raise exception if not
-					    	require('feature/pull-request/pull-request-table'); 
+					    	require('feature/pull-request/pull-request-table');
 
 					    	// load missing resources
 					    	var selectorRes = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:searchable-multi-selector');
 							var userRes = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:user-multi-selector');
 							var branchSelector = WRM.require("wr!" + 'com.atlassian.stash.stash-web-plugin:repository-branch-selector');
 
-							jQuery.when(selectorRes, userRes, branchSelector).done(function() {	
+							jQuery.when(selectorRes, userRes, branchSelector).done(function() {
 								require(['stash-plugin/pullrequest-list-page'], function(prListUtil){
 									prListUtil.addPrFilters();
 								});
@@ -1540,7 +1540,7 @@
 					}
 				});
 			}
-		});	
+		});
 	//});
 }());
 // Note: to see all stash events add ?eve=* to URL
