@@ -1,0 +1,3 @@
+2.1.0
+===================
+- fix PR filter bug (multiple filter were not take in account)
