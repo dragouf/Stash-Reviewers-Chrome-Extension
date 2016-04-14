@@ -2,21 +2,21 @@
 	"manifest_version": 2,
 	"name": "Bitbucket Server Reviewers",
 	"description": "Allow to add group of reviewers for pull request in bitbucker server",
-	"version": "1.6.1",
+	"version": "1.6.3",
 	"permissions": [
 		"storage",
     	"alarms",
     	"tabs"
   	],
-	"icons": { 
+	"icons": {
 		"16": "img/stash19.png",
 		"48": "img/stash48.png",
-		"128": "img/stash148.png" 
+		"128": "img/stash148.png"
 	},
 	"browser_action": {
-		"default_icon": {                    
-			"19": "img/stash48.png",          
-			"38": "img/stash48.png"          
+		"default_icon": {
+			"19": "img/stash48.png",
+			"38": "img/stash48.png"
 		},
 		"default_popup": "popup.html"
 	},
@@ -34,7 +34,7 @@
 
         "http://*/*/pull-requests/*/overview*",
         "https://*/*/pull-requests/*/overview*",
-        
+
         "http://*/*/repos/*/browse*",
         "https://*/*/repos/*/browse*",
 

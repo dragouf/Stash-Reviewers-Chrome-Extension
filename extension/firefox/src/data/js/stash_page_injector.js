@@ -633,6 +633,7 @@
 			    limit: 1000,
 			    avatarSize: 96,
 			    withAttributes:true,
+				withProperties:true,
 			    state: 'open',
 			    order: 'oldest',
 			    role: 'reviewer'
@@ -1210,7 +1211,8 @@
 		                start: start,
 		                limit: limit,
 		                avatarSize: bitbucket.internal.widget.avatarSizeInPx({ size: 'medium' }),
-		                withAttributes: true
+		                withAttributes: true,
+						withProperties: true
 		            });
 
 		        if (self.prDirection) {
@@ -1234,42 +1236,47 @@
 		            });
 		        }
 
-		        if (self.prAuthors && self.prAuthors.length) {
-		            self.prAuthors.forEach(function(u, index){
-		                var params = {};
-		                params["username." + (index + 1)] = u.name;
-		                params["role." + (index + 1)] = "AUTHOR";
-		                builder = builder.withParams(params);
-		            });
-		        }
+				var lastIndex = 0;
+				if (self.prAuthors && self.prAuthors.length) {
+					self.prAuthors.forEach(function(u, index){
+						lastIndex++;
+						var params = {};
+						params["username." + (lastIndex)] = u.name;
+						params["role." + (lastIndex)] = "AUTHOR";
+						builder = builder.withParams(params);
+					});
+				}
 
-		        if (self.prReviewers && self.prReviewers.length) {
-		            self.prReviewers.forEach(function(u, index){
-		                var params = {};
-		                params["username." + (index + 1)] = u.name;
-		                params["role." + (index + 1)] = "REVIEWER";
-		                builder = builder.withParams(params);
-		            });
-		        }
+				if (self.prReviewers && self.prReviewers.length) {
+					self.prReviewers.forEach(function(u, index){
+						lastIndex++;
+						var params = {};
+						params["username." + (lastIndex)] = u.name;
+						params["role." + (lastIndex)] = "REVIEWER";
+						builder = builder.withParams(params);
+					});
+				}
 
-		        if (self.prParticipants && self.prParticipants.length) {
-		            self.prParticipants.forEach(function(u, index){
-		                var params = {};
-		                params["username." + (index + 1)] = u.name;
-		                params["role." + (index + 1)] = "PARTICIPANT";
-		                builder = builder.withParams(params);
-		            });
-		        }
+				if (self.prParticipants && self.prParticipants.length) {
+					self.prParticipants.forEach(function(u, index){
+						lastIndex++;
+						var params = {};
+						params["username." + (lastIndex)] = u.name;
+						params["role." + (lastIndex)] = "PARTICIPANT";
+						builder = builder.withParams(params);
+					});
+				}
 
-		        if (self.prApprovers && self.prApprovers.length) {
-		            self.prApprovers.forEach(function(u, index){
-		                var params = {};
-		                params["username." + (index + 1)] = u.name;
-		                params["approved." + (index + 1)] = true;
-		                params["role." + (index + 1)] = "REVIEWER";
-		                builder = builder.withParams(params);
-		            });
-		        }
+				if (self.prApprovers && self.prApprovers.length) {
+					self.prApprovers.forEach(function(u, index){
+						lastIndex++;
+						var params = {};
+						params["username." + (lastIndex)] = u.name;
+						params["approved." + (lastIndex)] = true;
+						params["role." + (lastIndex)] = "REVIEWER";
+						builder = builder.withParams(params);
+					});
+				}
 
 		        return builder.build();
 		    };
@@ -1280,7 +1287,7 @@
 
 		    // recreate table to control it
 		    var state = getParameterByName('state') || 'OPEN';
-		    var order = state.toLowerCase() === 'open' ? 'oldest' : 'newest';
+		    var order = /*state.toLowerCase() === 'open' ? 'oldest' :*/ 'newest';
 
 		    var notFoundMsg = AJS.messages.info({
 		               title:"No Results",
