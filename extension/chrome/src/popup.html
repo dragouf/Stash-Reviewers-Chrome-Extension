@@ -1,55 +1,286 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="description" content="Stash Reviewers Groups">
-  <meta name="author" content="David LAURENT">
-  
-  <title>Stash Reviewers Groups</title>
-  
-  <!-- Scripts -->
-  <script src="js/jquery-2.0.3.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  
-  <!-- Cascading Style Sheets -->
-  <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-  <link href="css/custom.css" rel="stylesheet" media="screen">  
+	<meta charset="utf-8">
+	<meta name="description" content="Stash Reviewers Groups">
+	<meta name="author" content="David LAURENT">
+
+	<title>Bitbucket Reviewers Groups</title>
+
+	<!-- Scripts -->
+	<script src="js/jquery-2.0.3.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+
+	<!-- Cascading Style Sheets -->
+	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="css/popup_option.css" rel="stylesheet" media="screen">
 </head>
 
 <body>
-      <nav class="navbar navbar-default">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <img src="img/stash148.png" class="logo" alt="" style="width:48px;height:48px;" />
-            <span class="title">Stash Reviewers Groups</span>
-          </div>          
-        </div>
-      </nav>
-      <div class="container content">
+	<div class="container content" id="bitbucket-extension-options">
+		<ul class="nav nav-tabs">
+			<li role="presentation" class="active">
+				 <a href="#reviewers" aria-controls="reviewers" role="tab" data-toggle="tab">Reviewer Groups</a>
+			</li>
+			<li role="presentation">
+				<a href="#template" aria-controls="template" role="tab" data-toggle="tab">PR Template</a>
+			</li>
+			<li role="presentation">
+				<a href="#notification" aria-controls="notification" role="tab" data-toggle="tab">Notifications</a>
+			</li>
+			<li role="presentation">
+				<a href="#repomap" aria-controls="repomap" role="tab" data-toggle="tab">Git Remote Map</a>
+			</li>
+			<li role="presentation">
+				<a href="#features" aria-controls="features" role="tab" data-toggle="tab">Features</a>
+			</li>
+		</ul>
 
-      <div class="alert alert-info" role="alert">
-        <span class="block">Json format:</span>          
-        <code>{ "groups": [{ "groupName":"group name", "reviewers": ["reviewer 1 name or email", "reviewer 2 name or email"] } ] }</code>
-      </div>
-      
-      <div>
-          <div class="form-group">
-            <label for="text_json">json:</label>
-            <textarea class="form-control" rows="5" id="text_json"></textarea>
-          </div>
-          
-          <!--<div class="form-group">
-            <label for="json">HipChat Username:</label>
-            <input type="text" class="form-control" id="hipchat_username" placeholder="HipChat username without @">
-          </div>-->
+		<div class="tab-content">
+			<div id="reviewers" class="tab-pane active">
+				<div class="alert alert-info" role="alert">
+					<span class="block">Json format:</span>
+					<code>{ "groups": [{ "groupName":"group name", "reviewers": ["reviewer 1 name or email", "reviewer 2 name or email"] } ] }</code>
+				</div>
 
-          <span class="pull-left" style="font-size:xx-small">source: <a href="https://goo.gl/yDp4jB">https://goo.gl/yDp4jB</a></span>
-          <button type="button" class="btn btn-primary pull-right" id="bt_save">save</button>
-      </div>   
+				<div>
+					<div class="form-group">
+						<label for="text_json">json:</label>
+						<textarea class="form-control" rows="5" id="text_json"></textarea>
+					</div>
 
-    </div> <!-- /container --> 
-    
-    <script src="js/storage.js"></script>
-    <script src="js/popup.js"></script>
+					<div class="form-group">
+						<label for="hipchat_username">HipChat Username:</label>
+						<input type="text" class="form-control" id="hipchat_username" placeholder="HipChat username without @">
+					</div>
+				</div>
+			</div>
+
+			<div id="template" class="tab-pane">
+				<div class="form-group">
+					<label for="template_text">Template:</label>
+					<textarea class="form-control" rows="10" id="template_text"></textarea>
+				</div>
+			</div>
+
+			<div id="notification" class="tab-pane">
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="notificationState">Desktop Notifications</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="notificationState">
+							<label class="btn btn-primary active">
+								<input type="radio" name="notificationState" id="notificationEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="notificationState" id="notificationDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="notificationType">Notify</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="notificationType">
+							<label class="btn btn-primary">
+								<input type="radio" name="notificationType" id="notificationAll" value="1" autocomplete="off"> All
+							</label>
+							<label class="btn btn-primary active">
+								<input type="radio" name="notificationType" id="notificationMention" value="0" autocomplete="off" checked> Mentioned/PR
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="repomap" class="tab-pane">
+				<div class="form-group form-bottom-margin hide" id="repomapTemplate">
+					<div class="col-xs-5">
+						<input type="text" class="form-control" name="repo" placeholder="user/project name" />
+					</div>
+					<div class="col-xs-5">
+						<input type="text" class="form-control" name="remote" placeholder="remote name" />
+					</div>
+					<div class="col-xs-2">
+						<button type="button" class="btn btn-default removeButton"><i class="glyphicon glyphicon-minus"></i></button>
+					</div>
+				</div>
+			</div>
+
+			<div id="features" class="tab-pane">
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_reviewersgroup" data-toggle="popover">Reviewers Groups</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_reviewersgroup">
+							<label class="btn btn-primary active">
+								<input type="radio" name="reviewersgroup" id="reviewersgroupEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="reviewersgroup" id="reviewersgroupDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_prfilters" data-toggle="popover">PR Filters</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_prfilters">
+							<label class="btn btn-primary active">
+								<input type="radio" name="prfilters" id="prfiltersEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="prfilters" id="prfiltersDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_notifIcon" data-toggle="popover">Notifications Icon</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_notifIcon">
+							<label class="btn btn-primary active">
+								<input type="radio" name="notifIcon" id="notifIconEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="notifIcon" id="notifIconDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_checkout" data-toggle="popover">Checkout Dropdown</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_checkout">
+							<label class="btn btn-primary active">
+								<input type="radio" name="checkout" id="checkoutEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="checkout" id="checkoutDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_clickbranch" data-toggle="popover">Clickable from/to branch</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_clickbranch">
+							<label class="btn btn-primary active">
+								<input type="radio" name="clickbranch" id="clickbranchEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="clickbranch" id="clickbranchDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_sticker" data-toggle="popover">PR Sticker</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_sticker">
+							<label class="btn btn-primary active">
+								<input type="radio" name="sticker" id="stickerEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="sticker" id="stickerDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_build" data-toggle="popover">Build Button</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_build">
+							<label class="btn btn-primary active">
+								<input type="radio" name="build" id="buildEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="build" id="buildDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_forkorigin" data-toggle="popover">Fork origin</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_forkorigin">
+							<label class="btn btn-primary active">
+								<input type="radio" name="forkorigin" id="forkoriginEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="forkorigin" id="forkoriginDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_prtemplate" data-toggle="popover">PR Template</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_prtemplate">
+							<label class="btn btn-primary active">
+								<input type="radio" name="prtemplate" id="prtemplateEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="prtemplate" id="prtemplateDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_prconflicts" data-toggle="popover">PR Conflicts</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_prconflicts">
+							<label class="btn btn-primary active">
+								<input type="radio" name="prconflicts" id="prconflictsEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="prconflicts" id="prconflictsDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="footer">
+		 	<span class="pull-left" style="font-size:xx-small">source: <a href="https://github.com/dragouf/Stash-Reviewers-Chrome-Extension">see on github</a></span>
+			<button type="button" class="btn btn-primary pull-right" id="bt_save">save</button>
+			<span class="label label-success hidden pull-right" id="optionSavedAlert">saved!</span>
+		</div>
+	</div>
+
+	<script src="js/storage.js"></script>
+	<script src="js/popup.js"></script>
 </body>
 </html>
