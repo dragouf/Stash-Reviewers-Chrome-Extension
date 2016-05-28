@@ -32,6 +32,12 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian B
     * Note: sticker are clickable to go directly to the corresponding pull request
 * Add a link to start a jenkin build in one click on the pull request details page
     * Note: you can add your hipchat username into the config panel of the extension to receive build notification
+* Add template button to PR editor
+* Check for new version
+* Settings
+    * user can choose features to enable/disable inside extension option
+    * user can choose to receive desktop notification only for comments on his PR, mention or answer. 
+    * user can map a repository name to a specific name to match his remote name in git
 
 ### Installation
 
