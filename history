@@ -1,0 +1,11 @@
+1.6.0
+===================
+- add version check (user is notified when a new version is committed to github)
+- user can choose features to enable/disable inside extension option
+- user can choose to receive desktop notification only for comments on his PR, mention or answer.
+- add template button to PR editor
+- user can map a repository name to a specific name to match his remote name in git
+- move firefox extension to webextensions to unify code
+- checkout dropdown add reference to a specific commit if last PR's commit is older than source branch commit
+- validate json group definition before save
+- try to load ui/flag dependency (fix from shokmaster)

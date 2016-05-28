@@ -223,6 +223,14 @@ span.comment-count .aui-icon {
     background-color: #ced8ea !important;
 }
 
+#inline-dialog-inbox-pull-requests-content, #inline-dialog-inbox-messages-content {
+  width: 95%;
+}
+
+.aui-inline-dialog-contents {
+  width: 100% !important; /* HTML element has inline style */
+}
+
 table.no-rows {
     display: none !important;
 }
@@ -256,19 +264,19 @@ div.filter-group-container div.filter-group-content form.aui div.select2-contain
     display: none;
 }
 
-.pull-request-diff-outdated-lozenge { 
-  background: repeating-linear-gradient(45deg, rgba(246, 195, 66, 0.4)  , rgba(246, 195, 66, 0.4)   10px, rgba(109, 95, 61, 0.4) 10px, rgba(109, 95, 61, 0.4)   20px); 
-  position: absolute; 
-  top: 0; 
-  left: 0; 
-  bottom: 0; 
-  right: 0; 
-  z-index: -1;  
-  text-align: right; 
-  padding-right: 10px; 
-  padding-top: 10px; 
-  box-sizing: 
-  border-box; 
+.pull-request-diff-outdated-lozenge {
+  background: repeating-linear-gradient(45deg, rgba(246, 195, 66, 0.4)  , rgba(246, 195, 66, 0.4)   10px, rgba(109, 95, 61, 0.4) 10px, rgba(109, 95, 61, 0.4)   20px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: -1;
+  text-align: right;
+  padding-right: 10px;
+  padding-top: 10px;
+  box-sizing:
+  border-box;
 }
 #prSourceSelector {
     margin-right: 9px;
@@ -300,4 +308,13 @@ div.avatar-dropdown {
 
 #s2id_ddCheckoutCommand {
     margin-left: 10px;
+}
+
+a.aui-dropdown2-trigger.personal-app-button {
+    position: initial;
+}
+
+#s2id_ddCheckoutCommand .aui-icon:before {
+    font-size: 13px;
+    line-height: 18px;
 }
