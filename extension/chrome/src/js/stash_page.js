@@ -1837,6 +1837,16 @@
 	function extensionInit() {
 		var pageState;
 		var loadRequirement = jQuery.Deferred();
+		var loadAuiFlag = jQuery.Deferred();
+
+		try {
+			WRM.require("wr!" + 'com.atlassian.auiplugin:aui-flag').then(function(d) {
+				loadAuiFlag.resolve();
+			});
+		catch (_) {
+			// optional
+			loadAuiFlag.resolve();
+		}
 
 		try {
 			pageState = require('bitbucket/util/state');
@@ -1854,7 +1864,7 @@
 			}
 		}
 
-		jQuery.when(loadRequirement).done(function(){
+		jQuery.when(loadRequirement, loadAuiFlag).done(function(){
 			var user = pageState.getCurrentUser();
 			var project = pageState.getProject();
 			var repository = pageState.getRepository();
