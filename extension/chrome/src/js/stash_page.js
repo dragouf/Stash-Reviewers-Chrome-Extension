@@ -1843,6 +1843,7 @@
 			WRM.require("wr!" + 'com.atlassian.auiplugin:aui-flag').then(function(d) {
 				loadAuiFlag.resolve();
 			});
+		}
 		catch (_) {
 			// optional
 			loadAuiFlag.resolve();
