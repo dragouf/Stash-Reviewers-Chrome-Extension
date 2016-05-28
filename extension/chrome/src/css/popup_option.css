@@ -1,0 +1,42 @@
+/**
+ * Chrome Extension Twitter Bootstrap 3 Template
+ * Custom CSS
+ *
+ */
+
+/* Basic style tweaks */
+section {
+  padding: 5px;
+}
+.nav-tabs {
+  margin-bottom: 1em;
+  margin-top: 1em;
+  min-width: 610px;
+}
+.block {
+  display: block;
+}
+.content {
+  margin-bottom: 10px;
+}
+.bottom-margin {
+	margin-bottom: 5px;
+}
+.form-bottom-margin {
+	margin-bottom: 5px;
+	float: left;
+}
+textarea {
+  font-family: monospace;
+}
+.saved-message {
+  margin: 8px;
+}
+.footer {
+	margin-top: 10px;
+	float: left;
+	width: 100%;
+}
+.popover {
+	max-width: none;
+}
