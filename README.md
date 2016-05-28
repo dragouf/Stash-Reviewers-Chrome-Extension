@@ -66,8 +66,7 @@ Note: if ff version is greater than 41 you will have to change xpinstall.signatu
 ### Configuration
 
 ##### Enable/Disable features
-If you want to enable/disable feature in code go to file js/stash_page_injector.js from line 1458 and comment out features you don't want. 
-All features are called from this line to the end. Begining of the file should not be edited.
+just go to options panel and enable or disable features you want.
 
 ##### Configure reviewers groups
 A "Stash" icon will appear on the top right corner of chrome window. Click on it. It will ask you to add a json to describe which group you want to create with which reviewers.
@@ -93,8 +92,4 @@ After that when you will go to pull request creation page or update page a dropd
 
 **Note**: the extension will make a bitbucket server api request to find reviewers. It will simply send the string you added in the reviewers array as search term. Normally if you add email or username as recommanded API should return only one user. You can also enter a name but in this case if the API return more than one user, only the first one will be added.
 
-
-*If you like this extension you can buy it on chrome webstore at this address* :
-
-https://chrome.google.com/webstore/detail/stash-reviewers/kpgdinlfgnkbfkmffilkgmeahphehegk
 
