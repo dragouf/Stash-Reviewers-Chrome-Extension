@@ -2,7 +2,7 @@ Stash Reviewers Groups - Extension
 ==================
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/master/docs/launch.png" alt="extension art" />
+<img src="https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/stash-server-version/docs/launch.png" alt="extension art" />
 </p>
 
 >:warning: if you have bitbucket server (last version of stash) please switch to 'bitbucket-server-version' branch
@@ -32,20 +32,28 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian S
     * Note: sticker are clickable to go directly to the corresponding pull request
 * Add a link to start a jenkin build in one click on the pull request details page
     * Note: you can add your hipchat username into the config panel of the extension to receive build notification
+* Add template button to PR editor
+* Check for new version
+* Settings
+    * user can choose features to enable/disable inside extension option
+    * user can choose to receive desktop notification only for comments on his PR, mention or answer. 
+    * user can map a repository name to a specific name to match his remote name in git
 
 ### Installation
 
 #### Chrome
+you can find this extension on chrome webstore here: https://chrome.google.com/webstore/detail/bitbucket-server-extensio/hlagecmhpppmpfdifmigdglnhcpnohib
+
+OR from the code source of this repository:
+
 - clone this repository
-- search for &lt;your_stash_domain_here&gt; and replace with the correct stash url
 - Go to chrome settings->extensions (extension manager) 
 - Check the "Developer Mode" checkbox
 - Click on "Load unpacked extension" button.
 - From there choose the extension/chrome/src folder of this repository.
 
-#### Firefox
-- download last .xpi according to version number
-- open .xpi file with a zip tool like 7zip and replace &lt;your_stash_domain_here&gt; in main.js with the correct stash url
+#### Firefox (webextensions)
+- download last .xpi (according to version number) from extension/firefox/dist/ 
 - go to extensions panel and click on the tools icon on the right next to the search field and select : Install add-on from file.
 - then browse extension/firefox/dist and select the xpi file.
 
@@ -54,8 +62,7 @@ Note: if ff version is greater than 41 you will have to change xpinstall.signatu
 ### Configuration
 
 ##### Enable/Disable features
-If you want to enable/disable feature in code go to file js/stash_page_injector.js from line 1458 and comment out features you don't want. 
-All features are called from this line to the end. Begining of the file should not be edited.
+just go to options panel and enable or disable features you want.
 
 ##### Configure reviewers groups
 A "Stash" icon will appear on the top right corner of chrome window. Click on it. It will ask you to add a json to describe which group you want to create with which reviewers.
@@ -80,9 +87,4 @@ After that when you will go to pull request creation page or update page a dropd
 ![GitHub Logo](/docs/add_group.png)
 
 **Note**: the extension will make a stash api request to find reviewers. It will simply send the string you added in the reviewers array as search term. Normally if you add email or username as recommanded API should return only one user. You can also enter a name but in this case if the API return more than one user, only the first one will be added.
-
-
-*If you like this extension you can buy it on chrome webstore at this address* :
-
-https://chrome.google.com/webstore/detail/stash-reviewers/kpgdinlfgnkbfkmffilkgmeahphehegk
 
