@@ -42,16 +42,22 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian B
 ### Installation
 
 #### Chrome
+you can find this extension on chrome webstore here: https://chrome.google.com/webstore/detail/bitbucket-server-extensio/hlagecmhpppmpfdifmigdglnhcpnohib
+
+OR from the code source of this repository:
+
 - clone this repository
-- search for &lt;your_stash_domain_here&gt; and replace with the correct bitbucket server url
 - Go to chrome settings->extensions (extension manager) 
 - Check the "Developer Mode" checkbox
 - Click on "Load unpacked extension" button.
 - From there choose the extension/chrome/src folder of this repository.
 
-#### Firefox
-- download last .xpi according to version number
-- open .xpi file with a zip tool like 7zip and replace &lt;your_stash_domain_here&gt; in main.js with the correct bitbucket server url
+#### Firefox (webextensions)
+you can find this module on mozilla addons website here: https://addons.mozilla.org/en-US/firefox/addon/bitbucket-server-extension/
+
+OR from this repository:
+
+- download last .xpi (according to version number) from extension/firefox/dist/ 
 - go to extensions panel and click on the tools icon on the right next to the search field and select : Install add-on from file.
 - then browse extension/firefox/dist and select the xpi file.
 
