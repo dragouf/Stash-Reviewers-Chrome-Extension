@@ -66,8 +66,7 @@ Note: if ff version is greater than 41 you will have to change xpinstall.signatu
 ### Configuration
 
 ##### Enable/Disable features
-If you want to enable/disable feature in code go to file js/stash_page_injector.js from line 1458 and comment out features you don't want. 
-All features are called from this line to the end. Begining of the file should not be edited.
+just go to options panel and enable or disable features you want.
 
 ##### Configure reviewers groups
 A "Stash" icon will appear on the top right corner of chrome window. Click on it. It will ask you to add a json to describe which group you want to create with which reviewers.
