@@ -85,7 +85,7 @@
 			jQuery('#checkoutLink').remove();
 
 			if(!repository.links.clone) {
-				var $link =jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger">',
+				var $link =jQuery(['<div class="aui-item ddCheckoutCommand"><a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger">',
 								'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
 								'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
 								'</a>',
@@ -94,7 +94,7 @@
 								'		<li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
 								'	</ul>',
 								'</div>'].join('\n'));
-				jQuery('#branch-actions').parent().parent().append($link);
+				jQuery('.aui-toolbar2-primary').find('.aui-group').append($link);
 				return;
 			}
 
@@ -139,9 +139,9 @@
 			var command = '';
 			var ddlClicked = false;
 
-			var $wrapperdiv = jQuery('<div></div>', { id: 'checkoutLink', style: 'float: left' });
+			var $wrapperdiv = jQuery('<div></div>', { id: 'checkoutLink', style: 'float: left', class: 'aui-item ddCheckoutCommand' });
 			$wrapperdiv.append($link);
-			jQuery('#branch-actions').parent().parent().append($wrapperdiv);
+			jQuery('.aui-toolbar2-primary').find('.aui-group').append($wrapperdiv);
 			jQuery('.checkoutCommand_link').click(function(e){
 				ddlClicked = true;
 				var action = jQuery(e.target).data('action') || jQuery(e.target).parent().data('action');
@@ -600,7 +600,7 @@
 		function attachNavigateToBranchLink() {
 			var pr = pageState.getPullRequest();
 
-			var $branchOriginSpan = jQuery('.ref-name-from');
+			var $branchOriginSpan = jQuery('.source-branch');
 			if ($branchOriginSpan.length) {
 				var urlFrom = urlUtil.buildSlug(pr.fromRef.repository);
 				urlFrom += '?at=' + pr.fromRef.id;
@@ -608,7 +608,7 @@
 				$branchOriginSpan.wrap(jQuery('<a></a>', { href: urlFrom }));
 			}
 
-			var $branchDestinationSpan = jQuery('.ref-name-to');
+			var $branchDestinationSpan = jQuery('.target-branch');
 			if ($branchDestinationSpan.length) {
 				var urlTo = urlUtil.buildSlug(pr.toRef.repository);
 				urlTo += '?at=' + pr.toRef.id;
@@ -650,7 +650,7 @@
 								'		<li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
 								'	</ul>',
 								'</div>'].join('\n'));
-				jQuery('.pull-request-metadata').append($link);
+				jQuery('.pull-request-branches').append($link);
 				return;
 			}
 
@@ -703,7 +703,7 @@
 				var command = '';
 				var ddlClicked = false;
 
-				jQuery('.pull-request-metadata').append($link);
+				jQuery('.pull-request-branches').append($link);
 				jQuery('.checkoutCommand_link').click(function(e){
 					ddlClicked = true;
 					var action = jQuery(e.target).data('action') || jQuery(e.target).parent().data('action');
@@ -1414,7 +1414,7 @@
 				window.communication.runtime.sendMessage(window.chromeExtId, {
 					method: 'GET',
 					action: 'xhttp',
-					url: 'https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/master/version'
+					url: 'https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/stash-server-version/version'
 				}, function(data) {
 					if(!data) {
 						data.response = 'cant.reach.github';
@@ -1437,7 +1437,7 @@
 							body = "Can't connect to github to check version.";
 						}
 
-						body += '<br><br><a href="https://github.com/dragouf/Stash-Reviewers-Chrome-Extension/blob/master/history" target="_blank">See history (repository)</a>';
+						body += '<br><br><a href="https://github.com/dragouf/Stash-Reviewers-Chrome-Extension/blob/stash-server-version/history" target="_blank">See history (repository)</a>';
 						body += ' <a id="skipVersionLink" href="javascript:window.hideStashRGEVersion();" style="float:right">Skip this version</a>';
 
 						var flag = auiFlag({
