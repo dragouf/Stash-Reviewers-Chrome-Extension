@@ -93,7 +93,3 @@ After that when you will go to pull request creation page or update page a dropd
 **Note**: the extension will make a bitbucket server api request to find reviewers. It will simply send the string you added in the reviewers array as search term. Normally if you add email or username as recommanded API should return only one user. You can also enter a name but in this case if the API return more than one user, only the first one will be added.
 
 
-*If you like this extension you can buy it on chrome webstore at this address* :
-
-https://chrome.google.com/webstore/detail/stash-reviewers/kpgdinlfgnkbfkmffilkgmeahphehegk
-
