@@ -8,6 +8,7 @@
 - move firefox extension to webextensions to unify code
 - checkout dropdown add reference to a specific commit if last PR's commit is older than source branch commit
 - validate json group definition before save
+- try to load ui/flag dependency (fix from shokmaster)
 
 2.1.0
 ===================
