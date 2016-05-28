@@ -7,6 +7,7 @@
 - user can map a repository name to a specific name to match his remote name in git
 - move firefox extension to webextensions to unify code
 - checkout dropdown add reference to a specific commit if last PR's commit is older than source branch commit
+- validate json group definition before save
 
 2.1.0
 ===================

@@ -49,10 +49,10 @@
 						<textarea class="form-control" rows="5" id="text_json"></textarea>
 					</div>
 
-					<div class="form-group">
+					<!-- <div class="form-group">
 						<label for="hipchat_username">HipChat Username:</label>
 						<input type="text" class="form-control" id="hipchat_username" placeholder="HipChat username without @">
-					</div>
+					</div> -->
 				</div>
 			</div>
 
@@ -207,7 +207,7 @@
 					</div>
 				</div>
 
-				<div class="row bottom-margin">
+				<!-- <div class="row bottom-margin">
 					<div class="col-xs-6">
 						<label for="f_build" data-toggle="popover">Build Button</label>
 					</div>
@@ -221,7 +221,7 @@
 							</label>
 						</div>
 					</div>
-				</div>
+				</div> -->
 
 				<div class="row bottom-margin">
 					<div class="col-xs-6">
@@ -270,13 +270,30 @@
 						</div>
 					</div>
 				</div>
+
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="f_prtemplate" data-toggle="popover">Check new version</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="f_checkversion">
+							<label class="btn btn-primary active">
+								<input type="radio" name="checkversion" id="checkversion" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="checkversion" id="checkversion" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 
 		<div class="footer">
-		 	<span class="pull-left" style="font-size:xx-small">source: <a href="https://github.com/dragouf/Stash-Reviewers-Chrome-Extension">see on github</a></span>
+		 	<span class="pull-left" style="font-size:xx-small">source: <a href="https://github.com/dragouf/Stash-Reviewers-Chrome-Extension">view on github</a></span>
 			<button type="button" class="btn btn-primary pull-right" id="bt_save">save</button>
-			<span class="label label-success hidden pull-right" id="optionSavedAlert">saved!</span>
+			<span class="label label-danger hidden pull-right saved-message" id="optionErrorAlert">Error!</span>
+			<span class="label label-success hidden pull-right saved-message" id="optionSavedAlert">saved!</span>
 		</div>
 	</div>
 

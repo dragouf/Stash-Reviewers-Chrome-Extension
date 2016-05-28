@@ -6,7 +6,8 @@ $( document ).ready(function() {
 	function bindSaveClick() {
 		$('#bt_save').click(function() {
 			$.when(saveGroups(), saveHipChat(), saveTemplate(), saveNotification(), saveRepoMapping(), saveFeatures())
-			.done(displaySavedLabel);
+			.done(displaySavedLabel)
+			.fail(displayErrorLabel);
 		});
 	}
 
@@ -67,15 +68,25 @@ $( document ).ready(function() {
 	}
 
 	function displaySavedLabel() {
+		$('#optionErrorAlert').addClass('hidden');
 		$('#optionSavedAlert').removeClass('hidden');
 		setTimeout(function() {
 			$('#optionSavedAlert').addClass('hidden');
 		}, 800);
 	}
 
+	function displayErrorLabel(error) {
+		$('#optionErrorAlert').html('Error: ' + error.msg);
+		$('#optionErrorAlert').removeClass('hidden');
+	}
+
 	function saveGroups() {
 		var def = $.Deferred();
 		var newValue = $('#text_json').val();
+		try { JSON.parse(newValue) }
+		catch (e) {
+			def.reject({ msg: e.message, error: e });
+		}
 		extensionStorage.saveGroups(newValue, function() {
 			def.resolve();
 		});
@@ -267,6 +278,9 @@ $( document ).ready(function() {
 				break;
 			case 'f_prconflicts':
 				content = 'Display a warning message in PR review page in case of conflict';
+				break;
+			case 'f_prconflicts':
+				content = 'Check if there is no new version committed on github each time the extension load';
 				break;
 		}
 		el.popover({

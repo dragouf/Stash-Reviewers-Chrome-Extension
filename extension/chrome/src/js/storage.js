@@ -20,7 +20,8 @@ var extensionStorage = (function() {
 		pa: true,
 		forkorigin: true,
 		prtemplate: true,
-		prconflicts: true
+		prconflicts: true,
+		checkversion: true
 	};
 
 	var cloudStorage = chrome.storage.sync;

@@ -1862,7 +1862,8 @@
 
 			if(user) {
 				require(['bitbucket-plugin/header-notification'], function(notification) {
-					notification.checkForUpdate();
+					if(window.featuresData.checkversion == 1)
+						notification.checkForUpdate();
 					notification.removeAnnouncement();
 					if(window.featuresData.notifIcon == 1)
 						notification.addMessagesToolbarIcon();
