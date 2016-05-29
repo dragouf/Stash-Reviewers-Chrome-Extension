@@ -1,3 +1,10 @@
+1.6.2
+===================
+- update jquery and bootstrap
+- fix css selector for checkout dropdwon
+- fix template feature parsing issue
+
+
 1.6.1
 ===================
 - bug fix: help in options panel was incorrect

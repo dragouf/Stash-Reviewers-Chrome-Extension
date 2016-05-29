@@ -66,7 +66,7 @@ var extensionStorage = (function() {
 				var template = items[TEMPLATE_KEY];
 				if (!template) {
 					$.get(chrome.extension.getURL('/js/template.txt'), function(data) {
-						callback(data.split('\n'));
+						callback(data.replace("\r", '').split('\n'));
 					});
 				} else {
 					callback(template);

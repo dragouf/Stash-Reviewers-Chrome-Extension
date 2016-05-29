@@ -307,7 +307,7 @@ div.avatar-dropdown {
 .markup>ul>li>ul>li>ul{list-style-type:square}
 
 #s2id_ddCheckoutCommand {
-    margin-left: 10px;
+    margin: 0 5px 0 0;
 }
 
 a.aui-dropdown2-trigger.personal-app-button {
@@ -318,3 +318,9 @@ a.aui-dropdown2-trigger.personal-app-button {
     font-size: 13px;
     line-height: 18px;
 }
+.pull-request-checkout {  
+  display: inline-block;
+  padding-left: 7px;
+  margin-left: 5px;
+  line-height: 5px;
+ }

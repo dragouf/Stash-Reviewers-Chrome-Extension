@@ -94,7 +94,7 @@
 								'		<li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
 								'	</ul>',
 								'</div>'].join('\n'));
-				jQuery('.aui-toolbar2-primary').find('.aui-group').append($link);
+				jQuery('.aui-toolbar2-primary').find('.aui-group').find('.aui-item:first').after($link);
 				return;
 			}
 
@@ -141,7 +141,7 @@
 
 			var $wrapperdiv = jQuery('<div></div>', { id: 'checkoutLink', style: 'float: left', class: 'aui-item ddCheckoutCommand' });
 			$wrapperdiv.append($link);
-			jQuery('.aui-toolbar2-primary').find('.aui-group').append($wrapperdiv);
+			jQuery('.aui-toolbar2-primary').find('.aui-group').find('.aui-item:first').after($wrapperdiv);
 			jQuery('.checkoutCommand_link').click(function(e){
 				ddlClicked = true;
 				var action = jQuery(e.target).data('action') || jQuery(e.target).parent().data('action');
@@ -641,7 +641,7 @@
 			var remoteName = pr.fromRef.repository.project.owner ? pr.fromRef.repository.project.owner.slug : pr.fromRef.repository.project.name;
 
 			if(!pr.fromRef.repository.links.clone) {
-				var $link =jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
+				var $link =jQuery(['<div class="pull-request-checkout"><a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
 								'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
 								'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
 								'</a>',
@@ -649,7 +649,7 @@
 								'	<ul class="aui-list-truncate">',
 								'		<li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
 								'	</ul>',
-								'</div>'].join('\n'));
+								'</div></div>'].join('\n'));
 				jQuery('.pull-request-branches').append($link);
 				return;
 			}
@@ -664,7 +664,7 @@
 				cloneUrl = pr.fromRef.repository.links.clone[0].href;
 			}
 
-			var $link =jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
+			var $link =jQuery(['<div class="pull-request-checkout"><a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
 								'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
 								'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
 								'</a>',
@@ -676,7 +676,7 @@
 								'		<li data-action="newbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Create branch</a></li>',
 								'		<li data-action="checkout"><a href="javascript:void(0)" class="checkoutCommand_link">Checkout existing</a></li>',
 								'	</ul>',
-								'</div>'].join('\n'));
+								'</div></div>'].join('\n'));
 
 			// git remote naming
 			window.repoMapArray.forEach(function(map){
@@ -1417,7 +1417,9 @@
 					url: 'https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/stash-server-version/version'
 				}, function(data) {
 					if(!data) {
-						data.response = 'cant.reach.github';
+						data = {
+							response: 'cant.reach.github'
+						}
 					}
 					else if ((data.response || { response: '' }).length > 10) {
 						// it's not version file we retrieved

@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "Stash Extension",
 	"description": "Allow to add group of reviewers for pull request in stash + other features",
-	"version": "1.6.1",
+	"version": "1.6.2",
 	"permissions": [
 		"storage",
 		"alarms",
@@ -25,7 +25,7 @@
 		{
 			"all_frames": true,
 			"js": [
-				"js/jquery-2.0.3.min.js",
+				"js/jquery.min.js",
 				"js/storage.js",
 				"js/injector_loader.js"
 			],
@@ -33,7 +33,7 @@
 		}
 	],
 	"background": {
-		"scripts": ["js/jquery-2.0.3.min.js", "js/background.js"],
+		"scripts": ["js/jquery.min.js", "js/background.js"],
 		"persistent": false
 	},
 	"web_accessible_resources": [
