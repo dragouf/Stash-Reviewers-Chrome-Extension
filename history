@@ -2,6 +2,7 @@
 ===================
 - checkout dropdown was misplaced
 - parse error with template feature
+- wrong api request to get pr list for notification (with bitbucket v4.6)
 
 
 2.2.3
