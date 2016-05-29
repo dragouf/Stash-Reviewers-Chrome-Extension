@@ -22,7 +22,7 @@ function injectEngine(){
 			console.warn("reviewers plugin: no data");
 			var code = ["require('aui/flag')({",
 							"type: 'info',",
-							"title: 'Bitbucket Browser Extension',",
+							"title: 'Stash Browser Extension',",
 							"body: '<p>Please define groups for button to appear</p>',",
 							"close: 'auto'",
 						"});"].join('\n');
