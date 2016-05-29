@@ -1,3 +1,7 @@
+2.2.5
+===================
+- update jquery and bootstrap as requested by mozilla reviewers
+
 2.2.4
 ===================
 - checkout dropdown was misplaced
