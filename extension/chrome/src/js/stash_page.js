@@ -601,6 +601,9 @@
 			var pr = pageState.getPullRequest();
 
 			var $branchOriginSpan = jQuery('.ref-name-from');
+			if($branchOriginSpan.length === 0) {
+				$branchOriginSpan = jQuery('.source-branch');
+			}
 			if ($branchOriginSpan.length) {
 				var urlFrom = urlUtil.buildSlug(pr.fromRef.repository);
 				urlFrom += '?at=' + pr.fromRef.id;
@@ -609,6 +612,9 @@
 			}
 
 			var $branchDestinationSpan = jQuery('.ref-name-to');
+			if($branchDestinationSpan.length === 0) {
+				$branchDestinationSpan = jQuery('.target-branch');
+			}
 			if ($branchDestinationSpan.length) {
 				var urlTo = urlUtil.buildSlug(pr.toRef.repository);
 				urlTo += '?at=' + pr.toRef.id;
@@ -641,7 +647,7 @@
 			var remoteName = pr.fromRef.repository.project.owner ? pr.fromRef.repository.project.owner.slug : pr.fromRef.repository.project.name;
 
 			if(!pr.fromRef.repository.links.clone) {
-				var $link =jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
+				var $link =jQuery(['<div class="pull-request-checkout"><a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
 								'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
 								'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
 								'</a>',
@@ -649,8 +655,13 @@
 								'	<ul class="aui-list-truncate">',
 								'		<li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
 								'	</ul>',
-								'</div>'].join('\n'));
-				jQuery('.pull-request-metadata').append($link);
+								'</div></div>'].join('\n'));
+				if(jQuery('.pull-request-metadata-primary').length > 0) {
+					jQuery('.pull-request-metadata-primary').find('.pull-request-branches').after($link);
+				} else {
+					jQuery('.pull-request-metadata').append($link);
+				}
+
 				return;
 			}
 
@@ -664,7 +675,7 @@
 				cloneUrl = pr.fromRef.repository.links.clone[0].href;
 			}
 
-			var $link =jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
+			var $link =jQuery(['<div class="pull-request-checkout"><a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
 								'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
 								'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
 								'</a>',
@@ -676,7 +687,7 @@
 								'		<li data-action="newbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Create branch</a></li>',
 								'		<li data-action="checkout"><a href="javascript:void(0)" class="checkoutCommand_link">Checkout existing</a></li>',
 								'	</ul>',
-								'</div>'].join('\n'));
+								'</div></div>'].join('\n'));
 
 			// git remote naming
 			window.repoMapArray.forEach(function(map){
@@ -703,7 +714,14 @@
 				var command = '';
 				var ddlClicked = false;
 
-				jQuery('.pull-request-metadata').append($link);
+				// inject
+				if(jQuery('.pull-request-metadata-primary').length > 0) {
+					// bitbucket v4.3
+					jQuery('.pull-request-metadata-primary').find('.pull-request-branches').after($link);
+				} else {
+					jQuery('.pull-request-metadata').append($link);
+				}
+
 				jQuery('.checkoutCommand_link').click(function(e){
 					ddlClicked = true;
 					var action = jQuery(e.target).data('action') || jQuery(e.target).parent().data('action');
@@ -862,20 +880,61 @@
 				limit: 1000,
 				avatarSize: 96,
 				withAttributes:true,
-				state: 'open',
+				state: 'OPEN',
 				order: 'oldest',
 				role: 'reviewer'
 			};
 
-			var urlPRReviewers = nav.newBuilder(['rest', 'inbox', 'latest', 'pull-requests']).withParams(reqParams).build();
-			reqParams.role = 'author';
-			var urlPRAuthor = nav.newBuilder(['rest', 'inbox', 'latest', 'pull-requests']).withParams(reqParams).build();
+			var urlSegments = ['rest', 'inbox', 'latest', 'pull-requests'];
+			var urlSegmentsNew = ['rest', 'api', 'latest', 'inbox', 'pull-requests'];
+
+			var reviewersDefered = jQuery.Deferred()
+			var resolveReviewers = function(data) {
+				reviewersDefered.resolve();
+				return data;
+			}
+			var authorDefered = jQuery.Deferred()
+			var resolveAuthor = function(data) {
+				authorDefered.resolve();
+				return data;
+			}
+
+			var buildUrlPR = function(segments, role){
+				reqParams.role = role;
+				return nav.newBuilder(segments).withParams(reqParams).build();
+			}
+			var mergeResults = function(data){
+				jQuery.merge(allPR, data.values)
+			};
+			var rerunRequest = function(role) {
+				return function(err) {
+						var resolver = role === 'reviewer' ? resolveReviewers : resolveAuthor;
+						if(err.status == 404) {
+							return jQuery
+							.get(buildUrlPR(urlSegments, role))
+							.then(resolver)
+							.then(mergeResults);
+						}
+				}
+			};
+			var rerunRequestReviewers = rerunRequest('reviewer');
+			var rerunRequestAuthor = rerunRequest('author');
 
 			var allPR = [];
-			var firstDiferred = jQuery.get(urlPRReviewers).done(function(data){ jQuery.merge(allPR, data.values); });
-			var secondDiferred = jQuery.get(urlPRAuthor).done(function(data){ jQuery.merge(allPR, data.values); });
 
-			jQuery.when(firstDiferred, secondDiferred).done(function(){
+			jQuery
+			.get(buildUrlPR(urlSegmentsNew, 'reviewer'))
+			.then(mergeResults)
+			.then(resolveReviewers)
+			.fail(rerunRequestReviewers);
+
+			jQuery
+			.get(buildUrlPR(urlSegmentsNew, 'author'))
+			.then(mergeResults)
+			.then(resolveAuthor)
+			.fail(rerunRequestAuthor);
+
+			jQuery.when(reviewersDefered, authorDefered).done(function(){
 			var activities = [];
 			var requests = [];
 			// loop through PRs and request activities
@@ -1526,6 +1585,9 @@
 		}
 
 		function addPrFilters() {
+			if(jQuery('#pull-requests-content').length === 0) {
+				return;
+			}
 			jQuery('.spinner').show();
 			//redefined filter builder to include new parameters
 			PullRequestsTable.prototype.buildUrl = function (start, limit) {
@@ -1614,8 +1676,10 @@
 			var targeting = getParameterByName('at') || '';
 			var reviewing = getParameterByName('reviewing') || false;
 			// previous values
-			var refData = jQuery('#s2id_pr-target-branch-filter').data('select2').data();
-			var authorData = jQuery('#s2id_pr-author-filter').data('select2').data();
+			var $banchSelectorOrigin = jQuery('#s2id_pr-target-branch-filter');
+			var refData = $banchSelectorOrigin.length > 0 ? $banchSelectorOrigin.data('select2').data() : null;
+			var $authorFilterOrigin = jQuery('#s2id_pr-author-filter');
+			var authorData = $authorFilterOrigin.length > 0 ? $authorFilterOrigin.data('select2').data() : null;
 
 			var order = /*state.toLowerCase() === 'open' ? 'oldest' :*/ 'newest';
 

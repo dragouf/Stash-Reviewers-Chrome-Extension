@@ -73,13 +73,55 @@ function retrieveActivities() {
         }
 
         var deferredResult = jQuery.Deferred();
-        var urlPR = items.currentStashBaseUrl + "/rest/inbox/latest/pull-requests?start=0&limit=1000&avatarSize=64&withAttributes=true&state=open&order=oldest&role=";
+        var params = "?start=0&limit=1000&avatarSize=64&withAttributes=true&state=OPEN&order=oldest&role=";
+        var urlPR = items.currentStashBaseUrl + "/rest/inbox/latest/pull-requests" + params;
+        var urlPRNew = items.currentStashBaseUrl + "/rest/api/latest/inbox/pull-requests" + params;
 
-        var allPR = [];
-        var firstDiferred = jQuery.get(urlPR + "reviewer").done(function(data){ jQuery.merge(allPR, data.values); });
-        var secondDiferred = jQuery.get(urlPR + "author").done(function(data){ jQuery.merge(allPR, data.values); });
+        var buildUrlPR = function(url, role){
+          return url + role;
+        }
+        var reviewersDefered = jQuery.Deferred()
+        var resolveReviewers = function(data) {
+          reviewersDefered.resolve();
+          return data;
+        }
+        var authorDefered = jQuery.Deferred()
+        var resolveAuthor = function(data) {
+          authorDefered.resolve();
+          return data;
+        }
+        var mergeResults = function(data){
+  				jQuery.merge(allPR, data.values)
+  			};
+  			var rerunRequest = function(role) {
+  				return function(err) {
+  						var resolver = role === 'reviewer' ? resolveReviewers : resolveAuthor;
+  						if(err.status == 404) {
+  							return jQuery
+  							.get(buildUrlPR(urlPR, role))
+  							.then(resolver)
+  							.then(mergeResults);
+  						}
+  				}
+  			};
+  			var rerunRequestReviewers = rerunRequest('reviewer');
+  			var rerunRequestAuthor = rerunRequest('author');
 
-        jQuery.when(firstDiferred, secondDiferred).done(function(){
+  			var allPR = [];
+
+  			jQuery
+  			.get(buildUrlPR(urlPRNew, 'reviewer'))
+  			.then(mergeResults)
+  			.then(resolveReviewers)
+  			.fail(rerunRequestReviewers);
+
+  			jQuery
+  			.get(buildUrlPR(urlPRNew, 'author'))
+  			.then(mergeResults)
+  			.then(resolveAuthor)
+  			.fail(rerunRequestAuthor);
+
+        jQuery.when(reviewersDefered, authorDefered).done(function(){
             var activities = [];
             var requests = [];
             // loop through PRs and request activities

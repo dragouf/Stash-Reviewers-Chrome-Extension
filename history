@@ -1,3 +1,9 @@
+2.2.4
+===================
+- checkout dropdown was misplaced
+- parse error with template feature
+
+
 2.2.3
 ===================
 - bug fix: help in options panel was incorrect

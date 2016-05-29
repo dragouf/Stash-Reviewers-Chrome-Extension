@@ -318,3 +318,9 @@ a.aui-dropdown2-trigger.personal-app-button {
     font-size: 13px;
     line-height: 18px;
 }
+
+.pull-request-checkout {
+    border-left: 1px solid #ccc;
+    display: inline-block;
+    margin-left: 10px;
+}
