@@ -1,3 +1,7 @@
+2.2.3
+===================
+- bug fix: help in options panel was incorrect
+
 2.2.2
 ===================
 - update icon
@@ -20,4 +24,4 @@
 
 2.1.0
 ===================
-- fix PR filter bug (multiple filter were not take in account)
+- bug fix: PR filter bug (multiple filter were not take in account)
