@@ -1361,7 +1361,7 @@
 				'</li>'].join('\n');
 
 
-			jQuery('.help-link').after(button);
+			jQuery('.aui-header-secondary .aui-nav').find('> li:eq(1)').after(button);
 
 			updateUI(false, false, true);
 			createCommentsDialog();
@@ -1830,36 +1830,8 @@
 
 	function extensionInit() {
 		var pageState;
-		var loadRequirement = jQuery.Deferred();
-		var loadAuiFlag = jQuery.Deferred();
 
-		try {
-			WRM.require("wr!" + 'com.atlassian.auiplugin:aui-flag').then(function(d) {
-				loadAuiFlag.resolve();
-			});
-		}
-		catch (_) {
-			// optional
-			loadAuiFlag.resolve();
-		}
-
-		try {
-			pageState = require('stash/api/util/state');
-			loadRequirement.resolve();
-		}
-		catch (_) {
-			try {
-				WRM.require("wr!" + 'com.atlassian.stash.stash-web-api:state').then(function(){
-					pageState = require('stash/api/util/state');
-					loadRequirement.resolve();
-				});
-			}
-			catch (_) {
-				loadRequirement.reject();
-			}
-		}
-
-		jQuery.when(loadRequirement, loadAuiFlag).done(function(){
+		jQuery.when(polyfill()).done(function(){
 			var user = pageState.getCurrentUser();
 			var project = pageState.getProject();
 			var repository = pageState.getRepository();
@@ -1956,6 +1928,73 @@
 				});
 			}
 		});
+
+		function polyfill() {
+			var loadRequirement = jQuery.Deferred();
+			var loadAuiFlag = jQuery.Deferred();
+
+			try {
+				require('lodash');
+			} catch(_) {
+				// fake
+				define('lodash', function(){
+					return {
+						filter: function(list, fct) {
+							//native filter
+							return list.filter(fct);
+						},
+						sortBy:function (list){
+							// no order
+							return list;
+						}
+					}
+				});
+			}
+
+			try {
+				WRM.require("wr!" + 'com.atlassian.auiplugin:aui-flag').then(function(d) {
+					try {
+						require('aui/flag');
+					} catch(_) {
+						// fake
+						define('aui/flag', function(){
+							return function(options) {
+								alert(options.title + "\n" +options.body);
+							}
+						});
+					}
+					loadAuiFlag.resolve();
+				});
+			}
+			catch (_) {
+				// fake
+				define('aui/flag', function(){
+					return function(options) {
+						alert(options.title + "\n\n" +options.body);
+					}
+				});
+				// optional
+				loadAuiFlag.resolve();
+			}
+
+			try {
+				pageState = require('stash/api/util/state');
+				loadRequirement.resolve();
+			}
+			catch (_) {
+				try {
+					WRM.require("wr!" + 'com.atlassian.stash.stash-web-api:state').then(function(){
+						pageState = require('stash/api/util/state');
+						loadRequirement.resolve();
+					});
+				}
+				catch (_) {
+					loadRequirement.reject();
+				}
+			}
+
+			return jQuery.when(loadRequirement, loadAuiFlag);
+		}
 	}
 }());
 // Note: to see all stash events add ?eve=* to URL

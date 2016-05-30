@@ -1,3 +1,7 @@
+1.6.4
+===================
+- stash 3.3.x and lower compatibility
+
 1.6.3
 ===================
 - user bower boostrap version to pusblish extension on mozilla addon website
