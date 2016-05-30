@@ -874,6 +874,7 @@
 
 		function getLastPRCommentsAsync() {
 			var deferredResult = jQuery.Deferred();
+			var allPR = [];
 			// get lastest PR
 			var reqParams = {
 				start: 0,
@@ -919,8 +920,6 @@
 			};
 			var rerunRequestReviewers = rerunRequest('reviewer');
 			var rerunRequestAuthor = rerunRequest('author');
-
-			var allPR = [];
 
 			jQuery
 			.get(buildUrlPR(urlSegmentsNew, 'reviewer'))

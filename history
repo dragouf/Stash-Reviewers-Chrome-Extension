@@ -1,3 +1,8 @@
+2.2.6
+===================
+- bugfix: notifications from current user PR were not display
+- user bower boostrap version to pusblish extension on mozilla addon website
+
 2.2.5
 ===================
 - update jquery and bootstrap as requested by mozilla reviewers
