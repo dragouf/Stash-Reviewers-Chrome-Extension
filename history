@@ -1,3 +1,7 @@
+1.6.5
+===================
+- better aui/flag polyfill
+
 1.6.4
 ===================
 - stash 3.3.x and lower compatibility

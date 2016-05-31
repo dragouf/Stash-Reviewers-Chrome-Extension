@@ -318,9 +318,12 @@ a.aui-dropdown2-trigger.personal-app-button {
     font-size: 13px;
     line-height: 18px;
 }
-.pull-request-checkout {  
+.pull-request-checkout {
   display: inline-block;
   padding-left: 7px;
   margin-left: 5px;
   line-height: 5px;
  }
+
+ /* module-key = 'com.atlassian.auiplugin:aui-flag', location = 'src/less/flag.less' */
+ #aui-flag-container{position:fixed;top:71px;right:30px;z-index:4000}.aui-flag{left:0;max-height:300px;opacity:0;position:relative;top:-10px;transition:opacity .2s,top .5s}.aui-flag[aria-hidden="true"]{left:300px;max-height:0;opacity:0;overflow:hidden;top:0;transition:max-height .5s .5s,opacity .8s,left 1s}.aui-flag[aria-hidden="false"]{opacity:1;top:0;left:0}.aui-flag .aui-message{box-shadow:0 3px 6px rgba(0,0,0,0.2);margin-bottom:20px;border-top-width:1px;border-right-width:1px;border-bottom-width:1px;border-left-width:1px;border-radius:3px;width:300px}

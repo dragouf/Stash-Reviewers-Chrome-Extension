@@ -1956,23 +1956,15 @@
 					try {
 						require('aui/flag');
 					} catch(_) {
-						// fake
-						define('aui/flag', function(){
-							return function(options) {
-								alert(options.title + "\n" +options.body);
-							}
-						});
+						// fake for <= 3.2
+						polyfillAuiFlag();
 					}
 					loadAuiFlag.resolve();
 				});
 			}
 			catch (_) {
-				// fake
-				define('aui/flag', function(){
-					return function(options) {
-						alert(options.title + "\n\n" +options.body);
-					}
-				});
+				// fake for <= 3.2
+				polyfillAuiFlag();
 				// optional
 				loadAuiFlag.resolve();
 			}
@@ -1994,6 +1986,139 @@
 			}
 
 			return jQuery.when(loadRequirement, loadAuiFlag);
+		}
+
+		function polyfillAuiFlag() {
+			define('aui/flag', function(){
+				return flag;
+			});
+			var AUTO_CLOSE_TIME = 5000;
+			var ID_FLAG_CONTAINER = 'aui-flag-container';
+			var defaultOptions = {
+			    body: '',
+			    close: 'manual',
+			    title: '',
+			    type: 'info',
+			    id: null
+			};
+
+			function recomputeStyle (el) {
+			    el = el.length ? el[0] : el;
+			    window.getComputedStyle(el, null).getPropertyValue('left');
+			}
+
+			function flag (options) {
+			    options = jQuery.extend({}, defaultOptions, options);
+
+			    var $flag = renderFlagElement(options);
+			    extendFlagElement($flag);
+
+			    if (options.close === 'auto') {
+			        makeCloseable($flag);
+			        makeAutoClosable($flag);
+			    } else if (options.close === 'manual') {
+			        makeCloseable($flag);
+			    }
+
+			    pruneFlagContainer();
+
+			    return insertFlag($flag);
+			}
+
+			function extendFlagElement ($flag) {
+			    var flag = $flag[0];
+
+			    flag.close = function () {
+			        closeFlag($flag);
+			    };
+			}
+
+			function renderFlagElement (options) {
+			   var closeable = (options.close === 'never') ? '' : 'closeable';
+			   var title = options.title || '';
+			   var body = options.body || '';
+			    var html =
+			        '<div class="aui-flag">' +
+			            '<div class="aui-message aui-message-'+options.type+' '+options.type+' '+closeable+' shadowed">' +
+			                '<p class="title">' +
+			                    '<strong>'+title+'</strong>' +
+			                '</p>' +
+			                body + '<!-- .aui-message -->' +
+			            '</div>' +
+			        '</div>';
+
+			    var $element = jQuery(html);
+
+			    if (typeof options.id === 'string') {
+			        $element.attr('id', options.id);
+			    }
+
+			    return $element;
+			}
+
+			function makeCloseable ($flag) {
+			    var $icon = jQuery('<span class="aui-icon icon-close" role="button" tabindex="0"></span>');
+
+			    $icon.click(function () {
+			        closeFlag($flag);
+			    });
+
+			    $icon.keypress(function (e) {
+			        if ((e.which === 13) || (e.which === 32)) {
+			            closeFlag($flag);
+			            e.preventDefault();
+			        }
+			    });
+
+			    return $flag.find('.aui-message').append($icon)[0];
+			}
+
+			function makeAutoClosable ($flag) {
+			    $flag.find('.aui-message').addClass('aui-will-close');
+			    setTimeout(function () {
+			        $flag[0].close();
+			    }, AUTO_CLOSE_TIME);
+			}
+
+			function closeFlag ($flagToClose) {
+			    var flag = $flagToClose.get(0);
+
+			    flag.setAttribute('aria-hidden', 'true');
+			    flag.dispatchEvent(new CustomEvent('aui-flag-close', {bubbles: true}));
+
+			    return flag;
+			}
+
+			function pruneFlagContainer () {
+			    var $container = findContainer();
+			    var $allFlags = $container.find('.aui-flag');
+
+			    $allFlags.get().forEach(function (flag) {
+			        var isFlagAriaHidden = flag.getAttribute('aria-hidden') === 'true';
+
+			        if (isFlagAriaHidden) {
+			            jQuery(flag).remove();
+			        }
+			    });
+			}
+
+			function findContainer () {
+			    return jQuery('#' + ID_FLAG_CONTAINER);
+			}
+
+			function insertFlag ($flag) {
+			    var $flagContainer = findContainer();
+
+			    if (!$flagContainer.length) {
+			        $flagContainer = jQuery('<div id="' + ID_FLAG_CONTAINER + '"></div>');
+			        jQuery('body').prepend($flagContainer);
+			    }
+
+			    $flag.appendTo($flagContainer);
+			    recomputeStyle($flag);
+
+			    return $flag.attr('aria-hidden', 'false')[0];
+			}
 		}
 	}
 }());
