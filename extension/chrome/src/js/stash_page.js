@@ -35,7 +35,7 @@
 		}
 
 		function buildSlug(pageState) {
-			if(pageState.link && pageState.link.url) {
+			if(pageState && pageState.link && pageState.link.url) {
 				return pageState.link.url;
 			}
 			else return '';
@@ -851,7 +851,7 @@
 				}
 			});
 
-			return _.sortBy(returnedActivities, 'activityDate').reverse();;
+			return _.sortBy(returnedActivities, 'activityDate').reverse();
 		}
 
 		function getLastPRCommentsAsync() {
@@ -910,11 +910,11 @@
 		function getMostRecentActivityDate(comment) {
 			var date = comment.createdDate;
 
-			comment.tasks.forEach(function(task){
+			(comment.tasks || []).forEach(function(task){
 				date = task.createdDate > date ? task.createdDate : date;
 			});
 
-			comment.comments.forEach(function(subcomment){
+			(comment.comments || []).forEach(function(subcomment){
 				var newDate = getMostRecentActivityDate(subcomment);
 				date = newDate > date ? newDate : date;
 			});
@@ -938,7 +938,7 @@
 			count.total += subCommentsFromOthers.length;
 			count.unread += _.filter(subCommentsFromOthers, function(c){ return !c.isPanelRead }).length;
 
-			comment.comments.forEach(function(subcomment){
+			(comment.comments || []).forEach(function(subcomment){
 				var result = countSubComments(subcomment);
 				count.total += result.total;
 				count.unread += result.unread;
@@ -953,7 +953,7 @@
 			count.total += taskFromOthers.length;
 			count.unread += _.filter(taskFromOthers, function(t){ return !t.isPanelRead }).length;
 
-			comment.comments.forEach(function(subcomment){
+			(comment.comments || []).forEach(function(subcomment){
 				var result = countTasks(subcomment);
 				count.total += result.total;
 				count.unread += result.unread;
@@ -978,10 +978,11 @@
 					jQuery.extend(activity.comment, {isBadgeRead: isCommentRead });
 				}
 
-				count +=isCommentRead ? 0 : activity.comment.author.name !== user.name ? 1 : 0;
+				var authorName = activity.comment && activity.comment.author && activity.comment.author.name ? activity.comment.author.name : '';
+				count +=isCommentRead ? 0 : authorName !== user.name ? 1 : 0;
 
 				// sub comments
-				activity.comment.comments.forEach(function(subComment){
+				(activity.comment.comments || []).forEach(function(subComment){
 					// count sub sub comments
 					count += countUnreadActivities([{ comment: subComment }], prefix);
 				});
@@ -1040,11 +1041,11 @@
 			activities.forEach(function(activity){
 				localStorage.setItem(prefix + 'comment_' + activity.comment.id, true);
 
-				activity.comment.comments.forEach(function(subComment){
+				(activity.comment.comments || []).forEach(function(subComment){
 					markActivitiesAsRead([{ comment:subComment }], prefix);
 				});
 
-				activity.comment.tasks.forEach(function(task){
+				(activity.comment.tasks || []).forEach(function(task){
 					localStorage.setItem(prefix + 'task_' + task.id, true);
 				});
 			});
@@ -1067,10 +1068,12 @@
 			// body
 			var $tbody = $table.append('<tbody>').find('tbody');
 			activities.forEach(function(activity) {
+				var commentAuthorName = activity.comment && activity.comment.author && activity.comment.author.name ? activity.comment.author.name : '';
+				var prAuthorName = activity.pullrequest && activity.pullrequest.author && activity.pullrequest.author.user && activity.pullrequest.author.user.name ? activity.pullrequest.author.user.name : '';
 				var $msgRow = jQuery('<td class="comment message markup">'+activity.comment.text+'</td>');
-				var $userRow = jQuery('<td class="author">'+activity.comment.author.name+'</td>');
+				var $userRow = jQuery('<td class="author">'+ commentAuthorName +'</td>');
 				var $countRow = jQuery('<td class="comment-count"></td>');
-				var $prRow = jQuery('<td class="title"><a href="' + urlUtil.buildSlug(activity.pullrequest) + '/overview?commentId='+activity.comment.id+'" title="{'+activity.pullrequest.author.user.name+'} '+activity.pullrequest.title+'">'+activity.pullrequest.title+'</a></td>');
+				var $prRow = jQuery('<td class="title"><a href="' + urlUtil.buildSlug(activity.pullrequest) + '/overview?commentId='+activity.comment.id+'" title="{'+ prAuthorName +'} '+ (activity.pullrequest || {title:''}).title +'">'+ (activity.pullrequest || {title:''}).title +'</a></td>');
 				var $updatedRow = jQuery('<td class="comment-count"></td>').html(moment(activity.activityDate).fromNow());
 
 				var isLineUnread = hasUnreadActivities(activity, NotificationType.panel);
@@ -1082,10 +1085,12 @@
 				});
 
 				// avatar
+				activity.comment.author = activity.comment.author || {};
+				activity.comment.author.avatarUrl = activity.comment.author.avatarUrl || '';
 				var $avatar = jQuery(stash.widget.avatar({
 					size: 'small',
 					person: activity.comment.author,
-					tooltip: activity.comment.author.displayName
+					tooltip: (activity.comment.author || {displayName:''}).displayName
 				}));
 				$userRow.html($avatar);
 				$avatar.find('img').tooltip();
@@ -1287,12 +1292,12 @@
 				if(window.notificationType.toString() === '0') { // prAndMentioned only (also include answer)
 					var isIncluded = false;
 					// filter PR which are not from current user
-					if(activity.pullrequest.author.user.name === user.name) {
+					if(activity.pullrequest && activity.pullrequest.author && activity.pullrequest.author.user.name === user.name) {
 						isIncluded = true;
 					}
 
 					// filter mentioned
-					if(activity.comment.text.indexOf('@"'+user.name+'"') > -1) {
+					if(activity.comment && (activity.comment.text || '').indexOf('@"'+user.name+'"') > -1) {
 						isIncluded = true;
 					}
 
@@ -1319,7 +1324,7 @@
 				}
 
 				// notification for subcomments (answers)
-				activity.comment.comments.forEach(function(subComment){
+				(activity.comment.comments || []).forEach(function(subComment){
 					displayDesktopNotification([{
 						comment: subComment,
 						pullrequest: activity.pullrequest,
@@ -1328,7 +1333,7 @@
 				});
 
 				// notification for task
-				activity.comment.tasks.forEach(function(task){
+				(activity.comment.tasks || []).forEach(function(task){
 					var taskKey = prefix + 'task_' + task.id;
 					var taskState = localStorage.getItem(taskKey);
 					localStorage.setItem(taskKey, true);
@@ -1402,7 +1407,7 @@
 			var pr = pageState.getPullRequest();
 			if (pr) {
 				getLastPRCommentsOnceAsync().done(function(activities){
-					activities = _.filter(activities, function(a){ return a.pullrequest.id === pr.id; });
+					activities = _.filter(activities, function(a){ return (a.pullrequest || {id:''}).id === pr.id; });
 					markActivitiesAsRead(activities, NotificationType.badge);
 					markActivitiesAsRead(activities, NotificationType.panel);
 				});
@@ -1941,7 +1946,7 @@
 					return {
 						filter: function(list, fct) {
 							//native filter
-							return list.filter(fct);
+							return (list || []).filter(fct);
 						},
 						sortBy:function (list){
 							// no order
