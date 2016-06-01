@@ -1,18 +1,9 @@
-/**
- * Possible parameters for request:
- *  action: "xhttp" for a cross-origin HTTP request
- *  method: Default "GET"
- *  url   : required, but not validated
- *  data  : data to send in a POST request
- *
- * The callback function is called upon completion of the request */
-
- // ff webextensions workaround
- chrome = chrome || browser;
- var onMessage = chrome.runtime.onMessageExternal;
- if(true || !chrome.runtime.onMessageExternal) {
+// ff webextensions workaround
+chrome = chrome || browser;
+var onMessage = chrome.runtime.onMessageExternal;
+if(true || !chrome.runtime.onMessageExternal) {
  	onMessage = chrome.runtime.onMessage;
- }
+}
 
 var tempTabList = [];
 var extensionCommunicationCallback = function(request, sender, callback) {
@@ -62,110 +53,110 @@ var extensionCommunicationCallback = function(request, sender, callback) {
 	}
 }
 onMessage.addListener(extensionCommunicationCallback);
+
 if(onMessage !== chrome.runtime.onMessage) {
 	chrome.runtime.onMessage.addListener(extensionCommunicationCallback);
 }
 
 function retrieveActivities() {
-    chrome.storage.local.get(['tabList', 'currentStashBaseUrl'], function(items) {
-        if(items && ((!items.currentStashBaseUrl || items.currentStashBaseUrl.length === 0) || (!items.tabList || items.tabList.length === 0))){
-            return;
-        }
+	chrome.storage.local.get(['tabList', 'currentStashBaseUrl'], function(items) {
+		if(items && ((!items.currentStashBaseUrl || items.currentStashBaseUrl.length === 0) || (!items.tabList || items.tabList.length === 0))){
+			return;
+		}
 
-        var deferredResult = jQuery.Deferred();
-        var params = "?start=0&limit=1000&avatarSize=64&withAttributes=true&state=OPEN&order=oldest&role=";
-        var urlPR = items.currentStashBaseUrl + "/rest/inbox/latest/pull-requests" + params;
-        var urlPRNew = items.currentStashBaseUrl + "/rest/api/latest/inbox/pull-requests" + params;
+		var allPR = [];
+		var deferredResult = jQuery.Deferred();
+		var params = "?start=0&limit=1000&avatarSize=64&withAttributes=true&state=OPEN&order=oldest&role=";
+		var urlPR = items.currentStashBaseUrl + "/rest/inbox/latest/pull-requests" + params;
+		var urlPRNew = items.currentStashBaseUrl + "/rest/api/latest/inbox/pull-requests" + params;
 
-        var buildUrlPR = function(url, role){
-          return url + role;
-        }
-        var reviewersDefered = jQuery.Deferred()
-        var resolveReviewers = function(data) {
-          reviewersDefered.resolve();
-          return data;
-        }
-        var authorDefered = jQuery.Deferred()
-        var resolveAuthor = function(data) {
-          authorDefered.resolve();
-          return data;
-        }
-        var mergeResults = function(data){
-  				jQuery.merge(allPR, data.values)
-  			};
-  			var rerunRequest = function(role) {
-  				return function(err) {
-  						var resolver = role === 'reviewer' ? resolveReviewers : resolveAuthor;
-  						if(err.status == 404) {
-  							return jQuery
-  							.get(buildUrlPR(urlPR, role))
-  							.then(resolver)
-  							.then(mergeResults);
-  						}
-  				}
-  			};
-  			var rerunRequestReviewers = rerunRequest('reviewer');
-  			var rerunRequestAuthor = rerunRequest('author');
+		var buildUrlPR = function(url, role){
+		  return url + role;
+		}
+		var reviewersDefered = jQuery.Deferred()
+		var resolveReviewers = function(data) {
+		  reviewersDefered.resolve();
+		  return data;
+		}
+		var authorDefered = jQuery.Deferred()
+		var resolveAuthor = function(data) {
+		  authorDefered.resolve();
+		  return data;
+		}
+		var mergeResults = function(data){
+			jQuery.merge(allPR, data.values)
+		};
+		var rerunRequest = function(role) {
+			return function(err) {
+				var resolveDeferred = role === 'reviewer' ? resolveReviewers : resolveAuthor;
+				if(err.status == 404) {
+					return jQuery
+					.get(buildUrlPR(urlPR, role))
+					.then(mergeResults)
+					.then(resolveDeferred);
+				}
+			}
+		};
+		var rerunRequestReviewers = rerunRequest('reviewer');
+		var rerunRequestAuthor = rerunRequest('author');
 
-  			var allPR = [];
+		jQuery
+		.get(buildUrlPR(urlPRNew, 'reviewer'))
+		.then(mergeResults)
+		.then(resolveReviewers)
+		.fail(rerunRequestReviewers);
 
-  			jQuery
-  			.get(buildUrlPR(urlPRNew, 'reviewer'))
-  			.then(mergeResults)
-  			.then(resolveReviewers)
-  			.fail(rerunRequestReviewers);
+		jQuery
+		.get(buildUrlPR(urlPRNew, 'author'))
+		.then(mergeResults)
+		.then(resolveAuthor)
+		.fail(rerunRequestAuthor);
 
-  			jQuery
-  			.get(buildUrlPR(urlPRNew, 'author'))
-  			.then(mergeResults)
-  			.then(resolveAuthor)
-  			.fail(rerunRequestAuthor);
-
-        jQuery.when(reviewersDefered, authorDefered).done(function(){
-            var activities = [];
-            var requests = [];
-            // loop through PRs and request activities
-            allPR.forEach(function(pr){
+		jQuery.when(reviewersDefered, authorDefered).done(function(){
+			var activities = [];
+			var requests = [];
+			// loop through PRs and request activities
+			allPR.forEach(function(pr){
 				var prLink = '';
-                if(pr.links && pr.links.self) {
+				if(pr.links && pr.links.self) {
  	  				prLink = pr.links.self[0].href.replace(items.currentStashBaseUrl, '');
 					prLink = items.currentStashBaseUrl + '/rest/api/1.0' + prLink + '/activities?avatarSize=64';
- 	  		    }
+ 	  			}
 
-                if(prLink) {
-                    requests.push(jQuery.get(prLink)
-                    .done(function(activityList){
-                        // get comments after PR was updated
-                        jQuery.each(activityList.values, function(index, activity){
-                            jQuery.extend(activity, { pullrequest: pr });
-                            activities.push(activity);
-                        });
-                    }));
-                }
-            });
+				if(prLink) {
+					requests.push(jQuery.get(prLink)
+					.done(function(activityList){
+						// get comments after PR was updated
+						jQuery.each(activityList.values, function(index, activity){
+							jQuery.extend(activity, { pullrequest: pr });
+							activities.push(activity);
+						});
+					}));
+				}
+			});
 
-            jQuery.when.apply(jQuery, requests).always(function(){
-                // send retrieved data to page script
-                items.tabList.forEach(function(tabId, index){
-                    if (tabId) {
-                        chrome.tabs.sendMessage(tabId, { action: "ActivitiesRetrieved", activities: activities, desktopNotification: index === 0 });
-                    }
-                });
-            });
+			jQuery.when.apply(jQuery, requests).always(function(){
+				// send retrieved data to page script
+				items.tabList.forEach(function(tabId, index){
+					if (tabId) {
+						chrome.tabs.sendMessage(tabId, { action: "ActivitiesRetrieved", activities: activities, desktopNotification: index === 0 });
+					}
+				});
+			});
 
-        });
-    });
+		});
+	});
 }
 
 function pingAllExistingTabs() {
-    tempTabList = [];
-    chrome.tabs.query({}, function(tabs){
-        tabs.forEach(function(tab, index){
-            if (tab && tab.id) {
-                chrome.tabs.sendMessage(tab.id, { action: "ping" });
-            }
-        });
-    });
+	tempTabList = [];
+	chrome.tabs.query({}, function(tabs){
+		tabs.forEach(function(tab, index){
+			if (tab && tab.id) {
+				chrome.tabs.sendMessage(tab.id, { action: "ping" });
+			}
+		});
+	});
 }
 
 // periodically check activities
@@ -173,15 +164,15 @@ chrome.alarms.onAlarm.addListener(retrieveActivities);
 chrome.alarms.create("retrievedActivitiesAlarm", {periodInMinutes: 1.0} );
 
 chrome.tabs.onRemoved.addListener(function(tabId) {
-    pingAllExistingTabs();
+	pingAllExistingTabs();
 });
 
 chrome.tabs.onCreated.addListener(function(tabId) {
-    pingAllExistingTabs();
+	pingAllExistingTabs();
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId) {
-    pingAllExistingTabs();
+	pingAllExistingTabs();
 });
 
 chrome.browserAction.onClicked.addListener(function(tab) {

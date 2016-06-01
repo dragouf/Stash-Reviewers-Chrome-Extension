@@ -909,12 +909,12 @@
 			};
 			var rerunRequest = function(role) {
 				return function(err) {
-						var resolver = role === 'reviewer' ? resolveReviewers : resolveAuthor;
+						var resolveDeferred = role === 'reviewer' ? resolveReviewers : resolveAuthor;
 						if(err.status == 404) {
 							return jQuery
 							.get(buildUrlPR(urlSegments, role))
-							.then(resolver)
-							.then(mergeResults);
+							.then(mergeResults)
+							.then(resolveDeferred);
 						}
 				}
 			};
