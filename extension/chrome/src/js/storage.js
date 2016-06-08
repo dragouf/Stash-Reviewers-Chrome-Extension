@@ -4,6 +4,7 @@ var extensionStorage = (function() {
 	const REVIEWERS_KEY = 'stashplugin.groups_reviewers';
 	const HIPCHAT_KEY = 'stashplugin.hipchat';
 	const TEMPLATE_KEY = 'stashplugin.template';
+	const BACKGROUNDSTATE_KEY = 'stashplugin.backgroundstate';
 	const NOTIFSTATE_KEY = 'stashplugin.notifstate';
 	const NOTIFTYPE_KEY = 'stashplugin.notiftype';
 	const REPOMAP_KEY = 'stashplugin.repomap';
@@ -93,6 +94,20 @@ var extensionStorage = (function() {
 		cloudStorage.set(data, callback);
 	}
 
+	function loadBackgroundState(callback) {
+		cloudStorage.get(null, function(items){
+			if (callback) {
+				callback(items[BACKGROUNDSTATE_KEY]);
+			}
+		});
+	}
+	function saveBackgroundState(string, callback) {
+		var data = {};
+		data[BACKGROUNDSTATE_KEY] = string;
+		cloudStorage.set(data, callback);
+	}
+
+
 	function loadNotificationState(callback) {
 		cloudStorage.get(null, function(items){
 			if (callback) {
@@ -152,6 +167,8 @@ var extensionStorage = (function() {
 		saveTemplate: saveTemplate,
 		loadHipChatUsername: loadHipChatUsername,
 		saveHipChatUsername: saveHipChatUsername,
+		loadBackgroundState: loadBackgroundState,
+		saveBackgroundState: saveBackgroundState,
 		loadNotificationState: loadNotificationState,
 		saveNotificationState: saveNotificationState,
 		loadNotificationType: loadNotificationType,
@@ -160,6 +177,10 @@ var extensionStorage = (function() {
 		saveRepoMap: saveRepoMap,
 		loadFeatures: loadFeatures,
 		saveFeatures: saveFeatures,
+		backgroundStates: {
+			enable:'1',
+			disable:'0'
+		},
 		notificationStates: {
 			enable:'1',
 			disable:'0'

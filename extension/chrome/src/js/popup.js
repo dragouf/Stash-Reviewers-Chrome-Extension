@@ -34,6 +34,16 @@ $( document ).ready(function() {
 			}
 		});
 
+		extensionStorage.loadBackgroundState(function(state){
+			if(!state || state === extensionStorage.backgroundStates.enable){
+				$('#backgroundCheckDisable').prop('checked',false).parent().removeClass('active');
+				$('#backgroundCheckEnable').prop('checked',true).parent().addClass('active');
+			} else {
+				$('#backgroundCheckDisable').prop('checked',true).parent().addClass('active');
+ 				$('#backgroundCheckEnable').prop('checked',false).parent().removeClass('active');
+			}
+		});
+
 		extensionStorage.loadNotificationState(function(state){
 			if(!state || state === extensionStorage.notificationStates.enable){
 				$('#notificationDisable').prop('checked',false).parent().removeClass('active');
@@ -117,6 +127,11 @@ $( document ).ready(function() {
 	function saveNotification() {
 		var defState = $.Deferred();
 		var defType = $.Deferred();
+
+		var state = $('#backgroundCheck').find('input:radio:checked').val();
+		extensionStorage.saveBackgroundState(state, function() {
+			defState.resolve();
+		});
 
 		var state = $('#notificationState').find('input:radio:checked').val();
 		extensionStorage.saveNotificationState(state, function() {
