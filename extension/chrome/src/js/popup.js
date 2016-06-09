@@ -297,6 +297,15 @@ $( document ).ready(function() {
 			case 'f_prconflicts':
 				content = 'Check if there is no new version committed on github each time the extension load';
 				break;
+			case 'backgroundCheckEnable':
+				content = 'Background task which poll regularly server for new notification. This polling help to update notification icon and display desktop notification. If disabled, this will happen only when you reload bitbucket page.' ;
+				break;
+			case 'notificationState':
+				content = 'Notification display onto the desktop, outside of bitbucket page. Note that if you disable this feature it won\'t disable polling task which check in background for notification since it is used to update UI as well.' ;
+				break;
+			case 'notificationType':
+				content = 'All: all user comments are display as notification. Mentioned/PR: A notification is displayed only when someone mention you in is comment OR someone replay to one of your comment OR someone add a comment to your PR.' ;
+				break;
 		}
 		el.popover({
 			html: true,
