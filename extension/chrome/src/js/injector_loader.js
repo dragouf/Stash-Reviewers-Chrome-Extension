@@ -81,6 +81,7 @@ function injectBitbucketDetector() {
 		  // it's a bitbucket page
 		  isBitbucket = true;
 		  // inject main script
+		  attachListener();
 		  injectEngine();
 	  }
   });
@@ -88,26 +89,27 @@ function injectBitbucketDetector() {
 
 injectBitbucketDetector();
 
+function attachListener() {
+	// message sent from background.js
+	chrome.runtime.onMessage.addListener(function(message) {
+		// transfert it to injected page script
+		if (message && message.action === 'ActivitiesRetrieved') {
+			var data = { 'detail': {
+				identifier: 'ActivitiesRetrieved',
+				activities: message.activities,
+				desktopNotification: message.desktopNotification } };
 
-// message sent from background.js
-chrome.runtime.onMessage.addListener(function(message) {
-	// transfert it to injected page script
-	if (message && message.action === 'ActivitiesRetrieved') {
-		var data = { 'detail': {
-			identifier: 'ActivitiesRetrieved',
-			activities: message.activities,
-			desktopNotification: message.desktopNotification } };
-
-		// chrome
-		var event = new CustomEvent('ActivitiesRetrieved', data);
-		document.dispatchEvent(event);
-		// ff
-		window.postMessage(data, '*');
-	}
-	else if(message && message.action === 'ping') {
-		chrome.runtime.sendMessage({ action: 'pong', url: getSiteBaseURl()  });
-	}
-});
+			// chrome
+			var event = new CustomEvent('ActivitiesRetrieved', data);
+			document.dispatchEvent(event);
+			// ff
+			window.postMessage(data, '*');
+		}
+		else if(message && message.action === 'ping') {
+			chrome.runtime.sendMessage({ action: 'pong', url: getSiteBaseURl()  });
+		}
+	});
+}
 
 // transfert message from webpage to background (firefox add on)
 window.addEventListener("message", function(ev) {
