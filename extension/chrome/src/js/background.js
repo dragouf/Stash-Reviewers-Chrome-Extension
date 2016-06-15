@@ -119,9 +119,9 @@ function retrieveActivities() {
 			allPR.forEach(function(pr){
 				var prLink = '';
 				if(pr.links && pr.links.self) {
- 	  				prLink = pr.links.self[0].href.replace(items.currentStashBaseUrl, '');
+					prLink = pr.links.self[0].href.replace(items.currentStashBaseUrl, '');
 					prLink = items.currentStashBaseUrl + '/rest/api/1.0' + prLink + '/activities?avatarSize=64';
- 	  			}
+				}
 
 				if(prLink) {
 					requests.push(jQuery.get(prLink)
@@ -148,6 +148,25 @@ function retrieveActivities() {
 	});
 }
 
+// periodically check activities if background notification enabled
+extensionStorage.loadBackgroundState(function(response) {
+	if(typeof response === 'undefined' || response && response.toString() === extensionStorage.backgroundStates.enable.toString()) {
+		chrome.alarms.onAlarm.addListener(retrieveActivities);
+		chrome.alarms.create("retrievedActivitiesAlarm", {periodInMinutes: 1.0} );
+	}
+});
+
+// update detected bitbucket url each time tabs are opened/closed/updated
+chrome.tabs.onRemoved.addListener(function(tabId) {
+	pingAllExistingTabs();
+});
+
+chrome.tabs.onCreated.addListener(function(tabId) {
+	pingAllExistingTabs();
+});
+chrome.tabs.onUpdated.addListener(function(tabId) {
+	pingAllExistingTabs();
+});
 function pingAllExistingTabs() {
 	tempTabList = [];
 	chrome.tabs.query({}, function(tabs){
@@ -159,25 +178,10 @@ function pingAllExistingTabs() {
 	});
 }
 
-// periodically check activities
-chrome.alarms.onAlarm.addListener(retrieveActivities);
-chrome.alarms.create("retrievedActivitiesAlarm", {periodInMinutes: 1.0} );
 
-chrome.tabs.onRemoved.addListener(function(tabId) {
-	pingAllExistingTabs();
-});
-
-chrome.tabs.onCreated.addListener(function(tabId) {
-	pingAllExistingTabs();
-});
-
-chrome.tabs.onUpdated.addListener(function(tabId) {
-	pingAllExistingTabs();
-});
-
+// Click on extension icon
 chrome.browserAction.onClicked.addListener(function(tab) {
-  chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
-	  chrome.tabs.create({'url': items.currentStashBaseUrl + '/'}, function(tab) {
-	  });
-  });
+	chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
+		chrome.tabs.create({'url': items.currentStashBaseUrl + '/'}, function(tab) {});
+	});
 });

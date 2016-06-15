@@ -1,3 +1,8 @@
+2.2.8
+===================
+- feature: add an option to disable check for new notification in background
+- bug fix: loop in event message may result in some tab crash
+
 2.2.7
 ===================
 - bugfix: notifications were not retrieved correctly on bitbucket server version lower than 4.6

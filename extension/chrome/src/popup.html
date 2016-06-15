@@ -66,7 +66,22 @@
 			<div id="notification" class="tab-pane">
 				<div class="row bottom-margin">
 					<div class="col-xs-6">
-						<label for="notificationState">Desktop Notifications</label>
+						<label for="backgroundCheckEnable" data-toggle="popover">Background Check</label>
+					</div>
+					<div class="col-xs-6">
+						<div class="btn-group" data-toggle="buttons" id="backgroundCheck">
+							<label class="btn btn-primary active">
+								<input type="radio" name="backgroundCheck" id="backgroundCheckEnable" autocomplete="off" value="1" checked> Enable
+							</label>
+							<label class="btn btn-primary">
+								<input type="radio" name="backgroundCheck" id="backgroundCheckDisable" value="0" autocomplete="off"> Disable
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="row bottom-margin">
+					<div class="col-xs-6">
+						<label for="notificationState" data-toggle="popover">Desktop Notifications</label>
 					</div>
 					<div class="col-xs-6">
 						<div class="btn-group" data-toggle="buttons" id="notificationState">
@@ -81,7 +96,7 @@
 				</div>
 				<div class="row bottom-margin">
 					<div class="col-xs-6">
-						<label for="notificationType">Notify</label>
+						<label for="notificationType" data-toggle="popover">Notify</label>
 					</div>
 					<div class="col-xs-6">
 						<div class="btn-group" data-toggle="buttons" id="notificationType">
