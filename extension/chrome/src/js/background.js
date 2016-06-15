@@ -119,9 +119,9 @@ function retrieveActivities() {
 			allPR.forEach(function(pr){
 				var prLink = '';
 				if(pr.links && pr.links.self) {
- 	  				prLink = pr.links.self[0].href.replace(items.currentStashBaseUrl, '');
+					prLink = pr.links.self[0].href.replace(items.currentStashBaseUrl, '');
 					prLink = items.currentStashBaseUrl + '/rest/api/1.0' + prLink + '/activities?avatarSize=64';
- 	  			}
+				}
 
 				if(prLink) {
 					requests.push(jQuery.get(prLink)
@@ -182,7 +182,6 @@ function pingAllExistingTabs() {
 // Click on extension icon
 chrome.browserAction.onClicked.addListener(function(tab) {
 	chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
-		chrome.tabs.create({'url': items.currentStashBaseUrl + '/'}, function(tab) {
+		chrome.tabs.create({'url': items.currentStashBaseUrl + '/'}, function(tab) {});
 	});
-  });
 });
