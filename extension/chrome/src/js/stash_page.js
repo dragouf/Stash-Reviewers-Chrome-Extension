@@ -1665,6 +1665,79 @@
 				return builder.build();
 			};
 
+			var originalRowHandler = PullRequestsTable.prototype.handleNewRows
+			PullRequestsTable.prototype.handleNewRows = function (data, attachmentMethod) {
+				var self = this;
+				originalRowHandler.call(self, data, attachmentMethod);
+				var commitList = data.values.map(function(pr) {
+					return { commit: pr.fromRef.latestCommit, prId: pr.id }
+				});
+				addPRBuildStatus(commitList).done(function(buildDetails){
+					// add build column
+					if(self.$table.find('th.build-status-pr-list-col').length == 0) {
+						var $buildCol = jQuery('<th>', {
+							class: "build-status-pr-list-col",
+							title: 'Builds',
+							scope: 'col',
+							style: "display: table-cell;",
+							text: 'Builds'
+						});
+						pullRequestTable.$table.find('tr:first').append($buildCol);
+					}
+
+					var rows = pullRequestTable.$table.find('tr.pull-request-row');
+					rows.each(function(_index, row){
+						var $row = jQuery(row);
+						if($row.find('.build-status-pr-list-col-value').length == 0) {
+							var $buildCell = jQuery('<td>', { class: "build-status-pr-list-col-value" });
+							$buildCell.data('pullrequestid', $row.data('pullrequestid'));
+							$row.append($buildCell);
+						}
+					});
+
+					// add data to build cell
+					var rows = pullRequestTable.$table.find('tr.pull-request-row');
+					buildDetails.forEach(function(buildStatus) {
+						// find row and add build status
+						var cells = jQuery('td.build-status-pr-list-col-value');
+						var cell = cells.filter(function(_, td) {  return jQuery(td).data('pullrequestid') == buildStatus.prId });
+						if(cell) {
+							var $buildInfoLink = jQuery('<a>', {
+								href:"#",
+								class:"aui-icon aui-icon-small build-icon",
+								'data-commit-id': buildStatus.commit
+							});
+
+							var appendIcon = false;
+							if(buildStatus.inProgress) {
+								$buildInfoLink.data('data-build-status', 'INPROGRESS');
+								$buildInfoLink.attr('title', buildStatus.inProgress + ' builds in progress');
+								$buildInfoLink.addClass('aui-iconfont-time');
+								$buildInfoLink.addClass('inprogress-build-icon');
+								appendIcon = true;
+							} else if(buildStatus.failed) {
+								$buildInfoLink.data('data-build-status', 'FAILED');
+								$buildInfoLink.attr('title', buildStatus.failed + ' builds failed');
+								$buildInfoLink.addClass('aui-iconfont-error');
+								$buildInfoLink.addClass('failed-build-icon');
+								appendIcon = true;
+							} else if(buildStatus.successful > 0) {
+								$buildInfoLink.data('data-build-status', 'SUCCESSFUL');
+								$buildInfoLink.attr('title', buildStatus.successful + ' builds passed');
+								$buildInfoLink.addClass('aui-iconfont-approve');
+								$buildInfoLink.addClass('successful-build-icon');
+								appendIcon = true;
+							}
+
+							if(appendIcon) {
+								cell.html($buildInfoLink);
+								$buildInfoLink.tooltip();
+							}
+						}
+					});
+				});
+			};
+
 			function getPullRequestsUrlBuilder(state) {
 				return nav.rest().currentRepo().allPullRequests().withParams({ state: state });
 			}
@@ -1887,6 +1960,29 @@
 			$reviewersInput.data('select2').blur();
 			$participantsInput.data('select2').blur();
 			$approversInput.data('select2').blur();
+		}
+
+		function addPRBuildStatus(commitList) {
+			var commitIds = commitList.map(function(pr) { return pr.commit });
+			return jQuery.ajax('/rest/build-status/latest/commits/stats', {
+				method: 'POST',
+				headers: {
+					Accept : "application/json, text/javascript, */*;",
+					"Content-Type": "application/json"
+				},
+				data: JSON.stringify(commitIds),
+				dataType: 'json'
+		  	})
+			.then(function(data) {
+				jQuery.each(data, function(commitId, info){
+					var commit = commitList.filter(function(cl) { return cl.commit === commitId });
+					if(commit.length > 0) {
+						jQuery.extend(commit[0], info);
+					}
+				});
+
+				return commitList;
+			});
 		}
 
 		return {
