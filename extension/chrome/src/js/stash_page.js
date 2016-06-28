@@ -1682,10 +1682,10 @@
 							style: "display: table-cell;",
 							text: 'Builds'
 						});
-						pullRequestTable.$table.find('tr:first').append($buildCol);
+						self.$table.find('tr:first').append($buildCol);
 					}
 
-					var rows = pullRequestTable.$table.find('tr.pull-request-row');
+					var rows = self.$table.find('tr.pull-request-row');
 					rows.each(function(_index, row){
 						var $row = jQuery(row);
 						if($row.find('.build-status-pr-list-col-value').length == 0) {
@@ -1696,7 +1696,7 @@
 					});
 
 					// add data to build cell
-					var rows = pullRequestTable.$table.find('tr.pull-request-row');
+					var rows = self.$table.find('tr.pull-request-row');
 					buildDetails.forEach(function(buildStatus) {
 						// find row and add build status
 						var cells = jQuery('td.build-status-pr-list-col-value');
