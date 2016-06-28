@@ -1672,7 +1672,8 @@
 				var commitList = data.values.map(function(pr) {
 					return { commit: pr.fromRef.latestCommit, prId: pr.id }
 				});
-				addPRBuildStatus(commitList).done(function(buildDetails){
+
+				getPRBuildStatus(commitList).done(function(buildDetails){
 					// add build column
 					if(self.$table.find('th.build-status-pr-list-col').length == 0) {
 						var $buildCol = jQuery('<th>', {
@@ -1962,7 +1963,7 @@
 			$approversInput.data('select2').blur();
 		}
 
-		function addPRBuildStatus(commitList) {
+		function getPRBuildStatus(commitList) {
 			var commitIds = commitList.map(function(pr) { return pr.commit });
 			return jQuery.ajax('/rest/build-status/latest/commits/stats', {
 				method: 'POST',
