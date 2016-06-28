@@ -1542,52 +1542,11 @@
 		}
 	});
 
-	define('bitbucket-plugin/pullrequest-list-page', [
-		'aui',
-		'aui/flag',
-		'jquery',
-		'lodash',
-		'bitbucket/util/events',
-		'bitbucket/util/server',
-		'bitbucket/util/state',
-		'bitbucket/util/navbuilder',
-		'bitbucket/internal/feature/pull-request/pull-request-table',
-		'bitbucket/internal/widget/searchable-multi-selector',
-		'bitbucket/internal/feature/user/user-multi-selector',
-		'bitbucket/internal/widget/avatar-list',
-		'bitbucket/internal/feature/repository/branch-selector',
-		'bitbucket/internal/model/revision-reference'
-	], function (
-		AJS,
-		auiFlag,
-		jQuery,
-		_,
-		events,
-		ajax,
-		pageState,
-		nav,
-		PullRequestsTable,
-		SearchableMultiSelector,
-		UserMultiSelector,
-		avatarList,
-		BranchSelector,
-		revisionReference
-	) {
+	define('bitbucket-plugin/pullrequest-list-modifier', [
+		'bitbucket/internal/feature/pull-request/pull-request-table'
+	], function(PullRequestsTable) {
 		'use strict';
-		//////////////////////////////////////////////////// Add filter to Pull Request list
-		// utilities
-		function getParameterByName(name) {
-			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-				results = regex.exec(location.search);
-			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-		}
-
-		function addPrFilters() {
-			if(jQuery('#pull-requests-content').length === 0) {
-				return;
-			}
-			jQuery('.spinner').show();
+		function redefinePullRequestTable() {
 			//redefined filter builder to include new parameters
 			PullRequestsTable.prototype.buildUrl = function (start, limit) {
 				var self = this;
@@ -1738,6 +1697,82 @@
 					});
 				});
 			};
+		}
+
+		function getPRBuildStatus(commitList) {
+			var commitIds = commitList.map(function(pr) { return pr.commit });
+			return jQuery.ajax('/rest/build-status/latest/commits/stats', {
+				method: 'POST',
+				headers: {
+					Accept : "application/json, text/javascript, */*;",
+					"Content-Type": "application/json"
+				},
+				data: JSON.stringify(commitIds),
+				dataType: 'json'
+			})
+			.then(function(data) {
+				jQuery.each(data, function(commitId, info){
+					var commit = commitList.filter(function(cl) { return cl.commit === commitId });
+					if(commit.length > 0) {
+						jQuery.extend(commit[0], info);
+					}
+				});
+
+				return commitList;
+			});
+		}
+
+		return {
+			redefinePullRequestTable: redefinePullRequestTable
+		}
+	});
+
+	define('bitbucket-plugin/pullrequest-list-page', [
+		'aui',
+		'aui/flag',
+		'jquery',
+		'lodash',
+		'bitbucket/util/events',
+		'bitbucket/util/server',
+		'bitbucket/util/state',
+		'bitbucket/util/navbuilder',
+		'bitbucket/internal/feature/pull-request/pull-request-table',
+		'bitbucket/internal/widget/searchable-multi-selector',
+		'bitbucket/internal/feature/user/user-multi-selector',
+		'bitbucket/internal/widget/avatar-list',
+		'bitbucket/internal/feature/repository/branch-selector',
+		'bitbucket/internal/model/revision-reference'
+	], function (
+		AJS,
+		auiFlag,
+		jQuery,
+		_,
+		events,
+		ajax,
+		pageState,
+		nav,
+		PullRequestsTable,
+		SearchableMultiSelector,
+		UserMultiSelector,
+		avatarList,
+		BranchSelector,
+		revisionReference
+	) {
+		'use strict';
+		//////////////////////////////////////////////////// Add filter to Pull Request list
+		// utilities
+		function getParameterByName(name) {
+			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+				results = regex.exec(location.search);
+			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+		}
+
+		function addPrFilters() {
+			if(jQuery('#pull-requests-content').length === 0) {
+				return;
+			}
+			jQuery('.spinner').show();
 
 			function getPullRequestsUrlBuilder(state) {
 				return nav.rest().currentRepo().allPullRequests().withParams({ state: state });
@@ -1963,29 +1998,6 @@
 			$approversInput.data('select2').blur();
 		}
 
-		function getPRBuildStatus(commitList) {
-			var commitIds = commitList.map(function(pr) { return pr.commit });
-			return jQuery.ajax('/rest/build-status/latest/commits/stats', {
-				method: 'POST',
-				headers: {
-					Accept : "application/json, text/javascript, */*;",
-					"Content-Type": "application/json"
-				},
-				data: JSON.stringify(commitIds),
-				dataType: 'json'
-		  	})
-			.then(function(data) {
-				jQuery.each(data, function(commitId, info){
-					var commit = commitList.filter(function(cl) { return cl.commit === commitId });
-					if(commit.length > 0) {
-						jQuery.extend(commit[0], info);
-					}
-				});
-
-				return commitList;
-			});
-		}
-
 		return {
 			addPrFilters: addPrFilters
 		}
@@ -1998,6 +2010,7 @@
 		var pageState;
 		var loadRequirement = jQuery.Deferred();
 		var loadAuiFlag = jQuery.Deferred();
+		var loadPrRequirement = jQuery.Deferred();
 
 		try {
 			WRM.require("wr!" + 'com.atlassian.auiplugin:aui-flag').then(function(d) {
@@ -2025,7 +2038,20 @@
 			}
 		}
 
-		jQuery.when(loadRequirement, loadAuiFlag).done(function(){
+		// improve PR page
+		try {
+			WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:pull-request-table').then(function(){
+				require(['bitbucket-plugin/pullrequest-list-modifier'], function(prListModifier) {
+					prListModifier.redefinePullRequestTable();
+					loadPrRequirement.resolve();
+				});
+			});
+		}
+		catch (_) {
+			loadPrRequirement.resolve();
+		}
+
+		jQuery.when(loadRequirement, loadAuiFlag, loadPrRequirement).done(function(){
 			var user = pageState.getCurrentUser();
 			var project = pageState.getProject();
 			var repository = pageState.getRepository();
