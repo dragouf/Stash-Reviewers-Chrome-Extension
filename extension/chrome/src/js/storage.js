@@ -9,6 +9,7 @@ var extensionStorage = (function() {
 	const NOTIFTYPE_KEY = 'stashplugin.notiftype';
 	const REPOMAP_KEY = 'stashplugin.repomap';
 	const FEATURES_KEY = 'stashplugin.features';
+	const REVIEWERS_URL_KEY = 'stashplugin.reviewers_url';
 
 	var defaultFeatures = {
 		reviewersgroup: true,
@@ -55,6 +56,26 @@ var extensionStorage = (function() {
 				}
 				else {
 					callback(groups);
+				}
+
+			}
+		});
+	}
+
+	function saveUrl(string, callback) {
+		var data = {};
+		data[REVIEWERS_URL_KEY] = string;
+		cloudStorage.set(data, callback);
+	}
+	function loadUrl(callback) {
+		cloudStorage.get(null, function(items){
+			if (callback) {
+				var url = items[REVIEWERS_URL_KEY];
+				if(!url) {
+					callback('');
+				}
+				else {
+					callback(url);
 				}
 
 			}
@@ -163,6 +184,8 @@ var extensionStorage = (function() {
 	return {
 		saveGroups: saveGroups,
 		loadGroups: loadGroups,
+		saveUrl: saveUrl,
+		loadUrl: loadUrl,
 		loadTemplate: loadTemplate,
 		saveTemplate: saveTemplate,
 		loadHipChatUsername: loadHipChatUsername,

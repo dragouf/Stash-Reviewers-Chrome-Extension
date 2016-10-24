@@ -16,6 +16,10 @@ $( document ).ready(function() {
 			$('#text_json').val(item);
 		});
 
+		extensionStorage.loadUrl(function(item){
+			$('#json_url').val(item);
+		});
+
 		extensionStorage.loadHipChatUsername(function(username){
 			$('#hipchat_username').val(username);
 		});
@@ -91,17 +95,36 @@ $( document ).ready(function() {
 	}
 
 	function saveGroups() {
-		var def = $.Deferred();
-		var newValue = $('#text_json').val();
-		try { JSON.parse(newValue) }
-		catch (e) {
-			def.reject({ msg: e.message, error: e });
-		}
-		extensionStorage.saveGroups(newValue, function() {
-			def.resolve();
-		});
+		var newUrl = $('#json_url').val();
 
-		return def.promise();
+		var newValue = $('#text_json').val();
+		return new Promise((resolve, reject) => {
+			extensionStorage.saveUrl(newUrl, function() {});
+			if (newUrl) {
+				fetch(newUrl).then((res) => {
+					return res.json().then((body) => {
+						console.debug(body);
+						if (body) {
+							extensionStorage.saveGroups(JSON.stringify(body), function() {
+								resolve();
+							});
+						} else {
+							reject({msg: 'Corrupt file', e: {}})
+						}
+					})
+				}).catch((e) => {
+					reject({msg: e.message, error: e});
+				})
+			} else {
+				try { JSON.parse(newValue) }
+				catch (e) {
+					reject({ msg: e.message, error: e });
+				}
+				extensionStorage.saveGroups(newValue, function() {
+					resolve();
+				});
+			}
+		})
 	}
 
 	function saveHipChat() {
