@@ -96,14 +96,12 @@ $( document ).ready(function() {
 
 	function saveGroups() {
 		var newUrl = $('#json_url').val();
-
 		var newValue = $('#text_json').val();
 		return new Promise((resolve, reject) => {
 			extensionStorage.saveUrl(newUrl, function() {});
 			if (newUrl) {
 				fetch(newUrl).then((res) => {
 					return res.json().then((body) => {
-						console.debug(body);
 						if (body) {
 							extensionStorage.saveGroups(JSON.stringify(body), function() {
 								resolve();

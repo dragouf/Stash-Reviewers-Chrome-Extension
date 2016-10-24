@@ -5,6 +5,25 @@ if(true || !chrome.runtime.onMessageExternal) {
  	onMessage = chrome.runtime.onMessage;
 }
 
+// Refresh every 6h
+const REVIEWERS_LIST_REFREST = 6 * 60 * 60 * 1000;
+
+setInterval(function() {
+	extensionStorage.loadUrl(function(url) {
+		fetch(url).then(function(res) {
+			res.json().then(function(body) {
+				if (body) {
+					extensionStorage.saveGroups(JSON.stringify(body), function() {
+						console.info('Reviewers updated');
+					});
+				} else {
+					console.error('Error while loading reviewers from file');
+				}
+			})
+		});
+	});
+}, REVIEWERS_LIST_REFREST);
+
 var tempTabList = [];
 var extensionCommunicationCallback = function(request, sender, callback) {
 	if (request.action == "xhttp") {

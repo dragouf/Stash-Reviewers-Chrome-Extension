@@ -3,6 +3,7 @@ var extensionId = chrome.runtime.id || 'stashFF';
 
 function injectEngine(){
 	var groupDef = $.Deferred();
+	var urlDef = $.Deferred();
 	var hipchatDef = $.Deferred();
 	var templateDef = $.Deferred();
 	var notifStateDef = $.Deferred();
@@ -27,6 +28,13 @@ function injectEngine(){
 							"close: 'auto'",
 						"});"].join('\n');
 			createInlineScript(code);
+		}
+	});
+
+	extensionStorage.loadUrl(function(url) {
+		urlDef.resolve();
+		if (url) {
+			createInlineScript("var reviewerUrl =" + url + ";");
 		}
 	});
 
