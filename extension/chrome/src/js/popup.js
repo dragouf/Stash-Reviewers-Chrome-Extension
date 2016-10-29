@@ -1,7 +1,8 @@
-$( document ).ready(function() {
+$(document).ready(function() {
 	var mapIndex = 0;
 	loadData();
 	bindSaveClick();
+	bindAddFile();
 
 	function bindSaveClick() {
 		$('#bt_save').click(function() {
@@ -11,13 +12,27 @@ $( document ).ready(function() {
 		});
 	}
 
+	function bindAddFile() {
+		$('#bt_add_file').on('click', function() {
+			var nr = $('.json_url').length + 1;
+			$('#json_urls').append('<input class="form-control json_url" id="json_url_'+ nr +'" type="text"></input>');
+		});
+	}
+
 	function loadData() {
 		extensionStorage.loadGroups(function(item){
 			$('#text_json').val(item);
 		});
 
-		extensionStorage.loadUrl(function(item){
-			$('#json_url').val(item);
+		extensionStorage.loadUrl(function(items){
+			if (items.length > 0) {
+				$('#json_url_1').remove();
+				items.forEach((url, index) => {
+					const input = $('<input class="form-control json_url" id="json_url_'+ (index + 1) +'" type="text"></input>');
+					input.val(url);
+					$('#json_urls').append(input);
+				});
+			}
 		});
 
 		extensionStorage.loadHipChatUsername(function(username){
@@ -44,7 +59,7 @@ $( document ).ready(function() {
 				$('#backgroundCheckEnable').prop('checked',true).parent().addClass('active');
 			} else {
 				$('#backgroundCheckDisable').prop('checked',true).parent().addClass('active');
- 				$('#backgroundCheckEnable').prop('checked',false).parent().removeClass('active');
+				$('#backgroundCheckEnable').prop('checked',false).parent().removeClass('active');
 			}
 		});
 
@@ -54,7 +69,7 @@ $( document ).ready(function() {
 				$('#notificationEnable').prop('checked',true).parent().addClass('active');
 			} else {
 				$('#notificationDisable').prop('checked',true).parent().addClass('active');
- 				$('#notificationEnable').prop('checked',false).parent().removeClass('active');
+				$('#notificationEnable').prop('checked',false).parent().removeClass('active');
 			}
 		});
 
@@ -64,7 +79,7 @@ $( document ).ready(function() {
 				$('#notificationAll').prop('checked',true).parent().addClass('active');
 			} else {
 				$('#notificationMention').prop('checked',true).parent().addClass('active');
- 				$('#notificationAll').prop('checked',false).parent().removeClass('active');
+				$('#notificationAll').prop('checked',false).parent().removeClass('active');
 			}
 		});
 
@@ -95,34 +110,75 @@ $( document ).ready(function() {
 	}
 
 	function saveGroups() {
-		var newUrl = $('#json_url').val();
-		var newValue = $('#text_json').val();
-		return new Promise((resolve, reject) => {
-			extensionStorage.saveUrl(newUrl, function() {});
-			if (newUrl) {
-				fetch(newUrl).then((res) => {
-					return res.json().then((body) => {
-						if (body) {
-							extensionStorage.saveGroups(JSON.stringify(body), function() {
-								resolve();
-							});
-						} else {
-							reject({msg: 'Corrupt file', e: {}})
-						}
-					})
-				}).catch((e) => {
-					reject({msg: e.message, error: e});
-				})
-			} else {
-				try { JSON.parse(newValue) }
-				catch (e) {
-					reject({ msg: e.message, error: e });
-				}
-				extensionStorage.saveGroups(newValue, function() {
-					resolve();
-				});
+		const newUrls = [];
+		$('.json_url').each(function() {
+			if ($(this).val()) {
+				newUrls.push($(this).val());
 			}
-		})
+		});
+		const newValue = $('#text_json').val();
+		const groupPromises = [];
+		const def = $.Deferred();
+
+		groupPromises.push(new Promise((resolve, reject) => {
+			if (!newValue) {
+				resolve({groups:[]});
+			}
+			try { JSON.parse(newValue); }
+			catch (e) {
+				return reject({ msg: e.message, error: e });
+			}
+			resolve(JSON.parse(newValue));
+		}));
+
+		newUrls.forEach(url => {
+			const p = new Promise((resolve, reject) => {
+				fetch(url)
+				.then((res) => {
+					return res.json();
+				})
+				.then((body) => {
+					if (!body) {
+						return reject({msg: 'Corrupt file', e: {}});
+					}
+					resolve(body);
+				})
+				.catch((err) => {
+					reject({msg: err, e: err});
+				});
+			});
+			groupPromises.push(p);
+		});
+
+		Promise.all(groupPromises).then(values => {
+			let joined = [];
+			values.forEach((group) => {
+				if (group.groups) {
+					joined = joined.concat(group.groups);
+				}
+			});
+			if (joined.length === 0) {
+				throw({msg: 'Groups are empty', e: {}});
+			}
+			return Promise.all([
+				new Promise((resolve, reject) => {
+					extensionStorage.saveUrl(newUrls, () => {
+						resolve();
+					});
+				}),
+				new Promise((resolve, reject) => {
+					extensionStorage.saveGroups(newValue, () => {
+						resolve();
+					});
+				}),
+				new Promise((resolve, reject) => {
+					extensionStorage.saveGroupsArray(joined, () => {
+						resolve();
+					});
+				}),
+			]);
+		}).then(def.resolve).catch(def.reject);
+		return def.promise();
 	}
 
 	function saveHipChat() {
@@ -215,7 +271,7 @@ $( document ).ready(function() {
 	}
 
 	function getFeatureState(feature) {
-		return $('#f_' + feature).find('input:radio:checked').val()
+		return $('#f_' + feature).find('input:radio:checked').val();
 	}
 
 	function createNewMapInputs(mapData) {

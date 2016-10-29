@@ -46,11 +46,5 @@
 	],
 	"options_ui": {
 		"page": "popup.html"
-	},
-	"applications": {
-  		"gecko": {
-			"id": "bitbucket@dragouf.org",
-			"strict_min_version": "48.0"
-		}
 	}
 }

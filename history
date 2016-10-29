@@ -1,5 +1,9 @@
+2.2.10
+===================
+- feature: add support for centralized reviewers lists
+
 2.2.9
-============================
+===================
 - Display build status in PR list page
 
 2.2.8

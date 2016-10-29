@@ -14,7 +14,7 @@ function injectEngine(){
 	var manifest = chrome.runtime.getManifest();
 	createInlineScript("var stashRGEVersion = '" + manifest.version + "'; var chromeExtId='" + extensionId + "'; stashIcon='"+chrome.extension.getURL('img/stash128.png')+"';");
 
-	extensionStorage.loadGroups(function(data) {
+	extensionStorage.loadGroupsArray(function(data) {
 		groupDef.resolve();
 		if(data) {
 			createInlineScript("var jsonGroups = " + data + ";");
