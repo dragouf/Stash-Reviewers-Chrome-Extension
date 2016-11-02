@@ -9,7 +9,7 @@ if(true || !chrome.runtime.onMessageExternal) {
 const REVIEWERS_LIST_REFRESH = 6 * 60 * 60 * 1000;
 
 
-var reloadLists = function() {
+const reloadLists = function() {
 	const promises = [];
 	const arr = new Promise((resolve, reject) => {
 		const groupPromises = [];

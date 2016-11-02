@@ -16,8 +16,9 @@ function injectEngine(){
 
 	extensionStorage.loadGroupsArray(function(data) {
 		groupDef.resolve();
+		console.log('injector', data);
 		if(data) {
-			createInlineScript("var jsonGroups = " + data + ";");
+			createInlineScript("var jsonGroups = {groups: " + JSON.stringify(data) + "};");
 		}
 		else {
 			console.warn("reviewers plugin: no data");
@@ -28,13 +29,6 @@ function injectEngine(){
 							"close: 'auto'",
 						"});"].join('\n');
 			createInlineScript(code);
-		}
-	});
-
-	extensionStorage.loadUrl(function(url) {
-		urlDef.resolve();
-		if (url) {
-			createInlineScript("var reviewerUrl =" + url + ";");
 		}
 	});
 
