@@ -86,6 +86,12 @@ Json format is as follow :
   } ] }
 ```
 
+
+##### Using centralized lists
+If you want to share one list between more users. You need to upload .json file so it is accessible by everyone. Then you just add URL to `URL to json` field. There can be more sources. All lists from files and from JSON field are merged together. Remote lists are reloaded on launch and every 6 hours.
+
+![GitHub Logo](/docs/add_urls.png)
+
 After that when you will go to pull request creation page or update page a dropdown will appear after reviewers list with a list of groups you defined.
 
 ![GitHub Logo](/docs/add_group.png)

@@ -2,6 +2,8 @@ var extensionStorage = (function() {
 	'use strict';
 
 	const REVIEWERS_KEY = 'stashplugin.groups_reviewers';
+	const REVIEWERS_ARRAY_KEY = 'stashplugin.reviewers_array';
+	const REVIEWERS_URL_KEY = 'stashplugin.reviewers_url';
 	const HIPCHAT_KEY = 'stashplugin.hipchat';
 	const TEMPLATE_KEY = 'stashplugin.template';
 	const BACKGROUNDSTATE_KEY = 'stashplugin.backgroundstate';
@@ -41,14 +43,15 @@ var extensionStorage = (function() {
 	*/
 	function saveGroups(string, callback) {
 		var data = {};
-		data[REVIEWERS_KEY] = string
+		data[REVIEWERS_KEY] = string;
 		cloudStorage.set(data, callback);
 	}
 	function loadGroups(callback) {
-		cloudStorage.get(null, function(items){
+		cloudStorage.get(null, function(items) {
 			if (callback) {
 				var groups = items[REVIEWERS_KEY];
-				if(!groups) {
+				var urls = items[REVIEWERS_URL_KEY];
+				if(!groups && (!urls || urls.length === 0)) {
 					$.get(chrome.extension.getURL('/js/default.json'), function(data) {
 						callback(data);
 					});
@@ -56,7 +59,40 @@ var extensionStorage = (function() {
 				else {
 					callback(groups);
 				}
+			}
+		});
+	}
 
+	function saveGroupsArray(array, callback) {
+		const data = {};
+		data[REVIEWERS_ARRAY_KEY] = JSON.stringify(array);
+		cloudStorage.set(data, callback);
+	}
+	function loadGroupsArray(callback) {
+		cloudStorage.get(null, function(items) {
+			if (callback) {
+				const groups = JSON.parse(items[REVIEWERS_ARRAY_KEY]);
+				if (!groups) {
+					return callback([]);
+				}
+				callback(groups);
+			}
+		});
+	}
+
+	function saveUrl(array, callback) {
+		var data = {};
+		data[REVIEWERS_URL_KEY] = JSON.stringify(array);
+		cloudStorage.set(data, callback);
+	}
+	function loadUrl(callback) {
+		cloudStorage.get(null, function(items) {
+			if (callback) {
+				var urls = JSON.parse(items[REVIEWERS_URL_KEY]);
+				if(!urls) {
+					return callback([]);
+				}
+				callback(urls);
 			}
 		});
 	}
@@ -163,6 +199,10 @@ var extensionStorage = (function() {
 	return {
 		saveGroups: saveGroups,
 		loadGroups: loadGroups,
+		saveGroupsArray: saveGroupsArray,
+		loadGroupsArray: loadGroupsArray,
+		saveUrl: saveUrl,
+		loadUrl: loadUrl,
 		loadTemplate: loadTemplate,
 		saveTemplate: saveTemplate,
 		loadHipChatUsername: loadHipChatUsername,

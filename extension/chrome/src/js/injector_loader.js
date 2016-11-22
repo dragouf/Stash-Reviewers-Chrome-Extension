@@ -3,6 +3,7 @@ var extensionId = chrome.runtime.id || 'stashFF';
 
 function injectEngine(){
 	var groupDef = $.Deferred();
+	var urlDef = $.Deferred();
 	var hipchatDef = $.Deferred();
 	var templateDef = $.Deferred();
 	var notifStateDef = $.Deferred();
@@ -13,10 +14,11 @@ function injectEngine(){
 	var manifest = chrome.runtime.getManifest();
 	createInlineScript("var stashRGEVersion = '" + manifest.version + "'; var chromeExtId='" + extensionId + "'; stashIcon='"+chrome.extension.getURL('img/stash128.png')+"';");
 
-	extensionStorage.loadGroups(function(data) {
+	extensionStorage.loadGroupsArray(function(data) {
 		groupDef.resolve();
+		console.log('injector', data);
 		if(data) {
-			createInlineScript("var jsonGroups = " + data + ";");
+			createInlineScript("var jsonGroups = {groups: " + JSON.stringify(data) + "};");
 		}
 		else {
 			console.warn("reviewers plugin: no data");

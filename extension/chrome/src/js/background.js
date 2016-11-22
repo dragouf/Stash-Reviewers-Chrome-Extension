@@ -2,8 +2,79 @@
 chrome = chrome || browser;
 var onMessage = chrome.runtime.onMessageExternal;
 if(true || !chrome.runtime.onMessageExternal) {
- 	onMessage = chrome.runtime.onMessage;
+	onMessage = chrome.runtime.onMessage;
 }
+
+// Refresh every 6h
+const REVIEWERS_LIST_REFRESH = 6 * 60 * 60 * 1000;
+
+
+const reloadLists = function() {
+	const promises = [];
+	const arr = new Promise((resolve, reject) => {
+		const groupPromises = [];
+		extensionStorage.loadUrl(urls => {
+			urls.forEach(url => {
+				const p = new Promise((resolve, reject) => {
+					fetch(url)
+					.then((res) => {
+						return res.json();
+					})
+					.then((body) => {
+						if (!body) {
+							return reject({msg: 'Corrupt file', e: {}});
+						}
+						resolve(body);
+					})
+					.catch((err) => {
+						reject({msg: err, e: err});
+					});
+				});
+				groupPromises.push(p);
+			});
+			Promise.all(groupPromises).then(groups => {
+				let joined = [];
+				groups.forEach((group) => {
+					if (group.groups) {
+						joined = joined.concat(group.groups);
+					}
+				});
+				resolve({groups: joined});
+			});
+		});
+	});
+	promises.push(arr);
+
+	const str = new Promise((resolve, reject) => {
+		extensionStorage.loadGroups(groups => {
+			if (!groups) {
+				return resolve({groups: []});
+			}
+			resolve(JSON.parse(groups));
+		});
+	});
+	promises.push(str);
+
+	Promise.all(promises).then(values => {
+		let joined = [];
+		values.forEach((group) => {
+			if (group.groups) {
+				joined = joined.concat(group.groups);
+			}
+		});
+		if (joined.length === 0) {
+			throw({msg: 'Groups are empty', e: {}});
+		}
+		return new Promise((resolve, reject) => {
+			extensionStorage.saveGroupsArray(joined, () => {
+				resolve(joined);
+			});
+		});
+	}).then(groups => {
+		jsonGroups = groups;
+		console.info('Groups updated', groups);
+	}).catch(console.error);
+};
 
 var tempTabList = [];
 var extensionCommunicationCallback = function(request, sender, callback) {
@@ -185,3 +256,6 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 		chrome.tabs.create({'url': items.currentStashBaseUrl + '/'}, function(tab) {});
 	});
 });
+
+setInterval(reloadLists, REVIEWERS_LIST_REFRESH);
+reloadLists();
