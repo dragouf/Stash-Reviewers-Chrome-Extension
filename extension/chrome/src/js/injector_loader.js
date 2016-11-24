@@ -16,7 +16,6 @@ function injectEngine(){
 
 	extensionStorage.loadGroupsArray(function(data) {
 		groupDef.resolve();
-		console.log('injector', data);
 		if(data) {
 			createInlineScript("var jsonGroups = {groups: " + JSON.stringify(data) + "};");
 		}
