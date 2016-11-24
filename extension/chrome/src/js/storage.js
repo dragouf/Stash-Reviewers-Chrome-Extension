@@ -71,11 +71,11 @@ var extensionStorage = (function() {
 	function loadGroupsArray(callback) {
 		cloudStorage.get(null, function(items) {
 			if (callback) {
-				const groups = JSON.parse(items[REVIEWERS_ARRAY_KEY]);
+				const groups = items[REVIEWERS_ARRAY_KEY];
 				if (!groups) {
 					return callback([]);
 				}
-				callback(groups);
+				callback(JSON.parse(groups));
 			}
 		});
 	}
