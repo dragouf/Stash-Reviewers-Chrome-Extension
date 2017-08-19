@@ -2,19 +2,10 @@ let isBitbucket = false;
 const extensionId = chrome.runtime.id || 'stashFF';
 
 function injectEngine(){
-	const groupDef = $.Deferred();
-	const hipchatDef = $.Deferred();
-	const templateDef = $.Deferred();
-	const notifStateDef = $.Deferred();
-	const notifTypeDef = $.Deferred();
-	const repomapDef = $.Deferred();
-	const featuresDef = $.Deferred();
-
 	const manifest = chrome.runtime.getManifest();
 	createInlineScript("var stashRGEVersion = '" + manifest.version + "'; var chromeExtId='" + extensionId + "'; stashIcon='"+chrome.extension.getURL('img/stash128.png')+"';");
 
-	extensionStorage.loadGroupsArray(function(data) {
-		groupDef.resolve();
+	const groupDef = extensionStorage.loadGroupsArray().then(function(data) {
 		if(data) {
 			createInlineScript("var jsonGroups = {groups: " + JSON.stringify(data) + "};");
 		}
@@ -30,41 +21,35 @@ function injectEngine(){
 		}
 	});
 
-	extensionStorage.loadHipChatUsername(function(username){
-		hipchatDef.resolve();
+	const hipchatDef = extensionStorage.loadHipChatUsername().then(function(username){
 		createInlineScript("var hipchatUsername = '" + (username || '') + "';");
 	});
 
-	extensionStorage.loadTemplate(function(response) {
-		templateDef.resolve();
+	const templateDef = extensionStorage.loadTemplate().then(function(response) {
 		createInlineScript('var template = "' + response.join(',') + '";');
 	});
 
-	extensionStorage.loadNotificationState(function(response) {
-		notifStateDef.resolve();
+	const notifStateDef = extensionStorage.loadNotificationState().then(function(response) {
 		const val = (!response || response.toString() === extensionStorage.notificationStates.enable.toString()) ? 1 : 0; // notificationStates.enable by default
 		createInlineScript('var notificationState = "' + val + '";');
 	});
 
-	extensionStorage.loadNotificationType(function(response) {
-		notifTypeDef.resolve();
+	const notifTypeDef = extensionStorage.loadNotificationType().then(function(response) {
 		const val = (!response || response.toString() === extensionStorage.notificationTypes.prAndMentioned.toString()) ? 0 : 1; // prAndMentioned by default
 		createInlineScript('var notificationType = "' + val + '";');
 	});
 
-	extensionStorage.loadRepoMap(function(response) {
-		repomapDef.resolve();
+	const repomapDef = extensionStorage.loadRepoMap().then(function(response) {
 		const val = response || [];
 		createInlineScript('var repoMapArray = ' + JSON.stringify(val) + ';');
 	});
 
-	extensionStorage.loadFeatures(function(response) {
-		featuresDef.resolve();
+	const featuresDef = extensionStorage.loadFeatures().then(function(response) {
 		const val = response || {};
 		createInlineScript('var featuresData = ' + JSON.stringify(val) + ';');
 	});
 
-	$.when(groupDef, hipchatDef, templateDef, notifStateDef, notifTypeDef, repomapDef, featuresDef).then(function(){
+	Promise.all([groupDef, hipchatDef, templateDef, notifStateDef, notifTypeDef, repomapDef, featuresDef]).then(function(){
 		// UI injector
 		injectScriptFile('js/stash_page.js');
 

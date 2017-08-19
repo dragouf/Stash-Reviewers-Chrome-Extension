@@ -36,164 +36,215 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 			throw 'No storage available';
 		}
 	}
+
+	const storagePromised = {
+		set(items) {
+			return new Promise((resolve, reject) => {
+				cloudStorage.set(items, () => {
+					const err = chrome.runtime.lastError
+					if (err) {
+						reject(err)
+					} else {
+						resolve(items)
+					}
+				})
+			})
+		},
+		get(keys) {
+			return new Promise((resolve, reject) => {
+				cloudStorage.get(keys, (items) => {
+					const err = chrome.runtime.lastError
+					if (err) {
+						reject(err)
+					} else {
+						resolve(items)
+					}
+				})
+			})
+		}
+	}
+	
 	/**
 		@method
 		@memberof storage
 		@see {@link https://developer.chrome.com/apps/storage#type-StorageArea|StorageArea.set}
 	*/
-	function saveGroups(string, callback) {
+	function saveGroups(string) {
 		const data = {};
 		data[REVIEWERS_KEY] = string;
-		cloudStorage.set(data, callback);
-	}
-	function loadGroups(callback) {
-		cloudStorage.get(null, function(items) {
-			if (callback) {
-				const groups = items[REVIEWERS_KEY];
-				const urls = items[REVIEWERS_URL_KEY];
-				if(!groups && (!urls || urls.length === 0)) {
-					$.get(chrome.extension.getURL('/js/default.json'), function(data) {
-						callback(data);
-					});
-				}
-				else {
-					callback(groups);
-				}
-			}
-		});
+		return storagePromised.set(data);
 	}
 
-	function saveGroupsArray(array, callback) {
+	function loadDefaultGroups() {
+		return fetch(chrome.extension.getURL('/js/default.json'))
+			.then(res => res.text())
+	}
+
+	function loadGroups() {
+		return storagePromised.get(null).then(function(items) {
+			if (!items) {
+				return loadDefaultGroups()
+			}
+			const groups = items[REVIEWERS_KEY];
+			const urls = items[REVIEWERS_URL_KEY];
+			if(!groups && (!urls || urls.length === 0)) {
+				return loadDefaultGroups()
+			}
+			else {
+				return groups;
+			}
+		})
+	}
+
+	function saveGroupsArray(array) {
 		const data = {};
 		data[REVIEWERS_ARRAY_KEY] = JSON.stringify(array);
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
-	function loadGroupsArray(callback) {
-		cloudStorage.get(null, function(items) {
-			if (callback) {
+
+	function loadGroupsArray() {
+		return storagePromised.get(null)
+			.then(function(items) {
+				if (!items) {
+					return [];
+				}
 				const groups = items[REVIEWERS_ARRAY_KEY];
 				if (!groups) {
-					return callback([]);
+					return [];
 				}
-				callback(JSON.parse(groups));
-			}
-		});
+				try {
+					return JSON.parse(groups);
+				} catch (ex) {
+					console.error("loadGroupsArray JSON parse failed", ex)
+					return []
+				}
+			})
 	}
 
-	function saveUrl(array, callback) {
+	function saveUrl(array) {
 		const data = {};
 		data[REVIEWERS_URL_KEY] = JSON.stringify(array);
-		cloudStorage.set(data, callback);
-	}
-	function loadUrl(callback) {
-		cloudStorage.get(null, function(items) {
-			if (callback) {
-				const urls = JSON.parse(items[REVIEWERS_URL_KEY]);
-				if(!urls) {
-					return callback([]);
-				}
-				callback(urls);
-			}
-		});
+		return storagePromised.set(data);
 	}
 
-	function loadTemplate(callback) {
-		cloudStorage.get(null, function(items) {
-			if (callback) {
+	function loadUrl() {
+		return storagePromised.get(null)
+			.then(function(items) {
+				if (!items || !items[REVIEWERS_URL_KEY]) { return [] }
+				let urls
+				try {
+					urls = JSON.parse(items[REVIEWERS_URL_KEY]);
+				} catch (ex) {
+					console.error("loadUrl JSON parse failed", ex)
+					return []
+				}
+				if(!urls) {
+					return [];
+				}
+				return urls;
+			});
+	}
+
+	function loadDefaultTemplate() {
+		return fetch(chrome.extension.getURL('/js/template.txt'))
+			.then(res => res.text())
+			.then(function(data) {
+				return data.replace("\r", '').split("\n");
+			})
+	}
+
+	function loadTemplate() {
+		return storagePromised.get(null)
+			.then(function(items) {
+				if (!items) {
+					return loadDefaultTemplate()
+				}
 				const template = items[TEMPLATE_KEY];
 				if (!template) {
-					$.get(chrome.extension.getURL('/js/template.txt'), function(data) {
-						callback(data.replace("\r", '').split("\n"));
-					});
+					return loadDefaultTemplate()
 				} else {
-					callback(template);
+					return template;
 				}
-			}
-		});
+			});
 	}
-	function saveTemplate(string, callback) {
+	function saveTemplate(string) {
 		const data = {};
 		data[TEMPLATE_KEY] = string.split('\n');
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadHipChatUsername(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[HIPCHAT_KEY]);
-			}
-		});
+	function loadHipChatUsername() {
+		return storagePromised.get(null)
+			.then(function(items){
+				return items && items[HIPCHAT_KEY];
+			})
 	}
-	function saveHipChatUsername(string, callback) {
+
+	function saveHipChatUsername(string) {
 		const data = {};
 		data[HIPCHAT_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadBackgroundState(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[BACKGROUNDSTATE_KEY]);
-			}
-		});
+	function loadBackgroundState() {
+		return storagePromised.get(null)
+			.then(items => items && items[BACKGROUNDSTATE_KEY]);
 	}
-	function saveBackgroundState(string, callback) {
+
+	function saveBackgroundState(string) {
 		const data = {};
 		data[BACKGROUNDSTATE_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-
-	function loadNotificationState(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[NOTIFSTATE_KEY]);
-			}
-		});
+	function loadNotificationState() {
+		return storagePromised.get(null)
+			.then(function(items){
+				return (items && items[NOTIFSTATE_KEY]);
+			});
 	}
-	function saveNotificationState(string, callback) {
+
+	function saveNotificationState(string) {
 		const data = {};
 		data[NOTIFSTATE_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadNotificationType(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[NOTIFTYPE_KEY]);
-			}
-		});
+	function loadNotificationType() {
+		return storagePromised.get(null)
+			.then(function(items){
+				return (items && items[NOTIFTYPE_KEY]);
+			});
 	}
-	function saveNotificationType(string, callback) {
+	function saveNotificationType(string) {
 		const data = {};
 		data[NOTIFTYPE_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadRepoMap(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[REPOMAP_KEY]);
-			}
-		});
+	function loadRepoMap() {
+		return storagePromised.get(null)
+			.then(function(items){
+				return (items && items[REPOMAP_KEY]);
+			});
 	}
-	function saveRepoMap(string, callback) {
+
+	function saveRepoMap(string) {
 		const data = {};
 		data[REPOMAP_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadFeatures(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[FEATURES_KEY] || defaultFeatures);
-			}
-		});
+	function loadFeatures() {
+		return storagePromised.get(null)
+			.then(function(items){
+				return (items && items[FEATURES_KEY] || defaultFeatures);
+			});
 	}
-	function saveFeatures(string, callback) {
+	function saveFeatures(string) {
 		const data = {};
 		data[FEATURES_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
 	return {

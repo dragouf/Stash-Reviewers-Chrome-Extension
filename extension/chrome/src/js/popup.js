@@ -6,9 +6,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	function bindSaveClick() {
 		$('#bt_save').click(function() {
-			$.when(saveGroups(), saveHipChat(), saveTemplate(), saveNotification(), saveRepoMapping(), saveFeatures())
-				.done(displaySavedLabel)
-				.fail(displayErrorLabel);
+			Promise.all([saveGroups(), saveHipChat(), saveTemplate(), saveNotification(), saveRepoMapping(), saveFeatures()])
+				.then(displaySavedLabel, displayErrorLabel);
 		});
 	}
 
@@ -20,11 +19,11 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 
 	function loadData() {
-		extensionStorage.loadGroups(function(item){
+		extensionStorage.loadGroups().then(function(item){
 			$('#text_json').val(item);
 		});
 
-		extensionStorage.loadUrl(function(items){
+		extensionStorage.loadUrl().then(function(items){
 			if (items.length > 0) {
 				$('#json_url_1').remove();
 				items.forEach((url, index) => {
@@ -35,15 +34,15 @@ document.addEventListener("DOMContentLoaded", function() {
 			}
 		});
 
-		extensionStorage.loadHipChatUsername(function(username){
+		extensionStorage.loadHipChatUsername().then(function(username){
 			$('#hipchat_username').val(username);
 		});
 
-		extensionStorage.loadTemplate(function(template){
+		extensionStorage.loadTemplate().then(function(template){
 			$('#template_text').val(template.join('\n'));
 		});
 
-		extensionStorage.loadRepoMap(function(repoMap){
+		extensionStorage.loadRepoMap().then(function(repoMap){
 			if($.isArray(repoMap) && repoMap.length > 0) {
 				repoMap.forEach(function(map){
 					createNewMapInputs(map);
@@ -53,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			}
 		});
 
-		extensionStorage.loadBackgroundState(function(state){
+		extensionStorage.loadBackgroundState().then(function(state){
 			if(!state || state === extensionStorage.backgroundStates.enable){
 				$('#backgroundCheckDisable').prop('checked',false).parent().removeClass('active');
 				$('#backgroundCheckEnable').prop('checked',true).parent().addClass('active');
@@ -63,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			}
 		});
 
-		extensionStorage.loadNotificationState(function(state){
+		extensionStorage.loadNotificationState().then(function(state){
 			if(!state || state === extensionStorage.notificationStates.enable){
 				$('#notificationDisable').prop('checked',false).parent().removeClass('active');
 				$('#notificationEnable').prop('checked',true).parent().addClass('active');
@@ -73,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			}
 		});
 
-		extensionStorage.loadNotificationType(function(type){
+		extensionStorage.loadNotificationType().then(function(type){
 			if(type === extensionStorage.notificationTypes.all){
 				$('#notificationMention').prop('checked',false).parent().removeClass('active');
 				$('#notificationAll').prop('checked',true).parent().addClass('active');
@@ -87,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 
 	function loadFeaturesStates() {
-		extensionStorage.loadFeatures(function(features){
+		extensionStorage.loadFeatures().then(function(features) {
 			if(features && $.isPlainObject(features)) {
 				$.each(features, function(name, state){
 					setFeatureState(name, state);
@@ -118,11 +117,11 @@ document.addEventListener("DOMContentLoaded", function() {
 		});
 		const newValue = $('#text_json').val();
 		const groupPromises = [];
-		const def = $.Deferred();
 
 		groupPromises.push(new Promise((resolve, reject) => {
 			if (!newValue) {
 				resolve({groups:[]});
+				return
 			}
 			try { JSON.parse(newValue); }
 			catch (e) {
@@ -134,9 +133,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		newUrls.forEach(url => {
 			const p = new Promise((resolve, reject) => {
 				fetch(url)
-					.then((res) => {
-						return res.json();
-					})
+					.then((res) => res.json())
 					.then((body) => {
 						if (!body) {
 							return reject({msg: 'Corrupt file', e: {}});
@@ -150,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			groupPromises.push(p);
 		});
 
-		Promise.all(groupPromises).then(values => {
+		return Promise.all(groupPromises).then(values => {
 			let joined = [];
 			values.forEach((group) => {
 				if (group.groups) {
@@ -161,66 +158,40 @@ document.addEventListener("DOMContentLoaded", function() {
 				throw({msg: 'Groups are empty', e: {}});
 			}
 			return Promise.all([
-				new Promise((resolve) => {
-					extensionStorage.saveUrl(newUrls, () => {
-						resolve();
-					});
-				}),
-				new Promise((resolve) => {
-					extensionStorage.saveGroups(newValue, () => {
-						resolve();
-					});
-				}),
-				new Promise((resolve) => {
-					extensionStorage.saveGroupsArray(joined, () => {
-						resolve();
-					});
-				}),
+				extensionStorage.saveUrl(newUrls),
+				extensionStorage.saveGroups(newValue),
+				extensionStorage.saveGroupsArray(joined)
 			]);
-		}).then(def.resolve).catch(def.reject);
-		return def.promise();
+		});
 	}
 
 	function saveHipChat() {
-		const def = $.Deferred();
-		const username = $('#hipchat_username').val();
-		extensionStorage.saveHipChatUsername(username, function() {
-			def.resolve();
-		});
-
-		return def.promise();
+		const usernameEl = $('#hipchat_username')
+		if (usernameEl) {
+			return extensionStorage.saveHipChatUsername(usernameEl.val())
+		}
+		return Promise.resolve()
 	}
 
 	function saveTemplate() {
-		const def = $.Deferred();
-		const template = $('#template_text').val();
-		extensionStorage.saveTemplate(template, function() {
-			def.resolve();
-		});
-
-		return def.promise();
+		const templateEl = $('#template_text');
+		if (templateEl) {
+			return extensionStorage.saveTemplate(templateEl.val())
+		}
+		return Promise.resolve()
 	}
 
 	function saveNotification() {
-		const defState = $.Deferred();
-		const defType = $.Deferred();
-
 		const backgroundState = $('#backgroundCheck').find('input:radio:checked').val();
-		extensionStorage.saveBackgroundState(backgroundState, function() {
-			defState.resolve();
-		});
+		const backgroundPromised = extensionStorage.saveBackgroundState(backgroundState)
 
 		const notificationState = $('#notificationState').find('input:radio:checked').val();
-		extensionStorage.saveNotificationState(notificationState, function() {
-			defState.resolve();
-		});
+		const notificationPromised = extensionStorage.saveNotificationState(notificationState)
 
 		const type = $('#notificationType').find('input:radio:checked').val();
-		extensionStorage.saveNotificationType(type, function() {
-			defType.resolve();
-		});
+		const typePromised = extensionStorage.saveNotificationType(type)
 
-		return $.when(defState, defType);
+		return Promise.all([ backgroundPromised, notificationPromised, typePromised ]);
 	}
 
 	function saveRepoMapping() {
@@ -237,27 +208,17 @@ document.addEventListener("DOMContentLoaded", function() {
 			}
 		}
 
-		extensionStorage.saveRepoMap(data, function() {
-			def.resolve();
-		});
-
-		return def.promise();
+		return extensionStorage.saveRepoMap(data)
 	}
 
 	function saveFeatures() {
-		const deferred = $.Deferred();
-
 		const features = extensionStorage.defaultFeatures;
 
 		$.each(features, function(name) {
 			features[name] = getFeatureState(name);
 		});
 
-		extensionStorage.saveFeatures(features, function() {
-			deferred.resolve();
-		});
-
-		return deferred.promise();
+		return extensionStorage.saveFeatures(features)
 	}
 
 	function setFeatureState(feature, state) {

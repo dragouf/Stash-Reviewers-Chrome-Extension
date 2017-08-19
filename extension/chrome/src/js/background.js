@@ -2,53 +2,54 @@
 chrome = chrome || browser; // eslint-disable-line no-global-assign
 const onMessage = chrome.runtime.onMessageExternal || chrome.runtime.onMessage;
 
+// eslint-disable-next-line no-unused-vars
+let jsonGroups // is assigned here and used in other scripts
+
 // Refresh every 6h
 const REVIEWERS_LIST_REFRESH = 6 * 60 * 60 * 1000;
 
-
 const reloadLists = function() {
 	const promises = [];
-	const arr = new Promise((resolve) => {
-		const groupPromises = [];
-		extensionStorage.loadUrl(urls => {
-			urls.forEach(url => {
-				const p = new Promise((resolve, reject) => {
-					fetch(url)
-						.then((res) => {
-							return res.json();
-						})
-						.then((body) => {
-							if (!body) {
-								return reject({msg: 'Corrupt file', e: {}});
-							}
-							resolve(body);
-						})
-						.catch((err) => {
-							reject({msg: err, e: err});
-						});
-				});
-				groupPromises.push(p);
-			});
-			Promise.all(groupPromises).then(groups => {
-				let joined = [];
-				groups.forEach((group) => {
-					if (group.groups) {
-						joined = joined.concat(group.groups);
+	const groupPromises = [];
+	const arr = extensionStorage.loadUrl().then(urls => {
+		urls.forEach(url => {
+			const p = fetch(url)
+				.then((res) => {
+					return res.json();
+				})
+				.then((body) => {
+					if (!body) {
+						return {msg: 'Corrupt file', e: {}};
 					}
-				});
-				resolve({groups: joined});
+					return body;
+				})
+			groupPromises.push(p);
+		});
+		return Promise.all(groupPromises).then(groups => {
+			let joined = [];
+			groups.forEach((group) => {
+				if (group.groups) {
+					joined = joined.concat(group.groups);
+				}
 			});
+			return {groups: joined};
 		});
 	});
 	promises.push(arr);
 
-	const str = new Promise((resolve) => {
-		extensionStorage.loadGroups(groups => {
-			if (!groups) {
-				return resolve({groups: []});
-			}
-			resolve(JSON.parse(groups));
-		});
+	const str = extensionStorage.loadGroups().then(groups => {
+		if (!groups) {
+			return {groups: []};
+		}
+		if ("string" !== typeof groups) {
+			return groups
+		}
+		try {
+			return JSON.parse(groups);
+		} catch (ex) {
+			console.error("extensionStorage.loadGroups JSON parse failed", ex, groups)
+			return { groups: [] }
+		}
 	});
 	promises.push(str);
 
@@ -62,11 +63,7 @@ const reloadLists = function() {
 		if (joined.length === 0) {
 			throw({msg: 'Groups are empty', e: {}});
 		}
-		return new Promise((resolve) => {
-			extensionStorage.saveGroupsArray(joined, () => {
-				resolve(joined);
-			});
-		});
+		return extensionStorage.saveGroupsArray(joined)
 	}).then(groups => {
 		jsonGroups = groups;
 		console.info('Groups updated', groups);
@@ -132,7 +129,6 @@ function retrieveActivities() {
 			return;
 		}
 
-		const allPR = [];
 		const params = "?start=0&limit=1000&avatarSize=64&withAttributes=true&state=OPEN&order=oldest&role=";
 		const urlPR = items.currentStashBaseUrl + "/rest/inbox/latest/pull-requests" + params;
 		const urlPRNew = items.currentStashBaseUrl + "/rest/api/latest/inbox/pull-requests" + params;
@@ -140,47 +136,30 @@ function retrieveActivities() {
 		const buildUrlPR = function(url, role){
 			return url + role;
 		}
-		const reviewersDefered = jQuery.Deferred()
-		const resolveReviewers = function(data) {
-			reviewersDefered.resolve();
-			return data;
-		}
-		const authorDefered = jQuery.Deferred()
-		const resolveAuthor = function(data) {
-			authorDefered.resolve();
-			return data;
-		}
-		const mergeResults = function(data){
-			jQuery.merge(allPR, data.values)
-		};
 		const rerunRequest = function(role) {
 			return function(err) {
-				const resolveDeferred = role === 'reviewer' ? resolveReviewers : resolveAuthor;
-				if(err.status == 404) {
-					return jQuery
-						.get(buildUrlPR(urlPR, role))
-						.then(mergeResults)
-						.then(resolveDeferred);
+				if (err.status == 404) {
+					return fetch(buildUrlPR(urlPR, role))
 				}
+				return Promise.reject(err)
 			}
 		};
 		const rerunRequestReviewers = rerunRequest('reviewer');
 		const rerunRequestAuthor = rerunRequest('author');
 
-		jQuery
-			.get(buildUrlPR(urlPRNew, 'reviewer'))
-			.then(mergeResults)
-			.then(resolveReviewers)
-			.fail(rerunRequestReviewers);
+		const reviewersPromised = fetch(buildUrlPR(urlPRNew, 'reviewer'))
+			.then(res => res.json())
+			.catch(rerunRequestReviewers);
+		
+		const authorPromised = fetch(buildUrlPR(urlPRNew, 'author'))
+			.then(res => res.json())
+			.catch(rerunRequestAuthor);
 
-		jQuery
-			.get(buildUrlPR(urlPRNew, 'author'))
-			.then(mergeResults)
-			.then(resolveAuthor)
-			.fail(rerunRequestAuthor);
-
-		jQuery.when(reviewersDefered, authorDefered).done(function(){
-			const activities = [];
+		Promise.all([reviewersPromised, authorPromised]).then(function(results) {
+			if (results[0].errors) { throw results[0].errors }
+			if (results[1].errors) { throw results[1].errors }
+			const allPR = results[0].concat(results[1])
+			let activities;
 			const requests = [];
 			// loop through PRs and request activities
 			allPR.forEach(function(pr){
@@ -191,18 +170,20 @@ function retrieveActivities() {
 				}
 
 				if(prLink) {
-					requests.push(jQuery.get(prLink)
-						.done(function(activityList){
+					requests.push(fetch(prLink)
+						.then(res => res.json())
+						.then(function(activityList){
 						// get comments after PR was updated
-							jQuery.each(activityList.values, function(index, activity){
-								jQuery.extend(activity, { pullrequest: pr });
-								activities.push(activity);
+							activities = activityList.values.map(function(activity){
+								return Object.assign(activity, { pullrequest: pr });
 							});
-						}));
+						})
+						.catch(err => { console.error("Request to " + prLink + " failed", err)})
+					)
 				}
 			});
 
-			jQuery.when.apply(jQuery, requests).always(function(){
+			Promise.all(requests).then(function(){
 				// send retrieved data to page script
 				items.tabList.forEach(function(tabId, index){
 					if (tabId) {
@@ -216,7 +197,7 @@ function retrieveActivities() {
 }
 
 // periodically check activities if background notification enabled
-extensionStorage.loadBackgroundState(function(response) {
+extensionStorage.loadBackgroundState().then(function(response) {
 	if(typeof response === 'undefined' || response && response.toString() === extensionStorage.backgroundStates.enable.toString()) {
 		chrome.alarms.onAlarm.addListener(retrieveActivities);
 		chrome.alarms.create("retrievedActivitiesAlarm", {periodInMinutes: 1.0} );
