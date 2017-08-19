@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener("DOMContentLoaded", function() {
 	let mapIndex = 0;
 	loadData();
 	bindSaveClick();
