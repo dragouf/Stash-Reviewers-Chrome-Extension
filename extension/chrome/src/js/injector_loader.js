@@ -131,10 +131,10 @@ function injectScriptFile(scriptPath) {
 }
 
 function injectCssFile(cssPath) {
-	$('<link/>')
-		.attr('rel', 'stylesheet')
-		.attr('media', 'all')
-		.attr('type', 'text/css')
-		.attr('href', chrome.extension.getURL(cssPath))
-		.appendTo("head");
+	const link = document.createElement("link")
+	link.setAttribute('rel', 'stylesheet')
+	link.setAttribute('media', 'all')
+	link.setAttribute('type', 'text/css')
+	link.setAttribute('href', chrome.extension.getURL(cssPath))
+	document.getElementsByTagName("head")[0].appendChild(link)
 }

@@ -17,6 +17,7 @@
         "no-var": "warn",
         "object-shorthand": "warn",
         "prefer-const": "warn",
-        "no-console": "off"
+        "no-console": "off",
+        "prefer-template": "warn"
     }
 }

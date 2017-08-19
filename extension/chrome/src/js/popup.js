@@ -1,84 +1,105 @@
 document.addEventListener("DOMContentLoaded", function() {
+	const $ = document.querySelector.bind(document)
+	const $$ = document.querySelectorAll.bind(document)
+
 	let mapIndex = 0;
 	loadData();
 	bindSaveClick();
 	bindAddFile();
 
 	function bindSaveClick() {
-		$('#bt_save').click(function() {
+		$('#bt_save').addEventListener("click", function() {
 			Promise.all([saveGroups(), saveHipChat(), saveTemplate(), saveNotification(), saveRepoMapping(), saveFeatures()])
 				.then(displaySavedLabel, displayErrorLabel);
 		});
 	}
 
 	function bindAddFile() {
-		$('#bt_add_file').on('click', function() {
-			const nr = $('.json_url').length + 1;
-			$('#json_urls').append('<input class="form-control json_url" id="json_url_'+ nr +'" type="text"></input>');
+		$('#bt_add_file').addEventListener('click', function() {
+			const nr = $$('.json_url').length + 1;
+			$('#json_urls').insertAdjacentHTML('beforeend', `<input class="form-control json_url" id="json_url_${ nr }" type="text"></input>`);
 		});
+	}
+
+	function check(el) {
+		if (!el) { return }
+		el.checked = true
+		el.parentNode.classList.add("active")
+	}
+
+	function uncheck(el) {
+		if (!el) { return }
+		el.checked = false
+		el.parentNode.classList.remove("active")
 	}
 
 	function loadData() {
 		extensionStorage.loadGroups().then(function(item){
-			$('#text_json').val(item);
+			$('#text_json').value = item;
 		});
 
 		extensionStorage.loadUrl().then(function(items){
 			if (items.length > 0) {
 				$('#json_url_1').remove();
 				items.forEach((url, index) => {
-					const input = $('<input class="form-control json_url" id="json_url_'+ (index + 1) +'" type="text"></input>');
-					input.val(url);
-					$('#json_urls').append(input);
+					const input = `<input class="form-control json_url" id="json_url_${index + 1}" type="text" value="${url}"></input>`;
+					$('#json_urls').insertAdjacentHTML('beforeend', input);
 				});
 			}
 		});
 
 		extensionStorage.loadHipChatUsername().then(function(username){
-			$('#hipchat_username').val(username);
+			const hipchatUsername = $('#hipchat_username')
+			if (hipchatUsername) {
+				hipchatUsername.value = username;
+			}
 		});
 
 		extensionStorage.loadTemplate().then(function(template){
-			$('#template_text').val(template.join('\n'));
+			$('#template_text').value = template.join('\n');
 		});
 
 		extensionStorage.loadRepoMap().then(function(repoMap){
-			if($.isArray(repoMap) && repoMap.length > 0) {
-				repoMap.forEach(function(map){
-					createNewMapInputs(map);
-				});
+			if(Array.isArray(repoMap) && repoMap.length > 0) {
+				repoMap.forEach(createNewMapInputs);
 			} else {
 				createNewMapInputs();
 			}
 		});
 
 		extensionStorage.loadBackgroundState().then(function(state){
+			const backgroundCheckDisable = $('#backgroundCheckDisable')
+			const backgroundCheckEnable = $('#backgroundCheckEnable')
 			if(!state || state === extensionStorage.backgroundStates.enable){
-				$('#backgroundCheckDisable').prop('checked',false).parent().removeClass('active');
-				$('#backgroundCheckEnable').prop('checked',true).parent().addClass('active');
+				uncheck(backgroundCheckDisable)
+				check(backgroundCheckEnable)
 			} else {
-				$('#backgroundCheckDisable').prop('checked',true).parent().addClass('active');
-				$('#backgroundCheckEnable').prop('checked',false).parent().removeClass('active');
+				check(backgroundCheckDisable)
+				uncheck(backgroundCheckEnable)
 			}
 		});
 
 		extensionStorage.loadNotificationState().then(function(state){
+			const notificationDisable = $('#notificationDisable')
+			const notificationEnable = $('#notificationEnable')
 			if(!state || state === extensionStorage.notificationStates.enable){
-				$('#notificationDisable').prop('checked',false).parent().removeClass('active');
-				$('#notificationEnable').prop('checked',true).parent().addClass('active');
+				uncheck(notificationDisable)
+				check(notificationEnable)
 			} else {
-				$('#notificationDisable').prop('checked',true).parent().addClass('active');
-				$('#notificationEnable').prop('checked',false).parent().removeClass('active');
+				check(notificationDisable)
+				uncheck(notificationEnable)
 			}
 		});
 
 		extensionStorage.loadNotificationType().then(function(type){
+			const notificationMention = $('#notificationMention')
+			const notificationAll = $('#notificationAll')
 			if(type === extensionStorage.notificationTypes.all){
-				$('#notificationMention').prop('checked',false).parent().removeClass('active');
-				$('#notificationAll').prop('checked',true).parent().addClass('active');
+				uncheck(notificationMention)
+				check(notificationAll)
 			} else {
-				$('#notificationMention').prop('checked',true).parent().addClass('active');
-				$('#notificationAll').prop('checked',false).parent().removeClass('active');
+				check(notificationMention)
+				uncheck(notificationAll)
 			}
 		});
 
@@ -87,35 +108,28 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	function loadFeaturesStates() {
 		extensionStorage.loadFeatures().then(function(features) {
-			if(features && $.isPlainObject(features)) {
-				$.each(features, function(name, state){
-					setFeatureState(name, state);
-				});
+			if(features != null) {
+				Object.entries(features).forEach(setFeatureState)
 			}
 		});
 	}
 
 	function displaySavedLabel() {
-		$('#optionErrorAlert').addClass('hidden');
-		$('#optionSavedAlert').removeClass('hidden');
+		$('#optionErrorAlert').classList.add('hidden');
+		$('#optionSavedAlert').classList.remove('hidden');
 		setTimeout(function() {
-			$('#optionSavedAlert').addClass('hidden');
+			$('#optionSavedAlert').classList.add('hidden');
 		}, 800);
 	}
 
 	function displayErrorLabel(error) {
-		$('#optionErrorAlert').html('Error: ' + error.msg);
-		$('#optionErrorAlert').removeClass('hidden');
+		$('#optionErrorAlert').innerHTML = `Error: ${error.msg}`;
+		$('#optionErrorAlert').classList.remove('hidden');
 	}
 
 	function saveGroups() {
-		const newUrls = [];
-		$('.json_url').each(function() {
-			if ($(this).val()) {
-				newUrls.push($(this).val());
-			}
-		});
-		const newValue = $('#text_json').val();
+		const newUrls = Array.from($$('.json_url')).map(el => el.value).filter(Boolean)
+		const newValue = $('#text_json').value;
 		const groupPromises = [];
 
 		groupPromises.push(new Promise((resolve, reject) => {
@@ -168,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	function saveHipChat() {
 		const usernameEl = $('#hipchat_username')
 		if (usernameEl) {
-			return extensionStorage.saveHipChatUsername(usernameEl.val())
+			return extensionStorage.saveHipChatUsername(usernameEl.value)
 		}
 		return Promise.resolve()
 	}
@@ -176,34 +190,33 @@ document.addEventListener("DOMContentLoaded", function() {
 	function saveTemplate() {
 		const templateEl = $('#template_text');
 		if (templateEl) {
-			return extensionStorage.saveTemplate(templateEl.val())
+			return extensionStorage.saveTemplate(templateEl.value)
 		}
 		return Promise.resolve()
 	}
 
 	function saveNotification() {
-		const backgroundState = $('#backgroundCheck').find('input:radio:checked').val();
+		const backgroundState = $('#backgroundCheck input[type=radio]:checked').value;
 		const backgroundPromised = extensionStorage.saveBackgroundState(backgroundState)
 
-		const notificationState = $('#notificationState').find('input:radio:checked').val();
+		const notificationState = $('#notificationState input[type=radio]:checked').value;
 		const notificationPromised = extensionStorage.saveNotificationState(notificationState)
 
-		const type = $('#notificationType').find('input:radio:checked').val();
+		const type = $('#notificationType input[type=radio]:checked').value;
 		const typePromised = extensionStorage.saveNotificationType(type)
 
 		return Promise.all([ backgroundPromised, notificationPromised, typePromised ]);
 	}
 
 	function saveRepoMapping() {
-		const def = $.Deferred();
 		const data = [];
 		for(let index = 0; index < mapIndex; index++) {
-			const repo = $("input[name='map[" + index + "].repo']").val();
-			const remote = $("input[name='map[" + index + "].remote']").val();
+			const repo = $(`input[name='map[${index}].repo']`);
+			const remote = $(`input[name='map[${index}].remote']`);
 			if (repo && remote) {
 				data.push({
-					repo,
-					remote
+					repo: repo.value,
+					remote: remote.value
 				});
 			}
 		}
@@ -214,25 +227,49 @@ document.addEventListener("DOMContentLoaded", function() {
 	function saveFeatures() {
 		const features = extensionStorage.defaultFeatures;
 
-		$.each(features, function(name) {
+		Object.keys(features).forEach(function(name) {
 			features[name] = getFeatureState(name);
 		});
 
 		return extensionStorage.saveFeatures(features)
 	}
 
-	function setFeatureState(feature, state) {
+	function setFeatureState([feature, state]) {
+		const disableFeature = $(`#${feature}Disable`)
+		const enableFeature = $(`#${feature}Enable`)
 		if(state == 1){
-			$('#' + feature + 'Disable').prop('checked',false).parent().removeClass('active');
-			$('#' + feature + 'Enable').prop('checked',true).parent().addClass('active');
+			uncheck(disableFeature)
+			check(enableFeature)
 		} else {
-			$('#' + feature + 'Disable').prop('checked',true).parent().addClass('active');
-			$('#' + feature + 'Enable').prop('checked',false).parent().removeClass('active');
+			check(disableFeature)
+			uncheck(enableFeature)
 		}
 	}
 
 	function getFeatureState(feature) {
-		return $('#f_' + feature).find('input:radio:checked').val();
+		const el = $(`#f_${feature} input[type=radio]:checked`)
+		return el && el.value;
+	}
+
+	function repomapTemplate(mapIndex, mapData, addButton) {
+		const button = addButton
+			? '<button type="button" class="btn btn-default addButton"><i class="glyphicon glyphicon-plus"></i></button>'
+			: '<button type="button" class="btn btn-default removeButton"><i class="glyphicon glyphicon-minus"></i></button>'
+		const div = document.createElement("div")
+		div.classList.add("form-group", "form-bottom-margin")
+		div.setAttribute("data-index", mapIndex)
+		div.innerHTML = `
+			<div class="col-xs-5">
+				<input name="map[${mapIndex}].repo" value="${mapData.repo}" type="text" class="form-control" placeholder="user/project name" />
+			</div>
+			<div class="col-xs-5">
+				<input name="map[${mapIndex}].remote" value=${mapData.remote} type="text" class="form-control" placeholder="remote name" />
+			</div>
+			<div class="col-xs-2">
+				${button}
+			</div>
+		`
+		return div
 	}
 
 	function createNewMapInputs(mapData) {
@@ -240,43 +277,43 @@ document.addEventListener("DOMContentLoaded", function() {
 			repo: '',
 			remote: ''
 		};
-		const $template = $('#repomapTemplate');
-		const $clone = $template
-			.clone()
-			.removeClass('hide')
-			.removeAttr('id')
-			.attr('data-index', mapIndex)
-			.insertBefore($template);
-		$clone
-			.find('[name="repo"]').attr('name', 'map[' + mapIndex + '].repo').val(mapData.repo).end()
-			.find('[name="remote"]').attr('name', 'map[' + mapIndex + '].remote').val(mapData.remote).end();
+		const repomap = $('#repomap');
+		const renderAddButton = (mapIndex === 0)
+		const template = repomapTemplate(mapIndex, mapData, renderAddButton)
+		repomap.appendChild(template)
 
-		if(mapIndex == 0) {
-			const $addButton = $('<button type="button" class="btn btn-default addButton"><i class="glyphicon glyphicon-plus"></i></button>');
-			$clone
-				.find('.removeButton')
-				.replaceWith($addButton);
-
-			$addButton.click(function() {
-				createNewMapInputs();
-			});
-		}
 		// delete action
-		$clone.find('.removeButton').click(function(){
-			$(this).parents('.form-group').remove();
-		});
+		template.querySelectorAll('.removeButton').forEach(el =>
+			el.addEventListener("click", function(){
+				template.remove();
+			})
+		)
+
+		template.querySelectorAll('.addButton').forEach(el =>
+			el.addEventListener('click', () => createNewMapInputs())
+		)
 
 		mapIndex++;
 	}
 
-	$('.nav-tabs a').click(function(e) {
-		e.preventDefault();
-		$(this).tab('show');
-	});
+	function switchNavTab(el) { 
+		el.addEventListener("click", function(e) {
+			e.preventDefault();
+			// active class on tab LI
+			const allTabs = $$(".nav-tabs li")
+			allTabs.forEach(el => el.classList.remove("active"))
+			const tab = e.target
+			tab.parentNode.classList.add("active")
+			// active class on tab container
+			const allContainers = $$(".tab-pane")
+			allContainers.forEach(el => el.classList.remove("active"))
+			$(tab.hash).classList.add('active')
+		})
+	}
+	$$('.nav-tabs a').forEach(switchNavTab)
 
-	$('[data-toggle="popover"]').each(function(index, el){
-		el = $(el);
-		const forOption = el.attr('for');
+	$$('[data-toggle="popover"]').forEach(function(el){
+		const forOption = el.getAttribute('for');
 		let content = '';
 		switch(forOption) {
 		case 'f_reviewersgroup':
@@ -349,7 +386,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			html: true,
 			container: 'body',
 			trigger: 'hover click',
-			title: el.text(),
+			title: el.innerHTML,
 			content,
 			viewport: "#bitbucket-extension-options"
 		});
