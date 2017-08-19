@@ -1,9 +1,6 @@
 // ff webextensions workaround
-chrome = chrome || browser;
-var onMessage = chrome.runtime.onMessageExternal;
-if(true || !chrome.runtime.onMessageExternal) {
-	onMessage = chrome.runtime.onMessage;
-}
+chrome = chrome || browser; // eslint-disable-line no-global-assign
+const onMessage = chrome.runtime.onMessageExternal || chrome.runtime.onMessage;
 
 // Refresh every 6h
 const REVIEWERS_LIST_REFRESH = 6 * 60 * 60 * 1000;
@@ -11,24 +8,24 @@ const REVIEWERS_LIST_REFRESH = 6 * 60 * 60 * 1000;
 
 const reloadLists = function() {
 	const promises = [];
-	const arr = new Promise((resolve, reject) => {
+	const arr = new Promise((resolve) => {
 		const groupPromises = [];
 		extensionStorage.loadUrl(urls => {
 			urls.forEach(url => {
 				const p = new Promise((resolve, reject) => {
 					fetch(url)
-					.then((res) => {
-						return res.json();
-					})
-					.then((body) => {
-						if (!body) {
-							return reject({msg: 'Corrupt file', e: {}});
-						}
-						resolve(body);
-					})
-					.catch((err) => {
-						reject({msg: err, e: err});
-					});
+						.then((res) => {
+							return res.json();
+						})
+						.then((body) => {
+							if (!body) {
+								return reject({msg: 'Corrupt file', e: {}});
+							}
+							resolve(body);
+						})
+						.catch((err) => {
+							reject({msg: err, e: err});
+						});
 				});
 				groupPromises.push(p);
 			});
@@ -45,7 +42,7 @@ const reloadLists = function() {
 	});
 	promises.push(arr);
 
-	const str = new Promise((resolve, reject) => {
+	const str = new Promise((resolve) => {
 		extensionStorage.loadGroups(groups => {
 			if (!groups) {
 				return resolve({groups: []});
@@ -65,7 +62,7 @@ const reloadLists = function() {
 		if (joined.length === 0) {
 			throw({msg: 'Groups are empty', e: {}});
 		}
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			extensionStorage.saveGroupsArray(joined, () => {
 				resolve(joined);
 			});
@@ -76,19 +73,19 @@ const reloadLists = function() {
 	}).catch(console.error);
 };
 
-var tempTabList = [];
-var extensionCommunicationCallback = function(request, sender, callback) {
+let tempTabList = [];
+const extensionCommunicationCallback = function(request, sender, callback) {
 	if (request.action == "xhttp") {
-		var xhttp = new XMLHttpRequest();
-		var method = request.method ? request.method.toUpperCase() : 'GET';
+		const xhttp = new XMLHttpRequest();
+		const method = request.method ? request.method.toUpperCase() : 'GET';
 
-		xhttp.onreadystatechange = function (aEvt) {
-		  if (xhttp.readyState == 4) {
-			 if(xhttp.status == 200)
-				callback({status: xhttp.status, response: xhttp.response, redirect: this.getResponseHeader("Location") || request.url, httpObj: xhttp });
-			 else
-				callback({status: xhttp.status, response: xhttp.response, httpObj: xhttp });
-		  }
+		xhttp.onreadystatechange = function () {
+			if (xhttp.readyState == 4) {
+				if(xhttp.status == 200)
+					callback({status: xhttp.status, response: xhttp.response, redirect: this.getResponseHeader("Location") || request.url, httpObj: xhttp });
+				else
+					callback({status: xhttp.status, response: xhttp.response, httpObj: xhttp });
+			}
 		};
 
 		xhttp.open(method, request.url, true);
@@ -108,11 +105,11 @@ var extensionCommunicationCallback = function(request, sender, callback) {
 	}
 	else if (request.action === 'setBadgeCount') {
 		chrome.browserAction.setBadgeBackgroundColor({ color: [208, 68, 55, 255] });
-		chrome.browserAction.setBadgeText({text: request.badgeCount});;
+		chrome.browserAction.setBadgeText({text: request.badgeCount});
 	}
 	else if (request.action === 'pong') {
 		tempTabList.push(sender.tab.id);
-		var items = {
+		const items = {
 			tabList: tempTabList
 		}
 
@@ -135,60 +132,59 @@ function retrieveActivities() {
 			return;
 		}
 
-		var allPR = [];
-		var deferredResult = jQuery.Deferred();
-		var params = "?start=0&limit=1000&avatarSize=64&withAttributes=true&state=OPEN&order=oldest&role=";
-		var urlPR = items.currentStashBaseUrl + "/rest/inbox/latest/pull-requests" + params;
-		var urlPRNew = items.currentStashBaseUrl + "/rest/api/latest/inbox/pull-requests" + params;
+		const allPR = [];
+		const params = "?start=0&limit=1000&avatarSize=64&withAttributes=true&state=OPEN&order=oldest&role=";
+		const urlPR = items.currentStashBaseUrl + "/rest/inbox/latest/pull-requests" + params;
+		const urlPRNew = items.currentStashBaseUrl + "/rest/api/latest/inbox/pull-requests" + params;
 
-		var buildUrlPR = function(url, role){
-		  return url + role;
+		const buildUrlPR = function(url, role){
+			return url + role;
 		}
-		var reviewersDefered = jQuery.Deferred()
-		var resolveReviewers = function(data) {
-		  reviewersDefered.resolve();
-		  return data;
+		const reviewersDefered = jQuery.Deferred()
+		const resolveReviewers = function(data) {
+			reviewersDefered.resolve();
+			return data;
 		}
-		var authorDefered = jQuery.Deferred()
-		var resolveAuthor = function(data) {
-		  authorDefered.resolve();
-		  return data;
+		const authorDefered = jQuery.Deferred()
+		const resolveAuthor = function(data) {
+			authorDefered.resolve();
+			return data;
 		}
-		var mergeResults = function(data){
+		const mergeResults = function(data){
 			jQuery.merge(allPR, data.values)
 		};
-		var rerunRequest = function(role) {
+		const rerunRequest = function(role) {
 			return function(err) {
-				var resolveDeferred = role === 'reviewer' ? resolveReviewers : resolveAuthor;
+				const resolveDeferred = role === 'reviewer' ? resolveReviewers : resolveAuthor;
 				if(err.status == 404) {
 					return jQuery
-					.get(buildUrlPR(urlPR, role))
-					.then(mergeResults)
-					.then(resolveDeferred);
+						.get(buildUrlPR(urlPR, role))
+						.then(mergeResults)
+						.then(resolveDeferred);
 				}
 			}
 		};
-		var rerunRequestReviewers = rerunRequest('reviewer');
-		var rerunRequestAuthor = rerunRequest('author');
+		const rerunRequestReviewers = rerunRequest('reviewer');
+		const rerunRequestAuthor = rerunRequest('author');
 
 		jQuery
-		.get(buildUrlPR(urlPRNew, 'reviewer'))
-		.then(mergeResults)
-		.then(resolveReviewers)
-		.fail(rerunRequestReviewers);
+			.get(buildUrlPR(urlPRNew, 'reviewer'))
+			.then(mergeResults)
+			.then(resolveReviewers)
+			.fail(rerunRequestReviewers);
 
 		jQuery
-		.get(buildUrlPR(urlPRNew, 'author'))
-		.then(mergeResults)
-		.then(resolveAuthor)
-		.fail(rerunRequestAuthor);
+			.get(buildUrlPR(urlPRNew, 'author'))
+			.then(mergeResults)
+			.then(resolveAuthor)
+			.fail(rerunRequestAuthor);
 
 		jQuery.when(reviewersDefered, authorDefered).done(function(){
-			var activities = [];
-			var requests = [];
+			const activities = [];
+			const requests = [];
 			// loop through PRs and request activities
 			allPR.forEach(function(pr){
-				var prLink = '';
+				let prLink = '';
 				if(pr.links && pr.links.self) {
 					prLink = pr.links.self[0].href.replace(items.currentStashBaseUrl, '');
 					prLink = items.currentStashBaseUrl + '/rest/api/1.0' + prLink + '/activities?avatarSize=64';
@@ -196,13 +192,13 @@ function retrieveActivities() {
 
 				if(prLink) {
 					requests.push(jQuery.get(prLink)
-					.done(function(activityList){
+						.done(function(activityList){
 						// get comments after PR was updated
-						jQuery.each(activityList.values, function(index, activity){
-							jQuery.extend(activity, { pullrequest: pr });
-							activities.push(activity);
-						});
-					}));
+							jQuery.each(activityList.values, function(index, activity){
+								jQuery.extend(activity, { pullrequest: pr });
+								activities.push(activity);
+							});
+						}));
 				}
 			});
 
@@ -210,7 +206,7 @@ function retrieveActivities() {
 				// send retrieved data to page script
 				items.tabList.forEach(function(tabId, index){
 					if (tabId) {
-						chrome.tabs.sendMessage(tabId, { action: "ActivitiesRetrieved", activities: activities, desktopNotification: index === 0 });
+						chrome.tabs.sendMessage(tabId, { action: "ActivitiesRetrieved", activities, desktopNotification: index === 0 });
 					}
 				});
 			});
@@ -228,20 +224,20 @@ extensionStorage.loadBackgroundState(function(response) {
 });
 
 // update detected bitbucket url each time tabs are opened/closed/updated
-chrome.tabs.onRemoved.addListener(function(tabId) {
+chrome.tabs.onRemoved.addListener(function() {
 	pingAllExistingTabs();
 });
 
-chrome.tabs.onCreated.addListener(function(tabId) {
+chrome.tabs.onCreated.addListener(function() {
 	pingAllExistingTabs();
 });
-chrome.tabs.onUpdated.addListener(function(tabId) {
+chrome.tabs.onUpdated.addListener(function() {
 	pingAllExistingTabs();
 });
 function pingAllExistingTabs() {
 	tempTabList = [];
 	chrome.tabs.query({}, function(tabs){
-		tabs.forEach(function(tab, index){
+		tabs.forEach(function(tab){
 			if (tab && tab.id) {
 				chrome.tabs.sendMessage(tab.id, { action: "ping" });
 			}
@@ -251,9 +247,9 @@ function pingAllExistingTabs() {
 
 
 // Click on extension icon
-chrome.browserAction.onClicked.addListener(function(tab) {
+chrome.browserAction.onClicked.addListener(function() {
 	chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
-		chrome.tabs.create({'url': items.currentStashBaseUrl + '/'}, function(tab) {});
+		chrome.tabs.create({'url': items.currentStashBaseUrl + '/'}, function() {});
 	});
 });
 

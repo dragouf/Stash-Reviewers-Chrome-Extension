@@ -1,4 +1,4 @@
-var extensionStorage = (function() {
+const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	const REVIEWERS_KEY = 'stashplugin.groups_reviewers';
@@ -12,7 +12,7 @@ var extensionStorage = (function() {
 	const REPOMAP_KEY = 'stashplugin.repomap';
 	const FEATURES_KEY = 'stashplugin.features';
 
-	var defaultFeatures = {
+	const defaultFeatures = {
 		reviewersgroup: true,
 		prfilters: true,
 		notifIcon: true,
@@ -27,10 +27,10 @@ var extensionStorage = (function() {
 		checkversion: true
 	};
 
-	var cloudStorage = chrome.storage.sync;
+	let cloudStorage = chrome.storage.sync;
 	// missing api in firefox
 	if(typeof chrome === 'undefined' || typeof chrome.storage === 'undefined' || typeof chrome.storage.sync === 'undefined') {
-		var store = typeof chrome === 'undefined' && typeof browser !== 'undefined' ? browser : chrome;
+		const store = typeof chrome === 'undefined' && typeof browser !== 'undefined' ? browser : chrome;
 		cloudStorage = typeof store !== 'undefined' ? store.storage.local : typeof storage !== 'undefined' ? storage.local : null;
 		if (typeof cloudStorage === 'undefined') {
 			throw 'No storage available';
@@ -42,15 +42,15 @@ var extensionStorage = (function() {
 		@see {@link https://developer.chrome.com/apps/storage#type-StorageArea|StorageArea.set}
 	*/
 	function saveGroups(string, callback) {
-		var data = {};
+		const data = {};
 		data[REVIEWERS_KEY] = string;
 		cloudStorage.set(data, callback);
 	}
 	function loadGroups(callback) {
 		cloudStorage.get(null, function(items) {
 			if (callback) {
-				var groups = items[REVIEWERS_KEY];
-				var urls = items[REVIEWERS_URL_KEY];
+				const groups = items[REVIEWERS_KEY];
+				const urls = items[REVIEWERS_URL_KEY];
 				if(!groups && (!urls || urls.length === 0)) {
 					$.get(chrome.extension.getURL('/js/default.json'), function(data) {
 						callback(data);
@@ -81,14 +81,14 @@ var extensionStorage = (function() {
 	}
 
 	function saveUrl(array, callback) {
-		var data = {};
+		const data = {};
 		data[REVIEWERS_URL_KEY] = JSON.stringify(array);
 		cloudStorage.set(data, callback);
 	}
 	function loadUrl(callback) {
 		cloudStorage.get(null, function(items) {
 			if (callback) {
-				var urls = JSON.parse(items[REVIEWERS_URL_KEY]);
+				const urls = JSON.parse(items[REVIEWERS_URL_KEY]);
 				if(!urls) {
 					return callback([]);
 				}
@@ -100,7 +100,7 @@ var extensionStorage = (function() {
 	function loadTemplate(callback) {
 		cloudStorage.get(null, function(items) {
 			if (callback) {
-				var template = items[TEMPLATE_KEY];
+				const template = items[TEMPLATE_KEY];
 				if (!template) {
 					$.get(chrome.extension.getURL('/js/template.txt'), function(data) {
 						callback(data.replace("\r", '').split("\n"));
@@ -112,7 +112,7 @@ var extensionStorage = (function() {
 		});
 	}
 	function saveTemplate(string, callback) {
-		var data = {};
+		const data = {};
 		data[TEMPLATE_KEY] = string.split('\n');
 		cloudStorage.set(data, callback);
 	}
@@ -125,7 +125,7 @@ var extensionStorage = (function() {
 		});
 	}
 	function saveHipChatUsername(string, callback) {
-		var data = {};
+		const data = {};
 		data[HIPCHAT_KEY] = string;
 		cloudStorage.set(data, callback);
 	}
@@ -138,7 +138,7 @@ var extensionStorage = (function() {
 		});
 	}
 	function saveBackgroundState(string, callback) {
-		var data = {};
+		const data = {};
 		data[BACKGROUNDSTATE_KEY] = string;
 		cloudStorage.set(data, callback);
 	}
@@ -152,7 +152,7 @@ var extensionStorage = (function() {
 		});
 	}
 	function saveNotificationState(string, callback) {
-		var data = {};
+		const data = {};
 		data[NOTIFSTATE_KEY] = string;
 		cloudStorage.set(data, callback);
 	}
@@ -165,7 +165,7 @@ var extensionStorage = (function() {
 		});
 	}
 	function saveNotificationType(string, callback) {
-		var data = {};
+		const data = {};
 		data[NOTIFTYPE_KEY] = string;
 		cloudStorage.set(data, callback);
 	}
@@ -178,7 +178,7 @@ var extensionStorage = (function() {
 		});
 	}
 	function saveRepoMap(string, callback) {
-		var data = {};
+		const data = {};
 		data[REPOMAP_KEY] = string;
 		cloudStorage.set(data, callback);
 	}
@@ -191,32 +191,32 @@ var extensionStorage = (function() {
 		});
 	}
 	function saveFeatures(string, callback) {
-		var data = {};
+		const data = {};
 		data[FEATURES_KEY] = string;
 		cloudStorage.set(data, callback);
 	}
 
 	return {
-		saveGroups: saveGroups,
-		loadGroups: loadGroups,
-		saveGroupsArray: saveGroupsArray,
-		loadGroupsArray: loadGroupsArray,
-		saveUrl: saveUrl,
-		loadUrl: loadUrl,
-		loadTemplate: loadTemplate,
-		saveTemplate: saveTemplate,
-		loadHipChatUsername: loadHipChatUsername,
-		saveHipChatUsername: saveHipChatUsername,
-		loadBackgroundState: loadBackgroundState,
-		saveBackgroundState: saveBackgroundState,
-		loadNotificationState: loadNotificationState,
-		saveNotificationState: saveNotificationState,
-		loadNotificationType: loadNotificationType,
-		saveNotificationType: saveNotificationType,
-		loadRepoMap: loadRepoMap,
-		saveRepoMap: saveRepoMap,
-		loadFeatures: loadFeatures,
-		saveFeatures: saveFeatures,
+		saveGroups,
+		loadGroups,
+		saveGroupsArray,
+		loadGroupsArray,
+		saveUrl,
+		loadUrl,
+		loadTemplate,
+		saveTemplate,
+		loadHipChatUsername,
+		saveHipChatUsername,
+		loadBackgroundState,
+		saveBackgroundState,
+		loadNotificationState,
+		saveNotificationState,
+		loadNotificationType,
+		saveNotificationType,
+		loadRepoMap,
+		saveRepoMap,
+		loadFeatures,
+		saveFeatures,
 		backgroundStates: {
 			enable:'1',
 			disable:'0'
@@ -229,6 +229,6 @@ var extensionStorage = (function() {
 			all:'1',
 			prAndMentioned:'0'
 		},
-		defaultFeatures: defaultFeatures
+		defaultFeatures
 	};
 })();
