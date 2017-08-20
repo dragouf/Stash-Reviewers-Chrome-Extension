@@ -1536,8 +1536,9 @@
 	});
 
 	define('bitbucket-plugin/pullrequest-list-modifier', [
-		'bitbucket/internal/feature/pull-request/pull-request-table'
-	], function(PullRequestsTable) {
+		'bitbucket/internal/feature/pull-request/pull-request-table',
+		'jquery'
+	], function(PullRequestsTable, jQuery) {
 		'use strict';
 		function redefinePullRequestTable() {
 			//redefined filter builder to include new parameters
@@ -1995,10 +1996,9 @@
 		}
 	});
 
+	define('bitbucket-plugin/init', [ 'jquery' ], extensionInit);
 
-	extensionInit();
-
-	function extensionInit() {
+	function extensionInit(jQuery) {
 		let pageState;
 		const loadRequirement = jQuery.Deferred();
 		const loadAuiFlag = jQuery.Deferred();

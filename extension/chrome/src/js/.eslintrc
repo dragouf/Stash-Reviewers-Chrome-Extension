@@ -8,8 +8,6 @@
     "globals": {
         "extensionStorage": false,
         "jsonGroups": true,
-        "jQuery": false,
-        "$": false,
         "storage": false
     },
     "rules": {
