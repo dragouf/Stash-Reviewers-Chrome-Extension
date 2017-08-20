@@ -130,8 +130,8 @@ function retrieveActivities() {
 		}
 
 		const params = "?start=0&limit=1000&avatarSize=64&withAttributes=true&state=OPEN&order=oldest&role=";
-		const urlPR = items.currentStashBaseUrl + "/rest/inbox/latest/pull-requests" + params;
-		const urlPRNew = items.currentStashBaseUrl + "/rest/api/latest/inbox/pull-requests" + params;
+		const urlPR = `${items.currentStashBaseUrl  }/rest/inbox/latest/pull-requests${  params}`;
+		const urlPRNew = `${items.currentStashBaseUrl  }/rest/api/latest/inbox/pull-requests${  params}`;
 
 		const buildUrlPR = function(url, role){
 			return url + role;
@@ -166,7 +166,7 @@ function retrieveActivities() {
 				let prLink = '';
 				if(pr.links && pr.links.self) {
 					prLink = pr.links.self[0].href.replace(items.currentStashBaseUrl, '');
-					prLink = items.currentStashBaseUrl + '/rest/api/1.0' + prLink + '/activities?avatarSize=64';
+					prLink = `${items.currentStashBaseUrl  }/rest/api/1.0${  prLink  }/activities?avatarSize=64`;
 				}
 
 				if(prLink) {
@@ -178,7 +178,7 @@ function retrieveActivities() {
 								return Object.assign(activity, { pullrequest: pr });
 							});
 						})
-						.catch(err => { console.error("Request to " + prLink + " failed", err)})
+						.catch(err => { console.error(`Request to ${  prLink  } failed`, err)})
 					)
 				}
 			});
@@ -230,7 +230,7 @@ function pingAllExistingTabs() {
 // Click on extension icon
 chrome.browserAction.onClicked.addListener(function() {
 	chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
-		chrome.tabs.create({'url': items.currentStashBaseUrl + '/'}, function() {});
+		chrome.tabs.create({'url': `${items.currentStashBaseUrl  }/`}, function() {});
 	});
 });
 
