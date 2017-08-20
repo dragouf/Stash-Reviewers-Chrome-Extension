@@ -148,17 +148,17 @@ function retrieveActivities() {
 		const rerunRequestAuthor = rerunRequest('author');
 
 		const reviewersPromised = fetch(buildUrlPR(urlPRNew, 'reviewer'))
-			.then(res => res.json())
-			.catch(rerunRequestReviewers);
-		
-		const authorPromised = fetch(buildUrlPR(urlPRNew, 'author'))
-			.then(res => res.json())
-			.catch(rerunRequestAuthor);
+			.catch(rerunRequestReviewers)
+			.then(res => res.json());
 
-		Promise.all([reviewersPromised, authorPromised]).then(function(results) {
-			if (results[0].errors) { throw results[0].errors }
-			if (results[1].errors) { throw results[1].errors }
-			const allPR = results[0].concat(results[1])
+		const authorPromised = fetch(buildUrlPR(urlPRNew, 'author'))
+			.catch(rerunRequestAuthor)
+			.then(res => res.json())
+
+		Promise.all([reviewersPromised, authorPromised]).then(function([reviewersResult, authorResult]) {
+			if (reviewersResult.errors) { throw reviewersResult.errors }
+			if (authorResult.errors) { throw authorResult.errors }
+			const allPR = reviewersResult.concat(authorResult)
 			let activities;
 			const requests = [];
 			// loop through PRs and request activities
@@ -178,11 +178,13 @@ function retrieveActivities() {
 								return Object.assign(activity, { pullrequest: pr });
 							});
 						})
+						// make sure that this promise is always resolved, for `Promise.all` later
 						.catch(err => { console.error(`Request to ${  prLink  } failed`, err)})
 					)
 				}
 			});
 
+			// All these requests are always resolved thanks to the `catch` above
 			Promise.all(requests).then(function(){
 				// send retrieved data to page script
 				items.tabList.forEach(function(tabId, index){
@@ -230,7 +232,7 @@ function pingAllExistingTabs() {
 // Click on extension icon
 chrome.browserAction.onClicked.addListener(function() {
 	chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
-		chrome.tabs.create({'url': `${items.currentStashBaseUrl  }/`}, function() {});
+		chrome.tabs.create({'url': `${items.currentStashBaseUrl}/`});
 	});
 });
 

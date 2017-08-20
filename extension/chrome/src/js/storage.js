@@ -50,7 +50,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 				})
 			})
 		},
-		get(keys) {
+		get(keys = null) {
 			return new Promise((resolve, reject) => {
 				cloudStorage.get(keys, (items) => {
 					const err = chrome.runtime.lastError
@@ -81,7 +81,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadGroups() {
-		return storagePromised.get(null).then(function(items) {
+		return storagePromised.get().then(function(items) {
 			if (!items) {
 				return loadDefaultGroups()
 			}
@@ -103,7 +103,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadGroupsArray() {
-		return storagePromised.get(null)
+		return storagePromised.get()
 			.then(function(items) {
 				if (!items) {
 					return [];
@@ -128,7 +128,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadUrl() {
-		return storagePromised.get(null)
+		return storagePromised.get()
 			.then(function(items) {
 				if (!items || !items[REVIEWERS_URL_KEY]) { return [] }
 				let urls
@@ -154,7 +154,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadTemplate() {
-		return storagePromised.get(null)
+		return storagePromised.get()
 			.then(function(items) {
 				if (!items) {
 					return loadDefaultTemplate()
@@ -174,7 +174,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadHipChatUsername() {
-		return storagePromised.get(null)
+		return storagePromised.get()
 			.then(function(items){
 				return items && items[HIPCHAT_KEY];
 			})
@@ -187,7 +187,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadBackgroundState() {
-		return storagePromised.get(null)
+		return storagePromised.get()
 			.then(items => items && items[BACKGROUNDSTATE_KEY]);
 	}
 
@@ -198,7 +198,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadNotificationState() {
-		return storagePromised.get(null)
+		return storagePromised.get()
 			.then(function(items){
 				return (items && items[NOTIFSTATE_KEY]);
 			});
@@ -211,7 +211,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadNotificationType() {
-		return storagePromised.get(null)
+		return storagePromised.get()
 			.then(function(items){
 				return (items && items[NOTIFTYPE_KEY]);
 			});
@@ -223,7 +223,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadRepoMap() {
-		return storagePromised.get(null)
+		return storagePromised.get()
 			.then(function(items){
 				return (items && items[REPOMAP_KEY]);
 			});
@@ -236,7 +236,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	}
 
 	function loadFeatures() {
-		return storagePromised.get(null)
+		return storagePromised.get()
 			.then(function(items){
 				return (items && items[FEATURES_KEY] || defaultFeatures);
 			});
