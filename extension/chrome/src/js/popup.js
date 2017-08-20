@@ -1,3 +1,5 @@
+/* globals Popover */
+
 document.addEventListener("DOMContentLoaded", function() {
 	const $ = document.querySelector.bind(document)
 	const $$ = document.querySelectorAll.bind(document)
@@ -382,13 +384,12 @@ document.addEventListener("DOMContentLoaded", function() {
 			content = 'All: all user comments are display as notification. Mentioned/PR: A notification is displayed only when someone mention you in is comment OR someone replay to one of your comment OR someone add a comment to your PR.' ;
 			break;
 		}
-		el.popover({
-			html: true,
-			container: 'body',
-			trigger: 'hover click',
-			title: el.innerHTML,
-			content,
-			viewport: "#bitbucket-extension-options"
+		el.setAttribute("data-content", content)
+		el.setAttribute("data-title", el.innerHTML)
+		new Popover(el, {
+			container: "body",
+			trigger: 'hover',
+			placement: "right"
 		});
 	});
 });
