@@ -1,0 +1,21 @@
+{
+    "extends": "eslint:recommended",
+    "env": {
+        "browser": true,
+        "es6": true,
+        "webextensions": true
+    },
+    "globals": {
+        "extensionStorage": false,
+        "jsonGroups": true,
+        "storage": false
+    },
+    "rules": {
+        "indent": ["warn", "tab"],
+        "no-var": "warn",
+        "object-shorthand": "warn",
+        "prefer-const": "warn",
+        "no-console": "off",
+        "prefer-template": "warn"
+    }
+}

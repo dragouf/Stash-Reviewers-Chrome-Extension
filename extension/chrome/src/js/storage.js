@@ -1,4 +1,4 @@
-var extensionStorage = (function() {
+const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	const REVIEWERS_KEY = 'stashplugin.groups_reviewers';
@@ -12,7 +12,7 @@ var extensionStorage = (function() {
 	const REPOMAP_KEY = 'stashplugin.repomap';
 	const FEATURES_KEY = 'stashplugin.features';
 
-	var defaultFeatures = {
+	const defaultFeatures = {
 		reviewersgroup: true,
 		prfilters: true,
 		notifIcon: true,
@@ -27,196 +27,247 @@ var extensionStorage = (function() {
 		checkversion: true
 	};
 
-	var cloudStorage = chrome.storage.sync;
+	let cloudStorage = chrome.storage.sync;
 	// missing api in firefox
 	if(typeof chrome === 'undefined' || typeof chrome.storage === 'undefined' || typeof chrome.storage.sync === 'undefined') {
-		var store = typeof chrome === 'undefined' && typeof browser !== 'undefined' ? browser : chrome;
+		const store = typeof chrome === 'undefined' && typeof browser !== 'undefined' ? browser : chrome;
 		cloudStorage = typeof store !== 'undefined' ? store.storage.local : typeof storage !== 'undefined' ? storage.local : null;
 		if (typeof cloudStorage === 'undefined') {
 			throw 'No storage available';
 		}
 	}
+
+	const storagePromised = {
+		set(items) {
+			return new Promise((resolve, reject) => {
+				cloudStorage.set(items, () => {
+					const err = chrome.runtime.lastError
+					if (err) {
+						reject(err)
+					} else {
+						resolve(items)
+					}
+				})
+			})
+		},
+		get(keys = null) {
+			return new Promise((resolve, reject) => {
+				cloudStorage.get(keys, (items) => {
+					const err = chrome.runtime.lastError
+					if (err) {
+						reject(err)
+					} else {
+						resolve(items)
+					}
+				})
+			})
+		}
+	}
+	
 	/**
 		@method
 		@memberof storage
 		@see {@link https://developer.chrome.com/apps/storage#type-StorageArea|StorageArea.set}
 	*/
-	function saveGroups(string, callback) {
-		var data = {};
+	function saveGroups(string) {
+		const data = {};
 		data[REVIEWERS_KEY] = string;
-		cloudStorage.set(data, callback);
-	}
-	function loadGroups(callback) {
-		cloudStorage.get(null, function(items) {
-			if (callback) {
-				var groups = items[REVIEWERS_KEY];
-				var urls = items[REVIEWERS_URL_KEY];
-				if(!groups && (!urls || urls.length === 0)) {
-					$.get(chrome.extension.getURL('/js/default.json'), function(data) {
-						callback(data);
-					});
-				}
-				else {
-					callback(groups);
-				}
-			}
-		});
+		return storagePromised.set(data);
 	}
 
-	function saveGroupsArray(array, callback) {
+	function loadDefaultGroups() {
+		return fetch(chrome.extension.getURL('/js/default.json'))
+			.then(res => res.text())
+	}
+
+	function loadGroups() {
+		return storagePromised.get().then(function(items) {
+			if (!items) {
+				return loadDefaultGroups()
+			}
+			const groups = items[REVIEWERS_KEY];
+			const urls = items[REVIEWERS_URL_KEY];
+			if(!groups && (!urls || urls.length === 0)) {
+				return loadDefaultGroups()
+			}
+			else {
+				return groups;
+			}
+		})
+	}
+
+	function saveGroupsArray(array) {
 		const data = {};
 		data[REVIEWERS_ARRAY_KEY] = JSON.stringify(array);
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
-	function loadGroupsArray(callback) {
-		cloudStorage.get(null, function(items) {
-			if (callback) {
+
+	function loadGroupsArray() {
+		return storagePromised.get()
+			.then(function(items) {
+				if (!items) {
+					return [];
+				}
 				const groups = items[REVIEWERS_ARRAY_KEY];
 				if (!groups) {
-					return callback([]);
+					return [];
 				}
-				callback(JSON.parse(groups));
-			}
-		});
+				try {
+					return JSON.parse(groups);
+				} catch (ex) {
+					console.error("loadGroupsArray JSON parse failed", ex)
+					return []
+				}
+			})
 	}
 
-	function saveUrl(array, callback) {
-		var data = {};
+	function saveUrl(array) {
+		const data = {};
 		data[REVIEWERS_URL_KEY] = JSON.stringify(array);
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
-	function loadUrl(callback) {
-		cloudStorage.get(null, function(items) {
-			if (callback) {
-				var urls = JSON.parse(items[REVIEWERS_URL_KEY]);
+
+	function loadUrl() {
+		return storagePromised.get()
+			.then(function(items) {
+				if (!items || !items[REVIEWERS_URL_KEY]) { return [] }
+				let urls
+				try {
+					urls = JSON.parse(items[REVIEWERS_URL_KEY]);
+				} catch (ex) {
+					console.error("loadUrl JSON parse failed", ex)
+					return []
+				}
 				if(!urls) {
-					return callback([]);
+					return [];
 				}
-				callback(urls);
-			}
-		});
+				return urls;
+			});
 	}
 
-	function loadTemplate(callback) {
-		cloudStorage.get(null, function(items) {
-			if (callback) {
-				var template = items[TEMPLATE_KEY];
+	function loadDefaultTemplate() {
+		return fetch(chrome.extension.getURL('/js/template.txt'))
+			.then(res => res.text())
+			.then(function(data) {
+				return data.replace("\r", '').split("\n");
+			})
+	}
+
+	function loadTemplate() {
+		return storagePromised.get()
+			.then(function(items) {
+				if (!items) {
+					return loadDefaultTemplate()
+				}
+				const template = items[TEMPLATE_KEY];
 				if (!template) {
-					$.get(chrome.extension.getURL('/js/template.txt'), function(data) {
-						callback(data.replace("\r", '').split("\n"));
-					});
+					return loadDefaultTemplate()
 				} else {
-					callback(template);
+					return template;
 				}
-			}
-		});
+			});
 	}
-	function saveTemplate(string, callback) {
-		var data = {};
+	function saveTemplate(string) {
+		const data = {};
 		data[TEMPLATE_KEY] = string.split('\n');
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadHipChatUsername(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[HIPCHAT_KEY]);
-			}
-		});
+	function loadHipChatUsername() {
+		return storagePromised.get()
+			.then(function(items){
+				return items && items[HIPCHAT_KEY];
+			})
 	}
-	function saveHipChatUsername(string, callback) {
-		var data = {};
+
+	function saveHipChatUsername(string) {
+		const data = {};
 		data[HIPCHAT_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadBackgroundState(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[BACKGROUNDSTATE_KEY]);
-			}
-		});
+	function loadBackgroundState() {
+		return storagePromised.get()
+			.then(items => items && items[BACKGROUNDSTATE_KEY]);
 	}
-	function saveBackgroundState(string, callback) {
-		var data = {};
+
+	function saveBackgroundState(string) {
+		const data = {};
 		data[BACKGROUNDSTATE_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-
-	function loadNotificationState(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[NOTIFSTATE_KEY]);
-			}
-		});
+	function loadNotificationState() {
+		return storagePromised.get()
+			.then(function(items){
+				return (items && items[NOTIFSTATE_KEY]);
+			});
 	}
-	function saveNotificationState(string, callback) {
-		var data = {};
+
+	function saveNotificationState(string) {
+		const data = {};
 		data[NOTIFSTATE_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadNotificationType(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[NOTIFTYPE_KEY]);
-			}
-		});
+	function loadNotificationType() {
+		return storagePromised.get()
+			.then(function(items){
+				return (items && items[NOTIFTYPE_KEY]);
+			});
 	}
-	function saveNotificationType(string, callback) {
-		var data = {};
+	function saveNotificationType(string) {
+		const data = {};
 		data[NOTIFTYPE_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadRepoMap(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[REPOMAP_KEY]);
-			}
-		});
+	function loadRepoMap() {
+		return storagePromised.get()
+			.then(function(items){
+				return (items && items[REPOMAP_KEY]);
+			});
 	}
-	function saveRepoMap(string, callback) {
-		var data = {};
+
+	function saveRepoMap(string) {
+		const data = {};
 		data[REPOMAP_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
-	function loadFeatures(callback) {
-		cloudStorage.get(null, function(items){
-			if (callback) {
-				callback(items[FEATURES_KEY] || defaultFeatures);
-			}
-		});
+	function loadFeatures() {
+		return storagePromised.get()
+			.then(function(items){
+				return (items && items[FEATURES_KEY] || defaultFeatures);
+			});
 	}
-	function saveFeatures(string, callback) {
-		var data = {};
+	function saveFeatures(string) {
+		const data = {};
 		data[FEATURES_KEY] = string;
-		cloudStorage.set(data, callback);
+		return storagePromised.set(data);
 	}
 
 	return {
-		saveGroups: saveGroups,
-		loadGroups: loadGroups,
-		saveGroupsArray: saveGroupsArray,
-		loadGroupsArray: loadGroupsArray,
-		saveUrl: saveUrl,
-		loadUrl: loadUrl,
-		loadTemplate: loadTemplate,
-		saveTemplate: saveTemplate,
-		loadHipChatUsername: loadHipChatUsername,
-		saveHipChatUsername: saveHipChatUsername,
-		loadBackgroundState: loadBackgroundState,
-		saveBackgroundState: saveBackgroundState,
-		loadNotificationState: loadNotificationState,
-		saveNotificationState: saveNotificationState,
-		loadNotificationType: loadNotificationType,
-		saveNotificationType: saveNotificationType,
-		loadRepoMap: loadRepoMap,
-		saveRepoMap: saveRepoMap,
-		loadFeatures: loadFeatures,
-		saveFeatures: saveFeatures,
+		saveGroups,
+		loadGroups,
+		saveGroupsArray,
+		loadGroupsArray,
+		saveUrl,
+		loadUrl,
+		loadTemplate,
+		saveTemplate,
+		loadHipChatUsername,
+		saveHipChatUsername,
+		loadBackgroundState,
+		saveBackgroundState,
+		loadNotificationState,
+		saveNotificationState,
+		loadNotificationType,
+		saveNotificationType,
+		loadRepoMap,
+		saveRepoMap,
+		loadFeatures,
+		saveFeatures,
 		backgroundStates: {
 			enable:'1',
 			disable:'0'
@@ -229,6 +280,6 @@ var extensionStorage = (function() {
 			all:'1',
 			prAndMentioned:'0'
 		},
-		defaultFeatures: defaultFeatures
+		defaultFeatures
 	};
 })();

@@ -1,14 +1,17 @@
+/* eslint-env amd */
+/* globals bitbucket, aui, WRM, AJS, template */
+
 (function() {
 	// bitbucket page must have require function
 	if(typeof window.define === 'undefined' || typeof window.require === 'undefined' || typeof window.bitbucket === 'undefined')
 		return;
 
 	// workaround to fix missing firefox onMessageExternal
-	if(true || typeof window.chrome === 'undefined') {
+	if(typeof window.chrome === 'undefined') {
 		window.communication = {
 			runtime : {
-				sendMessage: function(extId, msg, callback) {
-					var randEventId = Math.floor((Math.random() * 1000) + 1);
+				sendMessage(extId, msg, callback) {
+					const randEventId = Math.floor((Math.random() * 1000) + 1);
 					msg.eventId = randEventId;
 					msg.extId = extId;
 					window.postMessage(msg, '*');
@@ -31,7 +34,7 @@
 
 	define('bitbucket-plugin/url', function(){
 		function getSiteBaseURl() {
-			return location.protocol + '//' + location.host;
+			return `${location.protocol}//${location.host}`;
 		}
 
 		function buildSlug(pageState) {
@@ -42,8 +45,8 @@
 		}
 
 		return {
-			getSiteBaseURl: getSiteBaseURl,
-			buildSlug: buildSlug
+			getSiteBaseURl,
+			buildSlug
 		}
 	});
 
@@ -66,35 +69,35 @@
 	) {
 		'use strict';
 		function addCheckoutLink(branchId) {
-			var project = pageState.getProject();
-			var repository = pageState.getRepository();
-			var ref = pageState.getRef();
+			const project = pageState.getProject();
+			const repository = pageState.getRepository();
+			const ref = pageState.getRef();
 
 			if(!project) {
 				console.info('no project for checkout dropdown');
 				return;
 			}
 
-			var cloneUrl;
-			var repoName = repository.name;
-			var branchOrigin = branchId || ref.displayId;
-			var remoteName = project.owner ? project.owner.slug : project.name;
+			let cloneUrl;
+			const repoName = repository.name;
+			const branchOrigin = branchId || ref.displayId;
+			let remoteName = project.owner ? project.owner.slug : project.name;
 
 			// remove previous
 			jQuery('.checkoutCommand_link').unbind('click');
 			jQuery('#checkoutLink').remove();
 
 			if(!repository.links.clone) {
-				var $link =jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger">',
-								'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
-								'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
-								'</a>',
-								'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
-								'	<ul class="aui-list-truncate">',
-								'		<li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
-								'	</ul>',
-								'</div>'].join('\n'));
-				jQuery('#branch-actions').parent().parent().append($link);
+				const $noCloneLink = jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger">',
+					'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
+					'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
+					'</a>',
+					'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
+					'	<ul class="aui-list-truncate">',
+					'		<li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
+					'	</ul>',
+					'</div>'].join('\n'));
+				jQuery('#branch-actions').parent().parent().append($noCloneLink);
 				return;
 			}
 
@@ -108,19 +111,19 @@
 				cloneUrl = repository.links.clone[0].href;
 			}
 
-			var $link =jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger">',
-								'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
-								'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
-								'</a>',
-								'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
-								'	<ul class="aui-list-truncate">',
-								'		<li data-action="clone"><a href="javascript:void(0)" class="checkoutCommand_link" id="cloneCommand">Clone</a></li>',
-								'		<li data-action="newremote"><a href="javascript:void(0)" class="checkoutCommand_link" id="remoteCommand">Add remote</a></li>',
-								'		<li data-action="newremotenewbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Add remote/Create branch</a></li>',
-								'		<li data-action="newbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Create branch</a></li>',
-								'		<li data-action="checkout"><a href="javascript:void(0)" class="checkoutCommand_link">Checkout existing</a></li>',
-								'	</ul>',
-								'</div>'].join('\n'));
+			const $cloneLink =jQuery(['<a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger">',
+				'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
+				'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
+				'</a>',
+				'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
+				'	<ul class="aui-list-truncate">',
+				'		<li data-action="clone"><a href="javascript:void(0)" class="checkoutCommand_link" id="cloneCommand">Clone</a></li>',
+				'		<li data-action="newremote"><a href="javascript:void(0)" class="checkoutCommand_link" id="remoteCommand">Add remote</a></li>',
+				'		<li data-action="newremotenewbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Add remote/Create branch</a></li>',
+				'		<li data-action="newbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Create branch</a></li>',
+				'		<li data-action="checkout"><a href="javascript:void(0)" class="checkoutCommand_link">Checkout existing</a></li>',
+				'	</ul>',
+				'</div>'].join('\n'));
 
 			// git remote naming
 			(window.repoMapArray || []).forEach(function(map){
@@ -130,33 +133,33 @@
 			});
 
 			// git commands
-			var cloneCommand = 'git clone ' +cloneUrl + ' ' + repoName + '_' + remoteName;
-			var addOriginCommand = 'git remote add ' +remoteName + ' ' + cloneUrl;
-			var fetchCommand = 'git fetch ' + remoteName;
-			var checkoutNewCommand = 'git checkout --track ' + remoteName + '/' + branchOrigin;
-			var checkoutCommand = 'git checkout ' + branchOrigin;
+			const cloneCommand = `git clone ${ cloneUrl  } ${  repoName  }_${  remoteName}`;
+			const addOriginCommand = `git remote add ${ remoteName  } ${  cloneUrl}`;
+			const fetchCommand = `git fetch ${  remoteName}`;
+			const checkoutNewCommand = `git checkout --track ${  remoteName  }/${  branchOrigin}`;
+			const checkoutCommand = `git checkout ${  branchOrigin}`;
 
-			var command = '';
-			var ddlClicked = false;
+			let command = '';
+			let ddlClicked = false;
 
-			var $wrapperdiv = jQuery('<div></div>', { id: 'checkoutLink', style: 'float: left' });
-			$wrapperdiv.append($link);
+			const $wrapperdiv = jQuery('<div></div>', { id: 'checkoutLink', style: 'float: left' });
+			$wrapperdiv.append($cloneLink);
 			jQuery('#branch-actions').parent().parent().append($wrapperdiv);
 			jQuery('.checkoutCommand_link').click(function(e){
 				ddlClicked = true;
-				var action = jQuery(e.target).data('action') || jQuery(e.target).parent().data('action');
+				const action = jQuery(e.target).data('action') || jQuery(e.target).parent().data('action');
 				switch(action) {
-					case 'clone': command = cloneCommand; document.execCommand('copy'); break;
-					case 'newremote': command = addOriginCommand + '; ' + fetchCommand + ';'; document.execCommand('copy'); break;
-					case 'newremotenewbranch': command = addOriginCommand + '; ' + fetchCommand + '; ' + checkoutNewCommand; document.execCommand('copy'); break;
-					case 'newbranch': command = fetchCommand + '; ' + checkoutNewCommand; document.execCommand('copy'); break;
-					case 'checkout': command = fetchCommand + '; ' + checkoutCommand; document.execCommand('copy'); break;
-					default: break;
+				case 'clone': command = cloneCommand; document.execCommand('copy'); break;
+				case 'newremote': command = `${addOriginCommand  }; ${  fetchCommand  };`; document.execCommand('copy'); break;
+				case 'newremotenewbranch': command = `${addOriginCommand  }; ${  fetchCommand  }; ${  checkoutNewCommand}`; document.execCommand('copy'); break;
+				case 'newbranch': command = `${fetchCommand  }; ${  checkoutNewCommand}`; document.execCommand('copy'); break;
+				case 'checkout': command = `${fetchCommand  }; ${  checkoutCommand}`; document.execCommand('copy'); break;
+				default: break;
 				}
 			});
 
-			jQuery('#cloneCommand').append(' (<span style="font-size:xx-small">'+repoName + '_' + remoteName+'</span>)');
-			jQuery('#remoteCommand').append(' (<span style="font-size:xx-small">'+remoteName+'</span>)');
+			jQuery('#cloneCommand').append(` (<span style="font-size:xx-small">${repoName  }_${  remoteName}</span>)`);
+			jQuery('#remoteCommand').append(` (<span style="font-size:xx-small">${remoteName}</span>)`);
 
 
 			jQuery(document).on('copy', function (e) {
@@ -186,16 +189,16 @@
 		}
 		//////////////////////////////////////////////////// Display PRs status on branch page
 		function loadPRStickers(branchRefId) {
-			var project = pageState.getProject();
-			var repository = pageState.getRepository();
-			var ref = pageState.getRef();
-			var branchId = branchRefId || ref.id;
+			const project = pageState.getProject();
+			const repository = pageState.getRepository();
+			const ref = pageState.getRef();
+			const branchId = branchRefId || ref.id;
 			if(!project || !project.links) {
 				console.info('no project link');
 				return;
 			}
-			var projectUrl = urlUtil.buildSlug(project);
-			var repoUrl = "repos/" + repository.slug;
+			const projectUrl = urlUtil.buildSlug(project);
+			const repoUrl = `repos/${  repository.slug}`;
 
 			if(!ref || !ref.repository || !ref.repository.origin) {
 				console.info('no repository origin');
@@ -203,91 +206,91 @@
 			}
 
 			// get project origin from ref and get PR with branch name
-			var projectOriginUrl = urlUtil.buildSlug(ref.repository.origin).replace('/browse', '');
-			projectOriginUrl = projectUrl + '/' + repoUrl;
+			let projectOriginUrl = urlUtil.buildSlug(ref.repository.origin).replace('/browse', '');
+			projectOriginUrl = `${projectUrl  }/${  repoUrl}`;
 
-			var getPRs = function(from, size, projectOriginUrl, fqBranchName) {
-			var prApiUrl = '/rest/api/1.0' + projectOriginUrl + '/pull-requests?direction=OUTGOING&at=' + fqBranchName + '&state=ALL&start=' + from + '&limit=' + size;
-			return jQuery.get(prApiUrl);
+			const getPRs = function(from, size, projectOriginUrl, fqBranchName) {
+				const prApiUrl = `/rest/api/1.0${  projectOriginUrl  }/pull-requests?direction=OUTGOING&at=${  fqBranchName  }&state=ALL&start=${  from  }&limit=${  size}`;
+				return jQuery.get(prApiUrl);
 			};
 
-			var searchPrs = function(from, size, projectOriginUrl, fqBranchName) {
-			var deferred = jQuery.Deferred();
-			var prList = [];
-			getPRs(from, size, projectOriginUrl, fqBranchName).done(function(pullRequests){
-				prList = pullRequests.values;
+			const searchPrs = function(from, size, projectOriginUrl, fqBranchName) {
+				const deferred = jQuery.Deferred();
+				let prList = [];
+				getPRs(from, size, projectOriginUrl, fqBranchName).done(function(pullRequests){
+					prList = pullRequests.values;
 
-				if(!pullRequests.isLastPage) {
-					searchPrs(from + size, size, projectOriginUrl, fqBranchName).done(function(list){
-					if (list.length > 0) {
-						jQuery.merge(prList, list);
+					if(!pullRequests.isLastPage) {
+						searchPrs(from + size, size, projectOriginUrl, fqBranchName).done(function(list){
+							if (list.length > 0) {
+								jQuery.merge(prList, list);
+							}
+
+							deferred.resolve(prList);
+						});
+					}
+					else {
+						deferred.resolve(prList);
 					}
 
-					deferred.resolve(prList);
-					});
-				}
-				else {
-					deferred.resolve(prList);
-				}
+				});
 
-			});
-
-			return 	deferred.promise();
+				return 	deferred.promise();
 			};
 
 			searchPrs(0, 20, projectOriginUrl, branchId).done(function(prs) {
-			var mergedClass = 'aui-lozenge-success';
-			var openClass = 'aui-lozenge-complete';
-			var declinedClass = 'aui-lozenge-error';
+				const mergedClass = 'aui-lozenge-success';
+				const openClass = 'aui-lozenge-complete';
+				const declinedClass = 'aui-lozenge-error';
 
-			var $wrapper = jQuery('<div id="pr-status-wrapper" style="display: inline-block"></div>');
-			jQuery('#pr-status-wrapper').remove();
-			jQuery('.aui-toolbar2-secondary').prepend($wrapper);
+				const $wrapper = jQuery('<div id="pr-status-wrapper" style="display: inline-block"></div>');
+				jQuery('#pr-status-wrapper').remove();
+				jQuery('.aui-toolbar2-secondary').prepend($wrapper);
 
-			prs.forEach(function(pr){
-				var commentsCount = (pr.properties && pr.properties.commentCount) ? pr.properties.commentCount : 0;
-				var resolvedTaskCount = (pr.properties && pr.properties.resolvedTaskCount) ? pr.properties.resolvedTaskCount : 0;
-				var openTaskCount = (pr.properties && pr.properties.openTaskCount) ? parseInt(pr.properties.openTaskCount) + parseInt(resolvedTaskCount) : 0;
-				var dest = pr.toRef ? pr.toRef.displayId : '';
+				prs.forEach(function(pr){
+					const commentsCount = (pr.properties && pr.properties.commentCount) ? pr.properties.commentCount : 0;
+					const resolvedTaskCount = (pr.properties && pr.properties.resolvedTaskCount) ? pr.properties.resolvedTaskCount : 0;
+					const openTaskCount = (pr.properties && pr.properties.openTaskCount) ? parseInt(pr.properties.openTaskCount) + parseInt(resolvedTaskCount) : 0;
+					const dest = pr.toRef ? pr.toRef.displayId : '';
 
-				var title = 'branch: ' + dest + ' | comments: ' + commentsCount + ' | tasks: ' + resolvedTaskCount + ' / ' + openTaskCount + ' | PR: ' + pr.title;
-				var $a = jQuery('<a>',{
-					text: pr.state,
-					title: title,
-					href: urlUtil.buildSlug(pr),
-					class: 'aui-lozenge declined aui-lozenge-subtle pull-request-list-trigger pull-request-state-lozenge'
+					const title = `branch: ${  dest  } | comments: ${  commentsCount  } | tasks: ${  resolvedTaskCount  } / ${  openTaskCount  } | PR: ${  pr.title}`;
+					const $a = jQuery('<a>',{
+						text: pr.state,
+						title,
+						href: urlUtil.buildSlug(pr),
+						class: 'aui-lozenge declined aui-lozenge-subtle pull-request-list-trigger pull-request-state-lozenge'
+					});
+					if(pr.state === 'OPEN'){
+						$a.addClass(openClass);
+					}
+					else if(pr.state === 'MERGED'){
+						$a.addClass(mergedClass);
+					}
+					else if(pr.state === 'DECLINED'){
+						$a.addClass(declinedClass);
+					}
+
+					$a.css('margin-left', '6px');
+
+					$wrapper.append($a);
+
+					jQuery("#pr-status-wrapper").find('a').tooltip();
 				});
-				if(pr.state === 'OPEN'){
-					$a.addClass(openClass);
-				}
-				else if(pr.state === 'MERGED'){
-					$a.addClass(mergedClass);
-				}
-				else if(pr.state === 'DECLINED'){
-					$a.addClass(declinedClass);
-				}
-
-				$a.css('margin-left', '6px');
-
-				$wrapper.append($a);
-
-				jQuery("#pr-status-wrapper").find('a').tooltip();
 			});
-		});
 		}
 
-		function addForkOriginLink(branchRefId) {
-			var repository = pageState.getRepository();
+		function addForkOriginLink() {
+			const repository = pageState.getRepository();
 			if(repository && repository.origin && repository.origin.links) {
-				var $link = jQuery('<a style="font-size: small;margin-left:10px;">forked from '+repository.origin.project.key+ '/' +repository.origin.name+'</a>').attr('href', urlUtil.buildSlug(repository.origin));
+				const $link = jQuery(`<a style="font-size: small;margin-left:10px;">forked from ${repository.origin.project.key }/${ repository.origin.name}</a>`).attr('href', urlUtil.buildSlug(repository.origin));
 				jQuery('h2.page-panel-content-header').append($link);
 			}
 		}
 
 		return {
-			loadPRStickers: loadPRStickers,
-			addForkOriginLink: addForkOriginLink,
-			addCheckoutLink: addCheckoutLink
+			loadPRStickers,
+			addForkOriginLink,
+			addCheckoutLink
 		}
 	});
 
@@ -307,16 +310,16 @@
 		pageState
 	) {
 		'use strict';
-		var listId = "ul_reviewers_list";
-		var reviewersDataKey = "reviewers";
-		var buttonIconId = "img_group_icon";
+		const listId = "ul_reviewers_list";
+		const reviewersDataKey = "reviewers";
+		const buttonIconId = "img_group_icon";
 
 		function getGroupIcon(){
-			return '<img id="'+buttonIconId+'" style="width:16px; height:16px;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAABiElEQVRIS72V/zEEQRCFv4sAESADIkAEZIAMXASIABEgAyJABC4DRIAIqE/NXu3Oza/aOtf/bO1uT7/u1697JqzAJivAoAZyBBwCWyGZGXAJfIX3HWAN+ADecwmXQO6A48RBg/nvBhB0M/g8hAT8NrAcyAlwW6Gyq+gq8tsN4PPPOZBnYK8CYkUG/Iz8HgFproLIuVzXzCR/IqcXYL8FJD5Y6ulokBa6VJQZv0UZKIizlkpUitItmdxfA0//2RP7tp1o/D2gOquNb6HLBkvLay/ed6BwMCs5CTvJ/cMp2pSvIP2BXajCg6WJL/XFflwkEtnorZwqXTqUqjkIvMdrJ5l0bUHm5iU1hCbmTpvG1YwFkRbpzK0eweyPAsr2xNXughysh173PXwa3m2+kk2tIedoGleiszzngscqE8ysFYLP1ADPQWyymfscY86Flbl9z6MAMyuRGmdifUz03hk3gLOjtLub9O+3ILkbcAzmwl3SgbTeHS2gxlJ5A7MSy1umLcSrzclSwH8BMXpPGYwvvtgAAAAASUVORK5CYII="/>';
+			return `<img id="${buttonIconId}" style="width:16px; height:16px;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAABiElEQVRIS72V/zEEQRCFv4sAESADIkAEZIAMXASIABEgAyJABC4DRIAIqE/NXu3Oza/aOtf/bO1uT7/u1697JqzAJivAoAZyBBwCWyGZGXAJfIX3HWAN+ADecwmXQO6A48RBg/nvBhB0M/g8hAT8NrAcyAlwW6Gyq+gq8tsN4PPPOZBnYK8CYkUG/Iz8HgFproLIuVzXzCR/IqcXYL8FJD5Y6ulokBa6VJQZv0UZKIizlkpUitItmdxfA0//2RP7tp1o/D2gOquNb6HLBkvLay/ed6BwMCs5CTvJ/cMp2pSvIP2BXajCg6WJL/XFflwkEtnorZwqXTqUqjkIvMdrJ5l0bUHm5iU1hCbmTpvG1YwFkRbpzK0eweyPAsr2xNXughysh173PXwa3m2+kk2tIedoGleiszzngscqE8ysFYLP1ADPQWyymfscY86Flbl9z6MAMyuRGmdifUz03hk3gLOjtLub9O+3ILkbcAzmwl3SgbTeHS2gxlJ5A7MSy1umLcSrzclSwH8BMXpPGYwvvtgAAAAASUVORK5CYII="/>`;
 		}
 
 		function getGroupIconLoader(){
-			return '<img id="'+buttonIconId+'" src="data:image/gif;base64,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"/>';
+			return `<img id="${buttonIconId}" src="data:image/gif;base64,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"/>`;
 		}
 
 		/**
@@ -324,46 +327,46 @@
 		 * @param {integer} term name or email of the user to search.
 		 */
 		function searchUsersAsync(term) {
-			var deferred = jQuery.Deferred();
+			const deferred = jQuery.Deferred();
 
-			var searchParams = { avatarSize: 32, permission: "LICENSED_USER", start: 0, filter: term };
+			const searchParams = { avatarSize: 32, permission: "LICENSED_USER", start: 0, filter: term };
 
 			jQuery.get( "/rest/api/latest/users", searchParams)
-			.done(function( data ) {
-				if (data.values.length > 0)
-				{
-					var rawd = data.values[0];
-					var select2Data = {
+				.done(function( data ) {
+					if (data.values.length > 0)
+					{
+						const rawd = data.values[0];
+						const select2Data = {
 							id: rawd.name,
 							text: rawd.displayName || rawd.name,
 							item: rawd };
 
-					deferred.resolve(select2Data);
-				}
+						deferred.resolve(select2Data);
+					}
 
-				deferred.resolve(null);
-			})
-			.fail(function(){
+					deferred.resolve(null);
+				})
+				.fail(function(){
 				// use resolve instead of reject to avoid prematured end with $.when
-				deferred.resolve(null);
-			});
+					deferred.resolve(null);
+				});
 
 			return deferred.promise();
 		}
 
 		function attachDropdownClickEvent(dropdown) {
-			jQuery(dropdown).find('#' + listId).find('li').click(function() {
-				var $element = jQuery(this);
-				var reviewers = $element.data(reviewersDataKey);
-				var differedList = [];
-				var select2DataArray = [];
+			jQuery(dropdown).find(`#${  listId}`).find('li').click(function() {
+				const $element = jQuery(this);
+				const reviewers = $element.data(reviewersDataKey);
+				const differedList = [];
+				const select2DataArray = [];
 
 				// show loader
-				jQuery('#'+buttonIconId).replaceWith(getGroupIconLoader());
+				jQuery(`#${buttonIconId}`).replaceWith(getGroupIconLoader());
 
 				reviewers.forEach(function(reviewer){
 					// request user data from search api
-					var searchDeferred = searchUsersAsync(reviewer);
+					const searchDeferred = searchUsersAsync(reviewer);
 					// waiting list
 					differedList.push(searchDeferred);
 					// add to the array
@@ -376,19 +379,19 @@
 
 				jQuery.when.apply(jQuery, differedList).done(function() {
 					// redisplay icon and remove loader
-					jQuery('#'+buttonIconId).replaceWith(getGroupIcon());
+					jQuery(`#${buttonIconId}`).replaceWith(getGroupIcon());
 
-					var replacePrevious = jQuery('#replaceGroups').is(':checked') || false;
+					const replacePrevious = jQuery('#replaceGroups').is(':checked') || false;
 					//////////// update the user selector
 					// need this to reproduce the event triggered by select2 on a single selection. (change Event contain "added" or "removed" property set with an object and not an array)
 					// Without that the widget/searchable-multi-selector wrapper made by atlassian won't change his data internally corrrectly
 
 					// clean (for atlassian wrapper)
-					var allUsers = AJS.$('#reviewers').auiSelect2("data");
+					const allUsers = AJS.$('#reviewers').auiSelect2("data");
 					AJS.$('#reviewers').auiSelect2("data", null).trigger("change");
 					AJS.$('#reviewers').auiSelect2("val", null).trigger("change");
 					allUsers.forEach(function(item){
-						var e = new jQuery.Event("change");
+						const e = new jQuery.Event("change");
 						e.removed = item;
 						AJS.$('#reviewers').trigger(e);
 					});
@@ -399,7 +402,7 @@
 
 					// add (for atlassian wrapper)
 					select2DataArray.forEach(function(select2Data){
-						var e = new jQuery.Event("change");
+						const e = new jQuery.Event("change");
 						e.added = select2Data;
 						AJS.$('#reviewers').trigger(e);
 					});
@@ -411,40 +414,40 @@
 		}
 
 		function injectReviewersDropdown(jsonGroups) {
-			var $reviewersInput = jQuery('#s2id_reviewers');
+			const $reviewersInput = jQuery('#s2id_reviewers');
 			if ($reviewersInput.length == 0) {
 				return;
 			}
 
 			// empty dropdown for reviewers group
-			var checkedProperty = '';
+			let checkedProperty = '';
 			if((localStorage.getItem('replaceGroupsState') || false).toString().toBool()) {
 				checkedProperty = ' checked="checked"';
 			}
 
-			var dropdownHTML = ([
-			'<a href="#reviewers_list" aria-owns="reviewers_list" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger" style="margin-left: 10px; display: inline-block; top: -10px;">',
+			const dropdownHTML = ([
+				'<a href="#reviewers_list" aria-owns="reviewers_list" aria-haspopup="true" class="aui-button aui-style-default aui-dropdown2-trigger" style="margin-left: 10px; display: inline-block; top: -10px;">',
 				getGroupIcon(),
-			'</a>',
-			'<div id="reviewers_list" class="aui-style-default aui-dropdown2">',
-				'<ul class="aui-list-truncate" id="'+ listId +'">',
+				'</a>',
+				'<div id="reviewers_list" class="aui-style-default aui-dropdown2">',
+				`<ul class="aui-list-truncate" id="${ listId }">`,
 				'</ul>',
-			'</div>',
-			'<div class="checkbox" id="replaceGroupsDiv">',
-				'<input class="checkbox" type="checkbox" name="replaceGroups" id="replaceGroups"'+checkedProperty+'>',
+				'</div>',
+				'<div class="checkbox" id="replaceGroupsDiv">',
+				`<input class="checkbox" type="checkbox" name="replaceGroups" id="replaceGroups"${checkedProperty}>`,
 				'<label for="replaceGroups">Replace</label>',
-			'</div>'
+				'</div>'
 			]).join("\n");
 
 			// jquery instance
-			var $dropdown = jQuery(dropdownHTML);
+			const $dropdown = jQuery(dropdownHTML);
 
 			// add groups list
 			jsonGroups.groups.forEach(function(group) {
-				var linkText = group.groupName + ' (' + group.reviewers.length + ' reviewers)';
-				var $a = jQuery('<a href="Javascript:void(0)"></a>').text(linkText);
-				var $li = jQuery('<li></li>').append($a).data(reviewersDataKey, group.reviewers);
-				$dropdown.find('#' + listId).append($li);
+				const linkText = `${group.groupName  } (${  group.reviewers.length  } reviewers)`;
+				const $a = jQuery('<a href="Javascript:void(0)"></a>').text(linkText);
+				const $li = jQuery('<li></li>').append($a).data(reviewersDataKey, group.reviewers);
+				$dropdown.find(`#${  listId}`).append($li);
 			});
 
 
@@ -452,14 +455,14 @@
 			attachDropdownClickEvent($dropdown);
 
 			// save checkbox state on change
-			$dropdown.find('#replaceGroups').on('change', function(data) {
-				var state = jQuery(this).is(':checked') || false;
+			$dropdown.find('#replaceGroups').on('change', function() {
+				const state = jQuery(this).is(':checked') || false;
 				localStorage.setItem('replaceGroupsState', state);
 			});
 
 			// fix z-index bug
 			$dropdown.on({
-				"aui-dropdown2-show": function() {
+				"aui-dropdown2-show"() {
 					window.setTimeout(function(){
 						jQuery("#reviewers_list").css("z-index", "4000");
 					}, 50);
@@ -471,26 +474,26 @@
 		}
 
 		function injectTemplateButton(templateStr) {
-			var buttonHTML = '<button class="aui-button aui-button-subtle aui-button-compact" title="Injects standard PR template">Standard template</button>';
+			const buttonHTML = '<button class="aui-button aui-button-subtle aui-button-compact" title="Injects standard PR template">Standard template</button>';
 
 			// jquery instance
-			var $button = jQuery(buttonHTML);
+			const $button = jQuery(buttonHTML);
 
 			// click event
 			$button.click(function(e) {
 				e.preventDefault();
-				var template = templateStr.split(',').join("\n");
+				const template = templateStr.split(',').join("\n");
 				jQuery('#pull-request-description').val(template);
 			});
 
 			// append to the page
-			var markDownHelp = jQuery('.pull-request-details a.markup-preview-help');
+			const markDownHelp = jQuery('.pull-request-details a.markup-preview-help');
 			jQuery(markDownHelp[0]).before($button);
 		}
 
 		return {
-			injectTemplateButton: injectTemplateButton,
-			injectReviewersDropdown: injectReviewersDropdown
+			injectTemplateButton,
+			injectReviewersDropdown
 		};
 	});
 
@@ -514,110 +517,109 @@
 		'use strict';
 		//////////////////////////////////////////////////// Build with jenkins link
 		function addBuildLink() {
-			var pr = pageState.getPullRequest();
-			var user = pageState.getCurrentUser();
+			const pr = pageState.getPullRequest();
 
 			if (!pr) {
 				return;
 			}
 
 			//if(!jQuery('.build-status-summary').length) { }
-				var $startWrapper = jQuery('<div class="plugin-item build-status-summary"></div>');
-				var $startLink = jQuery('<a href="#"><span class="aui-icon aui-icon-small aui-iconfont-devtools-side-diff" title="Builds">Build status</span><span class="label">Start build test</span></a>');
-				$startLink.click(function(){
-					var urlBase = 'http://<yourjenkinsurl>';
-					var url = urlBase + '/job/[your_job_name]/';
-					$startLink.find('span.label').text('Starting...');
+			const $startWrapper = jQuery('<div class="plugin-item build-status-summary"></div>');
+			const $startLink = jQuery('<a href="#"><span class="aui-icon aui-icon-small aui-iconfont-devtools-side-diff" title="Builds">Build status</span><span class="label">Start build test</span></a>');
+			$startLink.click(function(){
+				const urlBase = 'http://<yourjenkinsurl>';
+				const url = `${urlBase  }/job/[your_job_name]/`;
+				$startLink.find('span.label').text('Starting...');
 
-					var userName = (window.hipchatUsername || '').replace('@', '');
-					if (typeof window.chromeExtId !== 'undefined' && typeof window.chrome !== 'undefined')  {
-						window.communication.runtime.sendMessage(window.chromeExtId, {
-							method: 'POST',
-							action: 'xhttp',
-							url: url + 'buildWithParameters',
-							data: 'PULLREQUEST_ID=' + pr.id + '&HIPCHAT_USER=' + userName
-						}, function(data) {
-							$startLink.find('span.label').text('Start build test');
-							if(data.status == 201) {
-								auiFlag({
-									type: 'info',
-									title: 'Jenkins Build Started!',
-									body: '<br><a href="' + url + '" target="_blank">Go to Jenkins</a>', // shourld be data.redirect
-									close: 'auto'
-								});
-								$startLink.unbind('click');
-								$startLink.attr('href', url).attr('target', '_blank'); // should be data.redirect
-								$startLink.find('span.label').text('See started job on jenkins!');
-							}
-							else if(data.status == 403) {
-								auiFlag({
-									type: 'error',
-									title: 'You are not login to jenkins!',
-									body: '<br><a href="' + urlBase + '/login" target="_blank">Go to Jenkins</a>', // shourld be data.redirect
-									close: 'auto'
-								});
-							}
-							else {
-								auiFlag({
-									type: 'warning',
-									title: 'Could not start job, please check jenkins!',
-									body: '<br><a href="' + url + '" target="_blank">Go to Jenkins</a>', // shourld be data.redirect
-									close: 'auto'
-								});
-							}
-						});
-					}
-					else {
-						window.ajaxRequest({
-							method: 'POST',
-							url: url,
-							data: {
-							'PULLREQUEST_ID': pr.id,
-							'HIPCHAT_USER': userName
-							}
-						},
-						function(location) {
+				const userName = (window.hipchatUsername || '').replace('@', '');
+				if (typeof window.chromeExtId !== 'undefined' && typeof window.chrome !== 'undefined')  {
+					window.communication.runtime.sendMessage(window.chromeExtId, {
+						method: 'POST',
+						action: 'xhttp',
+						url: `${url  }buildWithParameters`,
+						data: `PULLREQUEST_ID=${  pr.id  }&HIPCHAT_USER=${  userName}`
+					}, function(data) {
+						$startLink.find('span.label').text('Start build test');
+						if(data.status == 201) {
 							auiFlag({
 								type: 'info',
 								title: 'Jenkins Build Started!',
-								body: '<br><a href="' + location + '">Go to Jenkins</a>',
+								body: `<br><a href="${  url  }" target="_blank">Go to Jenkins</a>`, // shourld be data.redirect
 								close: 'auto'
 							});
 							$startLink.unbind('click');
-							$startLink.attr('href', location);
+							$startLink.attr('href', url).attr('target', '_blank'); // should be data.redirect
 							$startLink.find('span.label').text('See started job on jenkins!');
+						}
+						else if(data.status == 403) {
+							auiFlag({
+								type: 'error',
+								title: 'You are not login to jenkins!',
+								body: `<br><a href="${  urlBase  }/login" target="_blank">Go to Jenkins</a>`, // shourld be data.redirect
+								close: 'auto'
+							});
+						}
+						else {
+							auiFlag({
+								type: 'warning',
+								title: 'Could not start job, please check jenkins!',
+								body: `<br><a href="${  url  }" target="_blank">Go to Jenkins</a>`, // shourld be data.redirect
+								close: 'auto'
+							});
+						}
+					});
+				}
+				else {
+					window.ajaxRequest({
+						method: 'POST',
+						url,
+						data: {
+							'PULLREQUEST_ID': pr.id,
+							'HIPCHAT_USER': userName
+						}
+					},
+					function(location) {
+						auiFlag({
+							type: 'info',
+							title: 'Jenkins Build Started!',
+							body: `<br><a href="${  location  }">Go to Jenkins</a>`,
+							close: 'auto'
 						});
-					}
+						$startLink.unbind('click');
+						$startLink.attr('href', location);
+						$startLink.find('span.label').text('See started job on jenkins!');
+					});
+				}
 
-					return false;
-				});
+				return false;
+			});
 
-				$startWrapper.append($startLink);
-				jQuery('.plugin-section-primary').prepend($startWrapper);
+			$startWrapper.append($startLink);
+			jQuery('.plugin-section-primary').prepend($startWrapper);
 		}
 
 		//////////////////////////////////////////////////// Clickable branch on PR page
 		function attachNavigateToBranchLink() {
-			var pr = pageState.getPullRequest();
+			const pr = pageState.getPullRequest();
 
-			var $branchOriginSpan = jQuery('.ref-name-from');
+			let $branchOriginSpan = jQuery('.ref-name-from');
 			if($branchOriginSpan.length === 0) {
 				$branchOriginSpan = jQuery('.source-branch');
 			}
 			if ($branchOriginSpan.length) {
-				var urlFrom = urlUtil.buildSlug(pr.fromRef.repository);
-				urlFrom += '?at=' + pr.fromRef.id;
+				let urlFrom = urlUtil.buildSlug(pr.fromRef.repository);
+				urlFrom += `?at=${  pr.fromRef.id}`;
 				//$branchOriginSpan.css('cursor', 'pointer').click(function(){ window.location.href = urlFrom; }).data('url', urlFrom);
 				$branchOriginSpan.wrap(jQuery('<a></a>', { href: urlFrom }));
 			}
 
-			var $branchDestinationSpan = jQuery('.ref-name-to');
+			let $branchDestinationSpan = jQuery('.ref-name-to');
 			if($branchDestinationSpan.length === 0) {
 				$branchDestinationSpan = jQuery('.target-branch');
 			}
 			if ($branchDestinationSpan.length) {
-				var urlTo = urlUtil.buildSlug(pr.toRef.repository);
-				urlTo += '?at=' + pr.toRef.id;
+				let urlTo = urlUtil.buildSlug(pr.toRef.repository);
+				urlTo += `?at=${  pr.toRef.id}`;
 				//$branchDestinationSpan.css('cursor', 'pointer').click(function(){ window.location.href = urlTo; }).data('url', urlTo);
 				$branchDestinationSpan.wrap(jQuery('<a></a>', { href: urlTo }));
 			}
@@ -625,41 +627,41 @@
 
 		//////////////////////////////////////////////////// dropdoan list with git checkout commands
 		function retrieveLastCommitOfBranch(repoBrowseUrl, branchPath) {
-			var relativeUrl = repoBrowseUrl.replace('browse', 'commits');
-			var url = '/rest/api/1.0' + relativeUrl + '?until=' + branchPath + '&limit=1';
+			const relativeUrl = repoBrowseUrl.replace('browse', 'commits');
+			const url = `/rest/api/1.0${  relativeUrl  }?until=${  branchPath  }&limit=1`;
 
 			return jQuery.get(url)
-			.then(function(data) {
-				return  data.values.length > 0 ? data.values[0].id : '';
-			});
+				.then(function(data) {
+					return  data.values.length > 0 ? data.values[0].id : '';
+				});
 		}
 		function addCheckoutLink() {
-			var pr = pageState.getPullRequest();
+			const pr = pageState.getPullRequest();
 
 			if (!pr.fromRef.repository.project) {
 				console.info('no rights to display checkout dropdown');
 				return;
 			}
 
-			var cloneUrl;
-			var repoName = pr.fromRef.repository.name;
-			var branchOrigin = pr.fromRef.displayId;
-			var remoteName = pr.fromRef.repository.project.owner ? pr.fromRef.repository.project.owner.slug : pr.fromRef.repository.project.name;
+			let cloneUrl;
+			const repoName = pr.fromRef.repository.name;
+			const branchOrigin = pr.fromRef.displayId;
+			let remoteName = pr.fromRef.repository.project.owner ? pr.fromRef.repository.project.owner.slug : pr.fromRef.repository.project.name;
 
 			if(!pr.fromRef.repository.links.clone) {
-				var $link =jQuery(['<div class="pull-request-checkout"><a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
-								'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
-								'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
-								'</a>',
-								'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
-								'	<ul class="aui-list-truncate">',
-								'		<li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
-								'	</ul>',
-								'</div></div>'].join('\n'));
+				const $noPermissionsLink = jQuery(['<div class="pull-request-checkout"><a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
+					'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
+					'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
+					'</a>',
+					'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
+					'	<ul class="aui-list-truncate">',
+					'		<li data-action=""><a href="javascript:void(0)" class="checkoutCommand_link" id="nothing">Sorry you don\'t have clone permission</a></li>',
+					'	</ul>',
+					'</div></div>'].join('\n'));
 				if(jQuery('.pull-request-metadata-primary').length > 0) {
-					jQuery('.pull-request-metadata-primary').find('.pull-request-branches').after($link);
+					jQuery('.pull-request-metadata-primary').find('.pull-request-branches').after($noPermissionsLink);
 				} else {
-					jQuery('.pull-request-metadata').append($link);
+					jQuery('.pull-request-metadata').append($noPermissionsLink);
 				}
 
 				return;
@@ -675,19 +677,19 @@
 				cloneUrl = pr.fromRef.repository.links.clone[0].href;
 			}
 
-			var $link =jQuery(['<div class="pull-request-checkout"><a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
-								'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
-								'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
-								'</a>',
-								'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
-								'	<ul class="aui-list-truncate">',
-								'		<li data-action="clone"><a href="javascript:void(0)" class="checkoutCommand_link" id="cloneCommand">Clone</a></li>',
-								'		<li data-action="newremote"><a href="javascript:void(0)" class="checkoutCommand_link" id="remoteCommand">Add remote</a></li>',
-								'		<li data-action="newremotenewbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Add remote/Create branch</a></li>',
-								'		<li data-action="newbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Create branch</a></li>',
-								'		<li data-action="checkout"><a href="javascript:void(0)" class="checkoutCommand_link">Checkout existing</a></li>',
-								'	</ul>',
-								'</div></div>'].join('\n'));
+			const $link =jQuery(['<div class="pull-request-checkout"><a id="s2id_ddCheckoutCommand" href="#ddCheckoutCommand" aria-owns="ddCheckoutCommand" aria-haspopup="true" class="ddCheckoutCommandPR aui-button aui-style-default aui-dropdown2-trigger">',
+				'<span class="aui-icon aui-icon-small aui-iconfont-devtools-checkout"></span> ',
+				'<span class="name" title="copy git checkout cmmands to paste to terminal">Checkout</span> ',
+				'</a>',
+				'<div id="ddCheckoutCommand" class="aui-style-default aui-dropdown2">',
+				'	<ul class="aui-list-truncate">',
+				'		<li data-action="clone"><a href="javascript:void(0)" class="checkoutCommand_link" id="cloneCommand">Clone</a></li>',
+				'		<li data-action="newremote"><a href="javascript:void(0)" class="checkoutCommand_link" id="remoteCommand">Add remote</a></li>',
+				'		<li data-action="newremotenewbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Add remote/Create branch</a></li>',
+				'		<li data-action="newbranch"><a href="javascript:void(0)" class="checkoutCommand_link">Create branch</a></li>',
+				'		<li data-action="checkout"><a href="javascript:void(0)" class="checkoutCommand_link">Checkout existing</a></li>',
+				'	</ul>',
+				'</div></div>'].join('\n'));
 
 			// git remote naming
 			window.repoMapArray.forEach(function(map){
@@ -699,20 +701,20 @@
 			// get last commit of the source branch
 			retrieveLastCommitOfBranch(urlUtil.buildSlug(pr.fromRef.repository), pr.fromRef.displayId).then(function(lastBranchCommit){
 				// git commands
-				var cloneCommand = 'git clone ' +cloneUrl + ' ' + repoName + '_' + remoteName;
-				var addOriginCommand = 'git remote add ' +remoteName + ' ' + cloneUrl;
-				var fetchCommand = 'git fetch ' + remoteName;
-				var checkoutNewCommand = 'git checkout --track ' + remoteName + '/' + branchOrigin;
-				var checkoutCommand = 'git checkout ' + branchOrigin;
-				var checkoutLastCommit = 'git checkout ' + pr.fromRef.latestCommit;
+				const cloneCommand = `git clone ${ cloneUrl  } ${  repoName  }_${  remoteName}`;
+				const addOriginCommand = `git remote add ${ remoteName  } ${  cloneUrl}`;
+				const fetchCommand = `git fetch ${  remoteName}`;
+				let checkoutNewCommand = `git checkout --track ${  remoteName  }/${  branchOrigin}`;
+				let checkoutCommand = `git checkout ${  branchOrigin}`;
+				const checkoutLastCommit = `git checkout ${  pr.fromRef.latestCommit}`;
 
 				if (lastBranchCommit !== pr.fromRef.latestCommit) {
-					checkoutNewCommand += '; ' + checkoutLastCommit;
-					checkoutCommand += '; ' + checkoutLastCommit;
+					checkoutNewCommand += `; ${  checkoutLastCommit}`;
+					checkoutCommand += `; ${  checkoutLastCommit}`;
 				}
 
-				var command = '';
-				var ddlClicked = false;
+				let command = '';
+				let ddlClicked = false;
 
 				// inject
 				if(jQuery('.pull-request-metadata-primary').length > 0) {
@@ -724,29 +726,29 @@
 
 				jQuery('.checkoutCommand_link').click(function(e){
 					ddlClicked = true;
-					var action = jQuery(e.target).data('action') || jQuery(e.target).parent().data('action');
+					const action = jQuery(e.target).data('action') || jQuery(e.target).parent().data('action');
 					switch(action) {
-						case 'clone': command = cloneCommand;
-							document.execCommand('copy');
-							break;
-						case 'newremote': command = addOriginCommand + '; ' + fetchCommand + ';';
-							document.execCommand('copy');
-							break;
-						case 'newremotenewbranch': command = addOriginCommand + '; ' + fetchCommand + '; ' + checkoutNewCommand;
-							document.execCommand('copy');
-							break;
-						case 'newbranch': command = fetchCommand + '; ' + checkoutNewCommand;
-							document.execCommand('copy');
-							break;
-						case 'checkout': command = fetchCommand + '; ' + checkoutCommand;
-							document.execCommand('copy');
-							break;
-						default: break;
+					case 'clone': command = cloneCommand;
+						document.execCommand('copy');
+						break;
+					case 'newremote': command = `${addOriginCommand  }; ${  fetchCommand  };`;
+						document.execCommand('copy');
+						break;
+					case 'newremotenewbranch': command = `${addOriginCommand  }; ${  fetchCommand  }; ${  checkoutNewCommand}`;
+						document.execCommand('copy');
+						break;
+					case 'newbranch': command = `${fetchCommand  }; ${  checkoutNewCommand}`;
+						document.execCommand('copy');
+						break;
+					case 'checkout': command = `${fetchCommand  }; ${  checkoutCommand}`;
+						document.execCommand('copy');
+						break;
+					default: break;
 					}
 				});
 
-				jQuery('#cloneCommand').append(' (<span style="font-size:xx-small">'+repoName + '_' + remoteName+'</span>)');
-				jQuery('#remoteCommand').append(' (<span style="font-size:xx-small">'+remoteName+'</span>)');
+				jQuery('#cloneCommand').append(` (<span style="font-size:xx-small">${repoName  }_${  remoteName}</span>)`);
+				jQuery('#remoteCommand').append(` (<span style="font-size:xx-small">${remoteName}</span>)`);
 
 
 				jQuery(document).on('copy', function (e) {
@@ -778,19 +780,19 @@
 
 		//////////////////////////////////////////////////// to go to the corresponding ticket when middle click jira ticket link
 		function replaceJiraLink() {
-			var href = jQuery('.pull-request-issues-trigger').attr('href') || '';
+			const href = jQuery('.pull-request-issues-trigger').attr('href') || '';
 			jQuery('.pull-request-issues-trigger').attr('href', href.replace('https://jira.rakuten-it.com/jira/', 'https://rakuten.atlassian.net/'))
 		}
 
 		//////////////////////////////////////////////////// display on overview page when there is conflicts
 		function displayConflicts() {
-			var pr = pageState.getPullRequest();
+			const pr = pageState.getPullRequest();
 
 			// get pr changes details
-			var url = '/rest/api/1.0' + urlUtil.buildSlug(pr) + '/changes'
+			const url = `/rest/api/1.0${  urlUtil.buildSlug(pr)  }/changes`
 
 			jQuery.get(url).done(function(prDetails) {
-				var conflictsCount = 0;
+				let conflictsCount = 0;
 				prDetails.values.forEach(function(details) {
 					if(details.conflict) {
 						conflictsCount++;
@@ -798,10 +800,10 @@
 				});
 
 				if(conflictsCount > 0) {
-					var $message = AJS.messages.warning({
-					 title:"Conflicts found !",
-					 body: "<p> There is "+conflictsCount+" conflicts. Please solve it. </p>",
-					 closeable: true
+					const $message = AJS.messages.warning({
+						title:"Conflicts found !",
+						body: `<p> There is ${conflictsCount} conflicts. Please solve it. </p>`,
+						closeable: true
 					});
 
 					jQuery('.pull-request-metadata').after($message);
@@ -810,11 +812,11 @@
 		}
 
 		return {
-			addBuildLink: addBuildLink,
-			attachNavigateToBranchLink: attachNavigateToBranchLink,
-			replaceJiraLink: replaceJiraLink,
-			addCheckoutLink: addCheckoutLink,
-			displayConflicts: displayConflicts
+			addBuildLink,
+			attachNavigateToBranchLink,
+			replaceJiraLink,
+			addCheckoutLink,
+			displayConflicts
 		}
 	});
 
@@ -846,19 +848,19 @@
 			return this.toString().toLowerCase() === 'true';
 		};
 
-		var NotificationType = { badge:'badge_', panel: 'panel_' };
+		const NotificationType = { badge:'badge_', panel: 'panel_' };
 
 		//////////////////////////////////////////////////// Toolbar icon functions
-		var deferredPrRequest;
+		let deferredPrRequest;
 
 		function filterAnOrderActivities(activities) {
-			var user = pageState.getCurrentUser();
-			var returnedActivities = [];
+			const user = pageState.getCurrentUser();
+			const returnedActivities = [];
 			activities.forEach(function(activity){
 				//if (activity.action == 'RESCOPED') {
-					//return false;
+				//return false;
 				//}
-				var outdated = false;
+				let outdated = false;
 				if (activity.diff && activity.diff.properties) {
 					outdated = !activity.diff.properties.current;
 				}
@@ -869,14 +871,14 @@
 				}
 			});
 
-			return _.sortBy(returnedActivities, 'activityDate').reverse();;
+			return _.sortBy(returnedActivities, 'activityDate').reverse();
 		}
 
 		function getLastPRCommentsAsync() {
-			var deferredResult = jQuery.Deferred();
-			var allPR = [];
+			const deferredResult = jQuery.Deferred();
+			const allPR = [];
 			// get lastest PR
-			var reqParams = {
+			const reqParams = {
 				start: 0,
 				limit: 1000,
 				avatarSize: 96,
@@ -886,71 +888,71 @@
 				role: 'reviewer'
 			};
 
-			var urlSegments = ['rest', 'inbox', 'latest', 'pull-requests'];
-			var urlSegmentsNew = ['rest', 'api', 'latest', 'inbox', 'pull-requests'];
+			const urlSegments = ['rest', 'inbox', 'latest', 'pull-requests'];
+			const urlSegmentsNew = ['rest', 'api', 'latest', 'inbox', 'pull-requests'];
 
-			var reviewersDefered = jQuery.Deferred()
-			var resolveReviewers = function(data) {
+			const reviewersDefered = jQuery.Deferred()
+			const resolveReviewers = function(data) {
 				reviewersDefered.resolve();
 				return data;
 			}
-			var authorDefered = jQuery.Deferred()
-			var resolveAuthor = function(data) {
+			const authorDefered = jQuery.Deferred()
+			const resolveAuthor = function(data) {
 				authorDefered.resolve();
 				return data;
 			}
 
-			var buildUrlPR = function(segments, role){
+			const buildUrlPR = function(segments, role){
 				reqParams.role = role;
 				return nav.newBuilder(segments).withParams(reqParams).build();
 			}
-			var mergeResults = function(data){
+			const mergeResults = function(data){
 				jQuery.merge(allPR, data.values)
 			};
-			var rerunRequest = function(role) {
+			const rerunRequest = function(role) {
 				return function(err) {
-						var resolveDeferred = role === 'reviewer' ? resolveReviewers : resolveAuthor;
-						if(err.status == 404) {
-							return jQuery
+					const resolveDeferred = role === 'reviewer' ? resolveReviewers : resolveAuthor;
+					if(err.status == 404) {
+						return jQuery
 							.get(buildUrlPR(urlSegments, role))
 							.then(mergeResults)
 							.then(resolveDeferred);
-						}
+					}
 				}
 			};
-			var rerunRequestReviewers = rerunRequest('reviewer');
-			var rerunRequestAuthor = rerunRequest('author');
+			const rerunRequestReviewers = rerunRequest('reviewer');
+			const rerunRequestAuthor = rerunRequest('author');
 
 			jQuery
-			.get(buildUrlPR(urlSegmentsNew, 'reviewer'))
-			.then(mergeResults)
-			.then(resolveReviewers)
-			.fail(rerunRequestReviewers);
+				.get(buildUrlPR(urlSegmentsNew, 'reviewer'))
+				.then(mergeResults)
+				.then(resolveReviewers)
+				.fail(rerunRequestReviewers);
 
 			jQuery
-			.get(buildUrlPR(urlSegmentsNew, 'author'))
-			.then(mergeResults)
-			.then(resolveAuthor)
-			.fail(rerunRequestAuthor);
+				.get(buildUrlPR(urlSegmentsNew, 'author'))
+				.then(mergeResults)
+				.then(resolveAuthor)
+				.fail(rerunRequestAuthor);
 
 			jQuery.when(reviewersDefered, authorDefered).done(function(){
-			var activities = [];
-			var requests = [];
-			// loop through PRs and request activities
-			allPR.forEach(function(pr){
-				requests.push(jQuery.get('/rest/api/1.0' + urlUtil.buildSlug(pr) + '/activities?avatarSize=96').done(function(activityList){
+				let activities = [];
+				const requests = [];
+				// loop through PRs and request activities
+				allPR.forEach(function(pr){
+					requests.push(jQuery.get(`/rest/api/1.0${  urlUtil.buildSlug(pr)  }/activities?avatarSize=96`).done(function(activityList){
 					// get comments after PR was updated
-					jQuery.each(activityList.values, function(index, activity){
-						jQuery.extend(activity, { pullrequest: pr });
-						activities.push(activity);
-					});
-				}));
-			});
+						jQuery.each(activityList.values, function(index, activity){
+							jQuery.extend(activity, { pullrequest: pr });
+							activities.push(activity);
+						});
+					}));
+				});
 
-			jQuery.when.apply(jQuery, requests).always(function(){
-				activities = filterAnOrderActivities(activities);
-				deferredResult.resolve(activities);
-			});
+				jQuery.when.apply(jQuery, requests).always(function(){
+					activities = filterAnOrderActivities(activities);
+					deferredResult.resolve(activities);
+				});
 			});
 
 			return deferredResult;
@@ -966,14 +968,14 @@
 		}
 
 		function getMostRecentActivityDate(comment) {
-			var date = comment.createdDate;
+			let date = comment.createdDate;
 
 			comment.tasks.forEach(function(task){
 				date = task.createdDate > date ? task.createdDate : date;
 			});
 
 			comment.comments.forEach(function(subcomment){
-				var newDate = getMostRecentActivityDate(subcomment);
+				const newDate = getMostRecentActivityDate(subcomment);
 				date = newDate > date ? newDate : date;
 			});
 
@@ -981,23 +983,23 @@
 		}
 
 		function filterSubcomments(comment) {
-			var user = pageState.getCurrentUser();
+			const user = pageState.getCurrentUser();
 			return _.filter(comment.comments, function(c){ return c.author.name !== user.name; });
 		}
 
 		function filterTasks(comment) {
-			var user = pageState.getCurrentUser();
+			const user = pageState.getCurrentUser();
 			return _.filter(comment.tasks, function(t){ return t.author.name !== user.name && t.state === "OPEN"; });
 		}
 
 		function countSubComments(comment) {
-			var count = { total: 0, unread: 0 };
-			var subCommentsFromOthers = filterSubcomments(comment);
+			const count = { total: 0, unread: 0 };
+			const subCommentsFromOthers = filterSubcomments(comment);
 			count.total += subCommentsFromOthers.length;
 			count.unread += _.filter(subCommentsFromOthers, function(c){ return !c.isPanelRead }).length;
 
 			comment.comments.forEach(function(subcomment){
-				var result = countSubComments(subcomment);
+				const result = countSubComments(subcomment);
 				count.total += result.total;
 				count.unread += result.unread;
 			});
@@ -1006,13 +1008,13 @@
 		}
 
 		function countTasks(comment) {
-			var count = { total: 0, unread: 0 };
-			var taskFromOthers = filterTasks(comment);
+			const count = { total: 0, unread: 0 };
+			const taskFromOthers = filterTasks(comment);
 			count.total += taskFromOthers.length;
 			count.unread += _.filter(taskFromOthers, function(t){ return !t.isPanelRead }).length;
 
 			comment.comments.forEach(function(subcomment){
-				var result = countTasks(subcomment);
+				const result = countTasks(subcomment);
 				count.total += result.total;
 				count.unread += result.unread;
 			});
@@ -1022,12 +1024,12 @@
 
 		function countUnreadActivities(activities, prefix) {
 			prefix = prefix || '';
-			var count = 0;
-			var user = pageState.getCurrentUser();
+			let count = 0;
+			const user = pageState.getCurrentUser();
 
 			activities.forEach(function(activity){
 				// verify the comment itself
-				var isCommentRead = (localStorage.getItem(prefix + 'comment_' + activity.comment.id) || false).toString().toBool();
+				const isCommentRead = (localStorage.getItem(`${prefix  }comment_${  activity.comment.id}`) || false).toString().toBool();
 
 				if (prefix === NotificationType.panel) {
 					jQuery.extend(activity.comment, {isPanelRead: isCommentRead });
@@ -1046,7 +1048,7 @@
 
 				// tasks
 				filterTasks(activity.comment).forEach(function(task){
-					var isTaskRead = (localStorage.getItem(prefix + 'task_' + task.id) || false).toString().toBool();
+					const isTaskRead = (localStorage.getItem(`${prefix  }task_${  task.id}`) || false).toString().toBool();
 					if (prefix === NotificationType.panel) {
 						jQuery.extend(task, {isPanelRead: isTaskRead });
 					}
@@ -1065,16 +1067,16 @@
 			return countUnreadActivities([activity], prefix) > 0;
 		}
 
-		var htmlComments = {};
+		const htmlComments = {};
 		function markdownToHtml(msg, msgId) {
 			if (htmlComments[msgId]) {
 				return jQuery.Deferred().resolve(htmlComments[msgId]).promise();
 			}
 
-			var url = nav.rest().markup().preview().build();
+			const url = nav.rest().markup().preview().build();
 			return ajax.rest({
 				type: 'POST',
-				url: url,
+				url,
 				data: msg,
 				dataType: 'json'
 			}).then(function(result){
@@ -1083,36 +1085,26 @@
 			});
 		}
 
-		function findUserBySlug(slug) {
-			var url = nav.rest().users().addPathComponents(slug).withParams({avatarSize:64}).build();
-
-			return jQuery.ajax({
-				type: 'GET',
-				url: url,
-				dataType: 'json'
-			});
-		}
-
 		function markActivitiesAsRead(activities, prefix) {
 			prefix = prefix || '';
 			activities.forEach(function(activity){
-				localStorage.setItem(prefix + 'comment_' + activity.comment.id, true);
+				localStorage.setItem(`${prefix  }comment_${  activity.comment.id}`, true);
 
 				activity.comment.comments.forEach(function(subComment){
 					markActivitiesAsRead([{ comment:subComment }], prefix);
 				});
 
 				activity.comment.tasks.forEach(function(task){
-					localStorage.setItem(prefix + 'task_' + task.id, true);
+					localStorage.setItem(`${prefix  }task_${  task.id}`, true);
 				});
 			});
 		}
 
 		function generateCommentsTable(activities) {
-			var $table = jQuery('<table></table>')
-							.addClass('aui')
-							.addClass('paged-table')
-							.addClass('comments-table');
+			let $table = jQuery('<table></table>')
+				.addClass('aui')
+				.addClass('paged-table')
+				.addClass('comments-table');
 
 			// header
 			$table.append('<thead>').find('thead').append('<tr>').find('tr')
@@ -1123,16 +1115,16 @@
 				.append('<th class="comment-count">Activities</th>');
 
 			// body
-			var $tbody = $table.append('<tbody>').find('tbody');
+			const $tbody = $table.append('<tbody>').find('tbody');
 			activities.forEach(function(activity) {
-				var $msgRow = jQuery('<td class="comment message markup">'+activity.comment.text+'</td>');
-				var $userRow = jQuery('<td class="author">'+activity.comment.author.name+'</td>');
-				var $countRow = jQuery('<td class="comment-count"></td>');
-				var $prRow = jQuery('<td class="title"><a href="' + urlUtil.buildSlug(activity.pullrequest) + '/overview?commentId='+activity.comment.id+'" title="{'+activity.pullrequest.author.user.name+'} '+activity.pullrequest.title+'">'+activity.pullrequest.title+'</a></td>');
-				var $updatedRow = jQuery('<td class="comment-count"></td>').html(moment(activity.activityDate).fromNow());
+				const $msgRow = jQuery(`<td class="comment message markup">${activity.comment.text}</td>`);
+				const $userRow = jQuery(`<td class="author">${activity.comment.author.name}</td>`);
+				const $countRow = jQuery('<td class="comment-count"></td>');
+				const $prRow = jQuery(`<td class="title"><a href="${  urlUtil.buildSlug(activity.pullrequest)  }/overview?commentId=${activity.comment.id}" title="{${activity.pullrequest.author.user.name}} ${activity.pullrequest.title}">${activity.pullrequest.title}</a></td>`);
+				const $updatedRow = jQuery('<td class="comment-count"></td>').html(moment(activity.activityDate).fromNow());
 
-				var isLineUnread = hasUnreadActivities(activity, NotificationType.panel);
-				var isBadgeUnread = hasUnreadActivities(activity, NotificationType.badge);
+				const isLineUnread = hasUnreadActivities(activity, NotificationType.panel);
+				const isBadgeUnread = hasUnreadActivities(activity, NotificationType.badge);
 
 				// convert raw msg to html
 				markdownToHtml(activity.comment.text, activity.comment.id).done(function(msg) {
@@ -1140,7 +1132,7 @@
 				});
 
 				// avatar
-				var $avatar = jQuery(bitbucket.internal.widget.avatar({
+				const $avatar = jQuery(bitbucket.internal.widget.avatar({
 					size: 'small',
 					person: activity.comment.author,
 					tooltip: activity.comment.author.displayName
@@ -1149,14 +1141,14 @@
 				$avatar.find('img').tooltip();
 
 				// sub comments count
-				var commentCount = countSubComments(activity.comment);
-				var $commentsCount = jQuery('<span class="comment-count" title="' + commentCount.unread + ' new unread comments">');
+				const commentCount = countSubComments(activity.comment);
+				const $commentsCount = jQuery(`<span class="comment-count" title="${  commentCount.unread  } new unread comments">`);
 				$commentsCount.append(jQuery(aui.icons.icon({
 					useIconFont: true,
 					icon: 'comment',
 					accessibilityText: 'comments'
 				})));
-				var $commentDigit = jQuery('<span>' + commentCount.total + '<span>');
+				const $commentDigit = jQuery(`<span>${  commentCount.total  }<span>`);
 				if(commentCount.unread > 0) {
 					$commentsCount.addClass('digit-unread');
 				}
@@ -1164,14 +1156,14 @@
 				$commentsCount.tooltip();
 
 				// task count
-				var taskCount = countTasks(activity.comment);
-				var $tasksCount = jQuery('<span class="pr-list-open-task-count" title="' + taskCount.unread + ' new unread tasks">');
+				const taskCount = countTasks(activity.comment);
+				const $tasksCount = jQuery(`<span class="pr-list-open-task-count" title="${  taskCount.unread  } new unread tasks">`);
 				$tasksCount.append(jQuery(aui.icons.icon({
 					useIconFont: true,
 					icon: 'editor-task',
 					accessibilityText: 'tasks'
 				})));
-				var $taskDigit = jQuery('<span class="task-count">' + taskCount.total + '<span>');
+				const $taskDigit = jQuery(`<span class="task-count">${  taskCount.total  }<span>`);
 				if(taskCount.unread > 0) {
 					$tasksCount.addClass('digit-unread');
 				}
@@ -1184,7 +1176,7 @@
 					.append($tasksCount);
 
 				// build row
-				var $tr = $tbody.append('<tr>').find('tr:last-child');
+				const $tr = $tbody.append('<tr>').find('tr:last-child');
 				if(isLineUnread) {
 					$tr.addClass('line-unread');
 				}
@@ -1203,9 +1195,9 @@
 
 			if (activities.length === 0) {
 				$table = AJS.messages.info({
-				 title:"No comments",
-				 body: "<p> There is no comment on any open pull request! </p>",
-				 closeable: false
+					title:"No comments",
+					body: "<p> There is no comment on any open pull request! </p>",
+					closeable: false
 				});
 			}
 
@@ -1221,70 +1213,71 @@
 		function updateUI($content, forceReload, desktopNotification) {
 			forceReload = forceReload || false;
 			desktopNotification = desktopNotification || false;
-			var $toolbar = jQuery('#inbox-messages');
+			const $toolbar = jQuery('#inbox-messages');
+			let $spinner
 
 			// display loader in panel
 			if($content) {
-				var $spinner = jQuery('<div class="loading-resource-spinner"></div>');
+				$spinner = jQuery('<div class="loading-resource-spinner"></div>');
 				jQuery('#global-div-comments-notif').remove();
-				var $globalDiv = jQuery('<div id="global-div-comments-notif"></div>');
+				const $globalDiv = jQuery('<div id="global-div-comments-notif"></div>');
 				$globalDiv.append('<h2>Last pull requests comments</h2>');
 				$globalDiv.append($spinner);
 				$content.empty().append($globalDiv);
 				$spinner.show().spin('medium');
 			}
 
-			var dataLoader = forceReload ? getLastPRCommentsAsync : getLastPRCommentsOnceAsync;
+			const dataLoader = forceReload ? getLastPRCommentsAsync : getLastPRCommentsOnceAsync;
 			dataLoader()
-			.always(function() {
-				if($content) {
-					$content.empty();
-					$spinner.spinStop().remove();
-				}
-			})
-			.done(function(activities) {
-				// desktop notification on chrome
-				if (!$content && desktopNotification) {
-					displayDesktopNotification(activities);
-				}
-				// update icon
-				var eventCount = countUnreadActivities(activities, NotificationType.badge);
-				if(!$content) {
-					$toolbar.find('.aui-badge').remove();
-					updateChromeIconBadge('');
-					if (eventCount > 0) {
-						var $badge = jQuery(aui.badges.badge({
-										text: eventCount
-									}));
-						$toolbar.append($badge);
-						setTimeout(function() {
-							// Needed for the transition to trigger
-							$badge.addClass('visible');
-						}, 0);
-
-						updateChromeIconBadge(eventCount);
+				.always(function() {
+					if($content) {
+						$content.empty();
+						$spinner.spinStop().remove();
 					}
-				}
+				})
+				.done(function(activities) {
+				// desktop notification on chrome
+					if (!$content && desktopNotification) {
+						displayDesktopNotification(activities);
+					}
+					// update icon
+					const eventCount = countUnreadActivities(activities, NotificationType.badge);
+					if(!$content) {
+						$toolbar.find('.aui-badge').remove();
+						updateChromeIconBadge('');
+						if (eventCount > 0) {
+							const $badge = jQuery(aui.badges.badge({
+								text: eventCount
+							}));
+							$toolbar.append($badge);
+							setTimeout(function() {
+							// Needed for the transition to trigger
+								$badge.addClass('visible');
+							}, 0);
 
-				// update panel
-				if($content) {
-					jQuery('#global-div-comments-notif').remove();
-					var $globalDiv = jQuery('<div id="global-div-comments-notif"></div>');
-					$globalDiv.append('<h2>Last pull requests comments</h2>');
-					var $wrapper = jQuery('<div class="inbox-table-wrapper aui-tabs horizontal-tabs"></div>');
-					$wrapper.append(generateCommentsTable(activities));
-					$globalDiv.append($wrapper);
-					$content.append($globalDiv);
-					// remove badge notification. Panel highlight notification are remove when PR is open
-					markActivitiesAsRead(activities, NotificationType.badge);
-				}
-			});
+							updateChromeIconBadge(eventCount);
+						}
+					}
+
+					// update panel
+					if($content) {
+						jQuery('#global-div-comments-notif').remove();
+						const $globalDiv = jQuery('<div id="global-div-comments-notif"></div>');
+						$globalDiv.append('<h2>Last pull requests comments</h2>');
+						const $wrapper = jQuery('<div class="inbox-table-wrapper aui-tabs horizontal-tabs"></div>');
+						$wrapper.append(generateCommentsTable(activities));
+						$globalDiv.append($wrapper);
+						$content.append($globalDiv);
+						// remove badge notification. Panel highlight notification are remove when PR is open
+						markActivitiesAsRead(activities, NotificationType.badge);
+					}
+				});
 		}
 
 		function createCommentsDialog() {
-			var inlineDialog;
+			let inlineDialog;
 
-			var onShowDialog = function ($content, trigger, showPopup) {
+			const onShowDialog = function ($content, trigger, showPopup) {
 				showPopup();
 				jQuery(document).on('keyup', hideOnEscapeKeyUp);
 
@@ -1294,14 +1287,14 @@
 				updateUI($content);
 			};
 
-			var hideOnEscapeKeyUp = function(e) {
+			const hideOnEscapeKeyUp = function(e) {
 				if(e.keyCode === jQuery.ui.keyCode.ESCAPE) {
 					inlineDialog.hide();
 					e.preventDefault();
 				}
 			};
 
-			var onHideDialog = function () {
+			const onHideDialog = function () {
 				jQuery(document).off('keyup', hideOnEscapeKeyUp);
 				AJS.dialog2.off('show', hideOnDialogShown);
 
@@ -1314,11 +1307,11 @@
 				updateUI();
 			};
 
-			var hideOnDialogShown = function () {
+			const hideOnDialogShown = function () {
 				inlineDialog.hide();
 			};
 
-			var $inboxTrigger = jQuery("#inbox-messages");
+			const $inboxTrigger = jQuery("#inbox-messages");
 			if ($inboxTrigger.length && pageState.getCurrentUser()) {
 				inlineDialog = AJS.InlineDialog($inboxTrigger, 'inbox-messages-content', onShowDialog, {
 					width: 870,
@@ -1333,24 +1326,24 @@
 			if(Notification.permission !== "granted" || window.notificationState.toString() === '0') {
 				return;
 			}
-			var user = pageState.getCurrentUser();
-			var prefix = "notif_";
+			const user = pageState.getCurrentUser();
+			const prefix = "notif_";
 
 			activities.forEach(function(activity){
-				var commentKey = prefix + 'comment_' + activity.comment.id;
-				var state = localStorage.getItem(commentKey);
+				const commentKey = `${prefix  }comment_${  activity.comment.id}`;
+				const state = localStorage.getItem(commentKey);
 				localStorage.setItem(commentKey, true);
 
-				var isIncluded = true; // all notifications
+				let isIncluded = true; // all notifications
 				if(window.notificationType.toString() === '0') { // prAndMentioned only (also include answer)
-					var isIncluded = false;
+					isIncluded = false;
 					// filter PR which are not from current user
 					if(activity.pullrequest.author.user.name === user.name) {
 						isIncluded = true;
 					}
 
 					// filter mentioned
-					if(activity.comment.text.indexOf('@"'+user.name+'"') > -1) {
+					if(activity.comment.text.indexOf(`@"${user.name}"`) > -1) {
 						isIncluded = true;
 					}
 
@@ -1360,11 +1353,11 @@
 					}
 				}
 
-				var notYetViewed = !(state || false).toString().toBool();
+				const notYetViewed = !(state || false).toString().toBool();
 				// notification for comments
 				if(isIncluded && activity.comment.author.name !== user.name && notYetViewed) {
-					var commentNotifTitle = activity.comment.author.name +' commented on : "' + activity.pullrequest.title + '"';
-					var notification = new Notification(commentNotifTitle, {
+					const commentNotifTitle = `${activity.comment.author.name } commented on : "${  activity.pullrequest.title  }"`;
+					const notification = new Notification(commentNotifTitle, {
 						icon: activity.comment.author.avatarUrl || window.stashIcon,
 						body: activity.comment.text,
 						eventTime: activity.comment.createdDate,
@@ -1372,7 +1365,7 @@
 					});
 
 					notification.onclick = function () {
-						window.open(urlUtil.getSiteBaseURl() + urlUtil.buildSlug(activity.pullrequest) + '/overview?commentId=' + activity.comment.id);
+						window.open(`${urlUtil.getSiteBaseURl() + urlUtil.buildSlug(activity.pullrequest)  }/overview?commentId=${  activity.comment.id}`);
 					};
 				}
 
@@ -1387,14 +1380,14 @@
 
 				// notification for task
 				activity.comment.tasks.forEach(function(task){
-					var taskKey = prefix + 'task_' + task.id;
-					var taskState = localStorage.getItem(taskKey);
+					const taskKey = `${prefix  }task_${  task.id}`;
+					const taskState = localStorage.getItem(taskKey);
 					localStorage.setItem(taskKey, true);
 
-					var notYetViewed = !(taskState || false).toString().toBool();
+					const notYetViewed = !(taskState || false).toString().toBool();
 					if(window.notificationType.toString() !== '0' && task.author.name !== user.name && notYetViewed) {
-						var taskNotifTitle = activity.comment.author.name +' created task on : "'+ activity.pullrequest.title +'"';
-						var notification = new Notification(taskNotifTitle, {
+						const taskNotifTitle = `${activity.comment.author.name } created task on : "${ activity.pullrequest.title }"`;
+						const notification = new Notification(taskNotifTitle, {
 							icon: task.author.avatarUrl || window.stashIcon,
 							body: task.text,
 							eventTime: task.createdDate,
@@ -1402,7 +1395,7 @@
 						});
 
 						notification.onclick = function () {
-							window.open(urlUtil.getSiteBaseURl() + urlUtil.buildSlug(activity.pullrequest) + '/overview?commentId=' + activity.comment.id);
+							window.open(`${urlUtil.getSiteBaseURl() + urlUtil.buildSlug(activity.pullrequest)  }/overview?commentId=${  activity.comment.id}`);
 						};
 					}
 
@@ -1412,10 +1405,10 @@
 
 		function addMessagesToolbarIcon() {
 			/// toolbar icon
-			var button = ['<li class="" title="Last PR messages">',
-					'<a href="#inbox-messages" id="inbox-messages" title="Last PR messages">',
-						'<span class="aui-icon aui-icon-small aui-iconfont-hipchat"></span>',
-					'</a>',
+			const button = ['<li class="" title="Last PR messages">',
+				'<a href="#inbox-messages" id="inbox-messages" title="Last PR messages">',
+				'<span class="aui-icon aui-icon-small aui-iconfont-hipchat"></span>',
+				'</a>',
 				'</li>'].join('\n');
 
 
@@ -1426,7 +1419,7 @@
 
 			// as desktop notification authorization
 			if (Notification.permission !== "granted") {
-			 	Notification.requestPermission();
+				Notification.requestPermission();
 			}
 
 			// periodically poll server for update
@@ -1434,8 +1427,8 @@
 				// use background worker to centralized request and avoid to much server queries
 				window.communication.runtime.sendMessage(window.chromeExtId, { action: 'setUrl', url: urlUtil.getSiteBaseURl() });
 
-				var activitiesCallback = function (eventArgs) {
-					var activities = filterAnOrderActivities(eventArgs.activities);
+				const activitiesCallback = function (eventArgs) {
+					const activities = filterAnOrderActivities(eventArgs.activities);
 					if (deferredPrRequest.state() !== 'pending') {
 						deferredPrRequest = jQuery.Deferred();
 						deferredPrRequest.resolve(activities);
@@ -1457,7 +1450,7 @@
 		}
 
 		function markActivitiesAsReadWhenPullRequestOpened() {
-			var pr = pageState.getPullRequest();
+			const pr = pageState.getPullRequest();
 			if (pr) {
 				getLastPRCommentsOnceAsync().done(function(activities){
 					activities = _.filter(activities, function(a){ return a.pullrequest.id === pr.id; });
@@ -1481,12 +1474,12 @@
 						// it's not version file we retrieved
 						data.response = 'cant.check.version';
 					}
-					var currentVersion = window.stashRGEVersion.toString().trim();
-					var newVersion = data.response.toString().trim();
-					var storedVersion = (localStorage.getItem('stashRGEVersion') || '').toString().trim();
+					const currentVersion = window.stashRGEVersion.toString().trim();
+					const newVersion = data.response.toString().trim();
+					const storedVersion = (localStorage.getItem('stashRGEVersion') || '').toString().trim();
 
 					if(newVersion !== storedVersion && newVersion !== currentVersion) {
-						var body = '<br>Please pull changes with git to update';
+						let body = '<br>Please pull changes with git to update';
 
 						if (data.response === 'cant.reach.github') {
 							body = "Please check you added your bitbucket server domain to extension manifest.json";
@@ -1498,10 +1491,10 @@
 						body += '<br><br><a href="https://github.com/dragouf/Stash-Reviewers-Chrome-Extension/blob/master/history" target="_blank">See history (repository)</a>';
 						body += ' <a id="skipVersionLink" href="javascript:window.hideStashRGEVersion();" style="float:right">Skip this version</a>';
 
-						var flag = auiFlag({
+						const flag = auiFlag({
 							type: 'info',
-							title: 'New version of the extension ('+ data.response +')',
-							body: body,
+							title: `New version of the extension (${ data.response })`,
+							body,
 							close: 'auto'
 						});
 
@@ -1516,9 +1509,9 @@
 
 		function removeAnnouncement() {
 			if(localStorage.getItem('wittified-banner')) {
-				var data = JSON.parse(localStorage.getItem('wittified-banner'));
-				var today = new Date().getTime();
-				var days = Math.floor((today - data.timestamp) / 1000 / 86400);
+				const data = JSON.parse(localStorage.getItem('wittified-banner'));
+				const today = new Date().getTime();
+				const days = Math.floor((today - data.timestamp) / 1000 / 86400);
 				if(days > 6) {
 					localStorage.removeItem('wittified-banner');
 				}
@@ -1526,7 +1519,7 @@
 				return;
 			}
 
-			var $closeSpan = jQuery('<span class="aui-icon icon-close" role="button" tabindex="0"></span>');
+			const $closeSpan = jQuery('<span class="aui-icon icon-close" role="button" tabindex="0"></span>');
 			$closeSpan.click(function() {
 				jQuery('section.notifications').remove();
 				localStorage.setItem('wittified-banner',  JSON.stringify({value: true, timestamp: new Date().getTime()}));
@@ -1535,25 +1528,26 @@
 		}
 
 		return {
-			addMessagesToolbarIcon: addMessagesToolbarIcon,
-			markActivitiesAsReadWhenPullRequestOpened: markActivitiesAsReadWhenPullRequestOpened,
-			checkForUpdate: checkForUpdate,
-			removeAnnouncement: removeAnnouncement
+			addMessagesToolbarIcon,
+			markActivitiesAsReadWhenPullRequestOpened,
+			checkForUpdate,
+			removeAnnouncement
 		}
 	});
 
 	define('bitbucket-plugin/pullrequest-list-modifier', [
-		'bitbucket/internal/feature/pull-request/pull-request-table'
-	], function(PullRequestsTable) {
+		'bitbucket/internal/feature/pull-request/pull-request-table',
+		'jquery'
+	], function(PullRequestsTable, jQuery) {
 		'use strict';
 		function redefinePullRequestTable() {
 			//redefined filter builder to include new parameters
 			PullRequestsTable.prototype.buildUrl = function (start, limit) {
-				var self = this;
-				var builder = self.getPullRequestsUrlBuilder()
+				const self = this;
+				let builder = self.getPullRequestsUrlBuilder()
 					.withParams({
-						start: start,
-						limit: limit,
+						start,
+						limit,
 						avatarSize: bitbucket.internal.widget.avatarSizeInPx({ size: 'medium' }),
 						withAttributes: true
 					});
@@ -1579,44 +1573,44 @@
 					});
 				}
 
-				var lastIndex = 0;
+				let lastIndex = 0;
 				if (self.prAuthors && self.prAuthors.length) {
-					self.prAuthors.forEach(function(u, index){
+					self.prAuthors.forEach(function(u){
 						lastIndex++;
-						var params = {};
-						params["username." + (lastIndex)] = u.name;
-						params["role." + (lastIndex)] = "AUTHOR";
+						const params = {};
+						params[`username.${  lastIndex}`] = u.name;
+						params[`role.${  lastIndex}`] = "AUTHOR";
 						builder = builder.withParams(params);
 					});
 				}
 
 				if (self.prReviewers && self.prReviewers.length) {
-					self.prReviewers.forEach(function(u, index){
+					self.prReviewers.forEach(function(u){
 						lastIndex++;
-						var params = {};
-						params["username." + (lastIndex)] = u.name;
-						params["role." + (lastIndex)] = "REVIEWER";
+						const params = {};
+						params[`username.${  lastIndex}`] = u.name;
+						params[`role.${  lastIndex}`] = "REVIEWER";
 						builder = builder.withParams(params);
 					});
 				}
 
 				if (self.prParticipants && self.prParticipants.length) {
-					self.prParticipants.forEach(function(u, index){
+					self.prParticipants.forEach(function(u){
 						lastIndex++;
-						var params = {};
-						params["username." + (lastIndex)] = u.name;
-						params["role." + (lastIndex)] = "PARTICIPANT";
+						const params = {};
+						params[`username.${  lastIndex}`] = u.name;
+						params[`role.${  lastIndex}`] = "PARTICIPANT";
 						builder = builder.withParams(params);
 					});
 				}
 
 				if (self.prApprovers && self.prApprovers.length) {
-					self.prApprovers.forEach(function(u, index){
+					self.prApprovers.forEach(function(u){
 						lastIndex++;
-						var params = {};
-						params["username." + (lastIndex)] = u.name;
-						params["approved." + (lastIndex)] = true;
-						params["role." + (lastIndex)] = "REVIEWER";
+						const params = {};
+						params[`username.${  lastIndex}`] = u.name;
+						params[`approved.${  lastIndex}`] = true;
+						params[`role.${  lastIndex}`] = "REVIEWER";
 						builder = builder.withParams(params);
 					});
 				}
@@ -1624,18 +1618,18 @@
 				return builder.build();
 			};
 
-			var originalRowHandler = PullRequestsTable.prototype.handleNewRows
+			const originalRowHandler = PullRequestsTable.prototype.handleNewRows
 			PullRequestsTable.prototype.handleNewRows = function (data, attachmentMethod) {
-				var self = this;
+				const self = this;
 				originalRowHandler.call(self, data, attachmentMethod);
-				var commitList = data.values.map(function(pr) {
+				const commitList = data.values.map(function(pr) {
 					return { commit: pr.fromRef.latestCommit, prId: pr.id }
 				});
 
 				getPRBuildStatus(commitList).done(function(buildDetails){
 					// add build column
 					if(self.$table.find('th.build-status-pr-list-col').length == 0) {
-						var $buildCol = jQuery('<th>', {
+						const $buildCol = jQuery('<th>', {
 							class: "build-status-pr-list-col",
 							title: 'Builds',
 							scope: 'col',
@@ -1645,45 +1639,44 @@
 						self.$table.find('tr:first').append($buildCol);
 					}
 
-					var rows = self.$table.find('tr.pull-request-row');
+					const rows = self.$table.find('tr.pull-request-row');
 					rows.each(function(_index, row){
-						var $row = jQuery(row);
+						const $row = jQuery(row);
 						if($row.find('.build-status-pr-list-col-value').length == 0) {
-							var $buildCell = jQuery('<td>', { class: "build-status-pr-list-col-value" });
+							const $buildCell = jQuery('<td>', { class: "build-status-pr-list-col-value" });
 							$buildCell.data('pullrequestid', $row.data('pullrequestid'));
 							$row.append($buildCell);
 						}
 					});
 
 					// add data to build cell
-					var rows = self.$table.find('tr.pull-request-row');
 					buildDetails.forEach(function(buildStatus) {
 						// find row and add build status
-						var cells = jQuery('td.build-status-pr-list-col-value');
-						var cell = cells.filter(function(_, td) {  return jQuery(td).data('pullrequestid') == buildStatus.prId });
+						const cells = jQuery('td.build-status-pr-list-col-value');
+						const cell = cells.filter(function(_, td) {  return jQuery(td).data('pullrequestid') == buildStatus.prId });
 						if(cell) {
-							var $buildInfoLink = jQuery('<a>', {
+							const $buildInfoLink = jQuery('<a>', {
 								href:"#",
 								class:"aui-icon aui-icon-small build-icon",
 								'data-commit-id': buildStatus.commit
 							});
 
-							var appendIcon = false;
+							let appendIcon = false;
 							if(buildStatus.inProgress) {
 								$buildInfoLink.data('data-build-status', 'INPROGRESS');
-								$buildInfoLink.attr('title', buildStatus.inProgress + ' builds in progress');
+								$buildInfoLink.attr('title', `${buildStatus.inProgress  } builds in progress`);
 								$buildInfoLink.addClass('aui-iconfont-time');
 								$buildInfoLink.addClass('inprogress-build-icon');
 								appendIcon = true;
 							} else if(buildStatus.failed) {
 								$buildInfoLink.data('data-build-status', 'FAILED');
-								$buildInfoLink.attr('title', buildStatus.failed + ' builds failed');
+								$buildInfoLink.attr('title', `${buildStatus.failed  } builds failed`);
 								$buildInfoLink.addClass('aui-iconfont-error');
 								$buildInfoLink.addClass('failed-build-icon');
 								appendIcon = true;
 							} else if(buildStatus.successful > 0) {
 								$buildInfoLink.data('data-build-status', 'SUCCESSFUL');
-								$buildInfoLink.attr('title', buildStatus.successful + ' builds passed');
+								$buildInfoLink.attr('title', `${buildStatus.successful  } builds passed`);
 								$buildInfoLink.addClass('aui-iconfont-approve');
 								$buildInfoLink.addClass('successful-build-icon');
 								appendIcon = true;
@@ -1700,7 +1693,7 @@
 		}
 
 		function getPRBuildStatus(commitList) {
-			var commitIds = commitList.map(function(pr) { return pr.commit });
+			const commitIds = commitList.map(function(pr) { return pr.commit });
 			return jQuery.ajax('/rest/build-status/latest/commits/stats', {
 				method: 'POST',
 				headers: {
@@ -1710,20 +1703,20 @@
 				data: JSON.stringify(commitIds),
 				dataType: 'json'
 			})
-			.then(function(data) {
-				jQuery.each(data, function(commitId, info){
-					var commit = commitList.filter(function(cl) { return cl.commit === commitId });
-					if(commit.length > 0) {
-						jQuery.extend(commit[0], info);
-					}
-				});
+				.then(function(data) {
+					jQuery.each(data, function(commitId, info){
+						const commit = commitList.filter(function(cl) { return cl.commit === commitId });
+						if(commit.length > 0) {
+							jQuery.extend(commit[0], info);
+						}
+					});
 
-				return commitList;
-			});
+					return commitList;
+				});
 		}
 
 		return {
-			redefinePullRequestTable: redefinePullRequestTable
+			redefinePullRequestTable
 		}
 	});
 
@@ -1762,9 +1755,9 @@
 		//////////////////////////////////////////////////// Add filter to Pull Request list
 		// utilities
 		function getParameterByName(name) {
-			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-				results = regex.exec(location.search);
+			name = name.replace(/[[]/, "\\[").replace(/[\]]/, "\\]");
+			const regex = new RegExp(`[\\?&]${  name  }=([^&#]*)`)
+			const results = regex.exec(location.search);
 			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 		}
 
@@ -1775,29 +1768,29 @@
 			jQuery('.spinner').show();
 
 			function getPullRequestsUrlBuilder(state) {
-				return nav.rest().currentRepo().allPullRequests().withParams({ state: state });
+				return nav.rest().currentRepo().allPullRequests().withParams({ state });
 			}
 
 			// recreate table to control it
-			var state = getParameterByName('state') || 'OPEN';
-			var author = getParameterByName('author') || '';
-			var targeting = getParameterByName('at') || '';
-			var reviewing = getParameterByName('reviewing') || false;
+			const state = getParameterByName('state') || 'OPEN';
+			const author = getParameterByName('author') || '';
+			const targeting = getParameterByName('at') || '';
+			const reviewing = getParameterByName('reviewing') || false;
 			// previous values
-			var $banchSelectorOrigin = jQuery('#s2id_pr-target-branch-filter');
-			var refData = $banchSelectorOrigin.length > 0 ? $banchSelectorOrigin.data('select2').data() : null;
-			var $authorFilterOrigin = jQuery('#s2id_pr-author-filter');
-			var authorData = $authorFilterOrigin.length > 0 ? $authorFilterOrigin.data('select2').data() : null;
+			const $banchSelectorOrigin = jQuery('#s2id_pr-target-branch-filter');
+			const refData = $banchSelectorOrigin.length > 0 ? $banchSelectorOrigin.data('select2').data() : null;
+			const $authorFilterOrigin = jQuery('#s2id_pr-author-filter');
+			const authorData = $authorFilterOrigin.length > 0 ? $authorFilterOrigin.data('select2').data() : null;
 
-			var order = /*state.toLowerCase() === 'open' ? 'oldest' :*/ 'newest';
+			const order = /*state.toLowerCase() === 'open' ? 'oldest' :*/ 'newest';
 
-			var notFoundMsg = AJS.messages.info({
-					 title:"No Results",
-					 body: '<p><a href="?create" class="aui-button aui-button-primary intro-create-pull-request" tabindex="0">Create a new pull request</a></p>',
-					 closeable: false
-					});
+			const notFoundMsg = AJS.messages.info({
+				title:"No Results",
+				body: '<p><a href="?create" class="aui-button aui-button-primary intro-create-pull-request" tabindex="0">Create a new pull request</a></p>',
+				closeable: false
+			});
 
-			var fakeResult = {"size":0,"limit":0,"isLastPage":false,"values":[{"id":8,"version":2,"title":"loading...","description":"loading...","state":"OPEN","open":false,"closed":true,"createdDate":1373011695000,"updatedDate":1373012559000,"locked":false,"author":{"user":{"name":"none","emailAddress":"none","id":16777,"displayName":"none","active":true,"slug":"none","type":"NORMAL", "avatarUrl":"#"},"role":"AUTHOR","approved":false},"reviewers":[],"participants":[],"attributes":{"resolvedTaskCount":["0"],"openTaskCount":["0"]}, toRef:{id:0, displayId:'', repository:{id:0, slug:'', project:{key:''}}}, fromRef:{id:0, displayId:'', repository:{id:0, slug:'', project:{key:''}}}}],"start":0,"nextPageStart":0};
+			const fakeResult = {"size":0,"limit":0,"isLastPage":false,"values":[{"id":8,"version":2,"title":"loading...","description":"loading...","state":"OPEN","open":false,"closed":true,"createdDate":1373011695000,"updatedDate":1373012559000,"locked":false,"author":{"user":{"name":"none","emailAddress":"none","id":16777,"displayName":"none","active":true,"slug":"none","type":"NORMAL", "avatarUrl":"#"},"role":"AUTHOR","approved":false},"reviewers":[],"participants":[],"attributes":{"resolvedTaskCount":["0"],"openTaskCount":["0"]}, toRef:{id:0, displayId:'', repository:{id:0, slug:'', project:{key:''}}}, fromRef:{id:0, displayId:'', repository:{id:0, slug:'', project:{key:''}}}}],"start":0,"nextPageStart":0};
 
 			// remove previous
 			jQuery(window).off('scroll.paged-scrollable');
@@ -1808,7 +1801,7 @@
 			jQuery('#pull-requests-content').empty();
 			jQuery('#pull-requests-content').append('<div id="pull-requests-table-container-filtered"></div>');
 
-			var pullRequestTable = new PullRequestsTable(state, order, getPullRequestsUrlBuilder, {
+			const pullRequestTable = new PullRequestsTable(state, order, getPullRequestsUrlBuilder, {
 				noneFoundMessageHtml: notFoundMsg,
 				initialData: fakeResult,
 				paginationContext: 'pull-request-table-filtered',
@@ -1831,20 +1824,20 @@
 			avatarList.init();
 
 			// inject filter UI
-			var urlParams = {
+			const urlParams = {
 				avatarSize: bitbucket.internal.widget.avatarSizeInPx({ size: 'xsmall' }),
 				permission: 'LICENSED_USER' // filter out non-licensed users
 			};
-			var dataSource = new SearchableMultiSelector.PagedDataSource(nav.rest().users().build(), urlParams);
+			const dataSource = new SearchableMultiSelector.PagedDataSource(nav.rest().users().build(), urlParams);
 
 			// create form
-			var $auiContainer = jQuery('<div class="filter-group-container"></div>');
-			var $auiItem = jQuery('<div class="filter-group-content"></div>');
-			var $form = jQuery('<form class="aui prevent-double-submit" action="#" method="get" accept-charset="UTF-8"></form>');
+			const $auiContainer = jQuery('<div class="filter-group-container"></div>');
+			const $auiItem = jQuery('<div class="filter-group-content"></div>');
+			const $form = jQuery('<form class="aui prevent-double-submit" action="#" method="get" accept-charset="UTF-8"></form>');
 			$auiContainer.append($auiItem);
 			$auiItem.append($form);
 
-			var $stateSelect = jQuery(['<select name="ddPrState" id="ddPrState">',
+			const $stateSelect = jQuery(['<select name="ddPrState" id="ddPrState">',
 				'<option value="OPEN">Open</option>',
 				'<option value="MERGED">Merged</option>',
 				'<option value="DECLINED">Declined</option>',
@@ -1852,40 +1845,40 @@
 			$stateSelect.val(pullRequestTable.prState || 'OPEN');
 			$form.append($stateSelect);
 
-			var $authorsInput = jQuery('<input class="text" type="text" name="authors" id="authors" placeholder="Authors filter">');
+			const $authorsInput = jQuery('<input class="text" type="text" name="authors" id="authors" placeholder="Authors filter">');
 			$form.append($authorsInput);
 
-			var $reviewersInput = jQuery('<input class="text" type="text" name="reviewers" id="reviewers" placeholder="Reviewers filter">');
+			const $reviewersInput = jQuery('<input class="text" type="text" name="reviewers" id="reviewers" placeholder="Reviewers filter">');
 			$form.append($reviewersInput);
 
-			var $participantsInput = jQuery('<input class="text" type="text" name="participants" id="participants" placeholder="Participants filter">');
+			const $participantsInput = jQuery('<input class="text" type="text" name="participants" id="participants" placeholder="Participants filter">');
 			$form.append($participantsInput);
 
-			var $approversInput = jQuery('<input class="text" type="text" name="approvers" id="approvers" placeholder="Approvers filter">');
+			const $approversInput = jQuery('<input class="text" type="text" name="approvers" id="approvers" placeholder="Approvers filter">');
 			$form.append($approversInput);
 
-			var $orderSelect = jQuery(['<select name="ddPrOrder" id="ddPrOrder">',
+			const $orderSelect = jQuery(['<select name="ddPrOrder" id="ddPrOrder">',
 				'<option value="oldest">Oldest first</option>',
 				'<option value="newest">Newest first</option>',
 				'</select>'].join('\n'));
 			$orderSelect.val(pullRequestTable.prOrder);
 			$form.append($orderSelect);
 
-			var $directionSelect = jQuery(['<select name="ddPrDirection" id="ddPrDirection">',
+			const $directionSelect = jQuery(['<select name="ddPrDirection" id="ddPrDirection">',
 				'<option value="INCOMING">Incoming</option>',
 				'<option value="OUTGOING">Outgoing</option>',
 				'</select>'].join('\n'));
 			$directionSelect.val(pullRequestTable.prDirection || 'INCOMING');
 			$form.append($directionSelect);
 
-			var $branchDropdown = jQuery('<button></button>', {
+			const $branchDropdown = jQuery('<button></button>', {
 				id: 'prSourceSelector',
 				type: 'button',
 				class: 'aui-button searchable-selector-trigger revision-reference-selector-trigger sourceBranch',
 				title: 'Select branch'
 			});
 			$branchDropdown.append('<span class="placeholder">Select branch</span>');
-			var branchSelector = new BranchSelector($branchDropdown, {
+			const branchSelector = new BranchSelector($branchDropdown, {
 				id: 'prSourceBranchSelector',
 				show: { branches: true, tags: false },
 				paginationContext: 'branch-filter-selector'
@@ -1901,7 +1894,7 @@
 
 			new UserMultiSelector($authorsInput, {
 				initialItems: pullRequestTable.prAuthors,
-				dataSource: dataSource,
+				dataSource,
 				placeholder: "Authors filter"
 			}).on("change", function() {
 				pullRequestTable.prAuthors = this.getSelectedItems();
@@ -1910,7 +1903,7 @@
 
 			new UserMultiSelector($reviewersInput, {
 				initialItems: pullRequestTable.prReviewers,
-				dataSource: dataSource,
+				dataSource,
 				placeholder: "Reviewers filter"
 			}).on("change", function() {
 				pullRequestTable.prReviewers = this.getSelectedItems();
@@ -1919,7 +1912,7 @@
 
 			new UserMultiSelector($participantsInput, {
 				initialItems: [],
-				dataSource: dataSource,
+				dataSource,
 				placeholder: "Participants filter"
 			}).on("change", function() {
 				pullRequestTable.prParticipants = this.getSelectedItems();
@@ -1928,7 +1921,7 @@
 
 			new UserMultiSelector($approversInput, {
 				initialItems: [],
-				dataSource: dataSource,
+				dataSource,
 				placeholder: "Approvers filter"
 			}).on("change", function() {
 				pullRequestTable.prApprovers = this.getSelectedItems();
@@ -1955,19 +1948,19 @@
 			});
 
 			events.on('bitbucket.internal.feature.pullRequestsTable.contentAdded', function(data) {
-				var $previousStickers = jQuery('#totalResultStamp');
+				const $previousStickers = jQuery('#totalResultStamp');
 
-				var previousSize = 0;
+				let previousSize = 0;
 				if (data && data.start > 0) {
 					previousSize = parseInt($previousStickers.data('size') || 0);
 				}
 
 				$previousStickers.remove();
 
-				var size = (data && data.size ? data.size : 0) + previousSize;
-				var $stamps = jQuery('<span id="totalResultStamp" class="aui-lozenge declined aui-lozenge-subtle pull-request-state-lozenge aui-lozenge-complete"></span>')
-								.html('Total: ' + size)
-								.data('size', size);
+				const size = (data && data.size ? data.size : 0) + previousSize;
+				const $stamps = jQuery('<span id="totalResultStamp" class="aui-lozenge declined aui-lozenge-subtle pull-request-state-lozenge aui-lozenge-complete"></span>')
+					.html(`Total: ${  size}`)
+					.data('size', size);
 				jQuery('#prSourceSelector').after($stamps);
 			});
 
@@ -1975,11 +1968,11 @@
 				if (start !== 0) {
 					return;
 				}
-				var emptyData = {
-						displayId: "All Branches",
-						id: "",
-						isDefault: false
-					};
+				const emptyData = {
+					displayId: "All Branches",
+					id: "",
+					isDefault: false
+				};
 				data.values.splice(0, 0, emptyData);
 				branchSelector.scrollableDataStores[0] = branchSelector.scrollableDataStores[0] || [];
 				branchSelector.scrollableDataStores[0].splice(0, 0, emptyData);
@@ -1999,21 +1992,20 @@
 		}
 
 		return {
-			addPrFilters: addPrFilters
+			addPrFilters
 		}
 	});
 
+	define('bitbucket-plugin/init', [ 'jquery' ], extensionInit);
 
-	extensionInit();
-
-	function extensionInit() {
-		var pageState;
-		var loadRequirement = jQuery.Deferred();
-		var loadAuiFlag = jQuery.Deferred();
-		var loadPrRequirement = jQuery.Deferred();
+	function extensionInit(jQuery) {
+		let pageState;
+		const loadRequirement = jQuery.Deferred();
+		const loadAuiFlag = jQuery.Deferred();
+		const loadPrRequirement = jQuery.Deferred();
 
 		try {
-			WRM.require("wr!" + 'com.atlassian.auiplugin:aui-flag').then(function(d) {
+			WRM.require("wr!" + 'com.atlassian.auiplugin:aui-flag').then(function() {
 				loadAuiFlag.resolve();
 			});
 		}
@@ -2052,10 +2044,10 @@
 		}
 
 		jQuery.when(loadRequirement, loadAuiFlag, loadPrRequirement).done(function(){
-			var user = pageState.getCurrentUser();
-			var project = pageState.getProject();
-			var repository = pageState.getRepository();
-			var pullRequest = pageState.getPullRequest();
+			const user = pageState.getCurrentUser();
+			const project = pageState.getProject();
+			const repository = pageState.getRepository();
+			const pullRequest = pageState.getPullRequest();
 
 			if(user) {
 				require(['bitbucket-plugin/header-notification'], function(notification) {
@@ -2092,7 +2084,7 @@
 						});
 
 						// PR Reviewers groups (create page)
-						require(['bitbucket-plugin/pullrequest-create-page', 'aui'], function(prCreateUtil, AJS){
+						require(['bitbucket-plugin/pullrequest-create-page'], function(prCreateUtil){
 							if(window.featuresData.prtemplate == 1)
 								prCreateUtil.injectTemplateButton(template);
 							if(window.featuresData.reviewersgroup == 1)
@@ -2105,9 +2097,9 @@
 							require('bitbucket/internal/feature/pull-request/pull-request-table');
 
 							// load missing resources
-							var selectorRes = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:searchable-multi-selector');
-							var userRes = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:user-multi-selector');
-							var branchSelector = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:repository-branch-selector');
+							const selectorRes = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:searchable-multi-selector');
+							const userRes = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:user-multi-selector');
+							const branchSelector = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:repository-branch-selector');
 
 							jQuery.when(selectorRes, userRes, branchSelector).done(function() {
 								require(['bitbucket-plugin/pullrequest-list-page'], function(prListUtil){
@@ -2115,8 +2107,8 @@
 										prListUtil.addPrFilters();
 								});
 							});
-					 	}
-					 	catch(e) { console.warn('not able to load plugin PR filter table', e) }
+						}
+						catch(e) { console.warn('not able to load plugin PR filter table', e) }
 					}
 					else if (pullRequest) {
 						require(['bitbucket-plugin/pullrequest-details-page', 'bitbucket-plugin/pullrequest-create-page'], function(prDetailsPage, prCreateUtil){

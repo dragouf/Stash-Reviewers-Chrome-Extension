@@ -1,57 +1,55 @@
 // ff webextensions workaround
-chrome = chrome || browser;
-var onMessage = chrome.runtime.onMessageExternal;
-if(true || !chrome.runtime.onMessageExternal) {
-	onMessage = chrome.runtime.onMessage;
-}
+chrome = chrome || browser; // eslint-disable-line no-global-assign
+const onMessage = chrome.runtime.onMessageExternal || chrome.runtime.onMessage;
+
+// eslint-disable-next-line no-unused-vars
+let jsonGroups // is assigned here and used in other scripts
 
 // Refresh every 6h
 const REVIEWERS_LIST_REFRESH = 6 * 60 * 60 * 1000;
 
-
 const reloadLists = function() {
 	const promises = [];
-	const arr = new Promise((resolve, reject) => {
-		const groupPromises = [];
-		extensionStorage.loadUrl(urls => {
-			urls.forEach(url => {
-				const p = new Promise((resolve, reject) => {
-					fetch(url)
-					.then((res) => {
-						return res.json();
-					})
-					.then((body) => {
-						if (!body) {
-							return reject({msg: 'Corrupt file', e: {}});
-						}
-						resolve(body);
-					})
-					.catch((err) => {
-						reject({msg: err, e: err});
-					});
-				});
-				groupPromises.push(p);
-			});
-			Promise.all(groupPromises).then(groups => {
-				let joined = [];
-				groups.forEach((group) => {
-					if (group.groups) {
-						joined = joined.concat(group.groups);
+	const groupPromises = [];
+	const arr = extensionStorage.loadUrl().then(urls => {
+		urls.forEach(url => {
+			const p = fetch(url)
+				.then((res) => {
+					return res.json();
+				})
+				.then((body) => {
+					if (!body) {
+						return {msg: 'Corrupt file', e: {}};
 					}
-				});
-				resolve({groups: joined});
+					return body;
+				})
+			groupPromises.push(p);
+		});
+		return Promise.all(groupPromises).then(groups => {
+			let joined = [];
+			groups.forEach((group) => {
+				if (group.groups) {
+					joined = joined.concat(group.groups);
+				}
 			});
+			return {groups: joined};
 		});
 	});
 	promises.push(arr);
 
-	const str = new Promise((resolve, reject) => {
-		extensionStorage.loadGroups(groups => {
-			if (!groups) {
-				return resolve({groups: []});
-			}
-			resolve(JSON.parse(groups));
-		});
+	const str = extensionStorage.loadGroups().then(groups => {
+		if (!groups) {
+			return {groups: []};
+		}
+		if ("string" !== typeof groups) {
+			return groups
+		}
+		try {
+			return JSON.parse(groups);
+		} catch (ex) {
+			console.error("extensionStorage.loadGroups JSON parse failed", ex, groups)
+			return { groups: [] }
+		}
 	});
 	promises.push(str);
 
@@ -65,30 +63,26 @@ const reloadLists = function() {
 		if (joined.length === 0) {
 			throw({msg: 'Groups are empty', e: {}});
 		}
-		return new Promise((resolve, reject) => {
-			extensionStorage.saveGroupsArray(joined, () => {
-				resolve(joined);
-			});
-		});
+		return extensionStorage.saveGroupsArray(joined)
 	}).then(groups => {
 		jsonGroups = groups;
 		console.info('Groups updated', groups);
 	}).catch(console.error);
 };
 
-var tempTabList = [];
-var extensionCommunicationCallback = function(request, sender, callback) {
+let tempTabList = [];
+const extensionCommunicationCallback = function(request, sender, callback) {
 	if (request.action == "xhttp") {
-		var xhttp = new XMLHttpRequest();
-		var method = request.method ? request.method.toUpperCase() : 'GET';
+		const xhttp = new XMLHttpRequest();
+		const method = request.method ? request.method.toUpperCase() : 'GET';
 
-		xhttp.onreadystatechange = function (aEvt) {
-		  if (xhttp.readyState == 4) {
-			 if(xhttp.status == 200)
-				callback({status: xhttp.status, response: xhttp.response, redirect: this.getResponseHeader("Location") || request.url, httpObj: xhttp });
-			 else
-				callback({status: xhttp.status, response: xhttp.response, httpObj: xhttp });
-		  }
+		xhttp.onreadystatechange = function () {
+			if (xhttp.readyState == 4) {
+				if(xhttp.status == 200)
+					callback({status: xhttp.status, response: xhttp.response, redirect: this.getResponseHeader("Location") || request.url, httpObj: xhttp });
+				else
+					callback({status: xhttp.status, response: xhttp.response, httpObj: xhttp });
+			}
 		};
 
 		xhttp.open(method, request.url, true);
@@ -108,11 +102,11 @@ var extensionCommunicationCallback = function(request, sender, callback) {
 	}
 	else if (request.action === 'setBadgeCount') {
 		chrome.browserAction.setBadgeBackgroundColor({ color: [208, 68, 55, 255] });
-		chrome.browserAction.setBadgeText({text: request.badgeCount});;
+		chrome.browserAction.setBadgeText({text: request.badgeCount});
 	}
 	else if (request.action === 'pong') {
 		tempTabList.push(sender.tab.id);
-		var items = {
+		const items = {
 			tabList: tempTabList
 		}
 
@@ -135,82 +129,67 @@ function retrieveActivities() {
 			return;
 		}
 
-		var allPR = [];
-		var deferredResult = jQuery.Deferred();
-		var params = "?start=0&limit=1000&avatarSize=64&withAttributes=true&state=OPEN&order=oldest&role=";
-		var urlPR = items.currentStashBaseUrl + "/rest/inbox/latest/pull-requests" + params;
-		var urlPRNew = items.currentStashBaseUrl + "/rest/api/latest/inbox/pull-requests" + params;
+		const params = "?start=0&limit=1000&avatarSize=64&withAttributes=true&state=OPEN&order=oldest&role=";
+		const urlPR = `${items.currentStashBaseUrl  }/rest/inbox/latest/pull-requests${  params}`;
+		const urlPRNew = `${items.currentStashBaseUrl  }/rest/api/latest/inbox/pull-requests${  params}`;
 
-		var buildUrlPR = function(url, role){
-		  return url + role;
+		const buildUrlPR = function(url, role){
+			return url + role;
 		}
-		var reviewersDefered = jQuery.Deferred()
-		var resolveReviewers = function(data) {
-		  reviewersDefered.resolve();
-		  return data;
-		}
-		var authorDefered = jQuery.Deferred()
-		var resolveAuthor = function(data) {
-		  authorDefered.resolve();
-		  return data;
-		}
-		var mergeResults = function(data){
-			jQuery.merge(allPR, data.values)
-		};
-		var rerunRequest = function(role) {
+		const rerunRequest = function(role) {
 			return function(err) {
-				var resolveDeferred = role === 'reviewer' ? resolveReviewers : resolveAuthor;
-				if(err.status == 404) {
-					return jQuery
-					.get(buildUrlPR(urlPR, role))
-					.then(mergeResults)
-					.then(resolveDeferred);
+				if (err.status == 404) {
+					return fetch(buildUrlPR(urlPR, role))
 				}
+				return Promise.reject(err)
 			}
 		};
-		var rerunRequestReviewers = rerunRequest('reviewer');
-		var rerunRequestAuthor = rerunRequest('author');
+		const rerunRequestReviewers = rerunRequest('reviewer');
+		const rerunRequestAuthor = rerunRequest('author');
 
-		jQuery
-		.get(buildUrlPR(urlPRNew, 'reviewer'))
-		.then(mergeResults)
-		.then(resolveReviewers)
-		.fail(rerunRequestReviewers);
+		const reviewersPromised = fetch(buildUrlPR(urlPRNew, 'reviewer'))
+			.catch(rerunRequestReviewers)
+			.then(res => res.json());
 
-		jQuery
-		.get(buildUrlPR(urlPRNew, 'author'))
-		.then(mergeResults)
-		.then(resolveAuthor)
-		.fail(rerunRequestAuthor);
+		const authorPromised = fetch(buildUrlPR(urlPRNew, 'author'))
+			.catch(rerunRequestAuthor)
+			.then(res => res.json())
 
-		jQuery.when(reviewersDefered, authorDefered).done(function(){
-			var activities = [];
-			var requests = [];
+		Promise.all([reviewersPromised, authorPromised]).then(function([reviewersResult, authorResult]) {
+			if (reviewersResult.errors) { throw reviewersResult.errors }
+			if (authorResult.errors) { throw authorResult.errors }
+			const allPR = reviewersResult.concat(authorResult)
+			let activities;
+			const requests = [];
 			// loop through PRs and request activities
 			allPR.forEach(function(pr){
-				var prLink = '';
+				let prLink = '';
 				if(pr.links && pr.links.self) {
 					prLink = pr.links.self[0].href.replace(items.currentStashBaseUrl, '');
-					prLink = items.currentStashBaseUrl + '/rest/api/1.0' + prLink + '/activities?avatarSize=64';
+					prLink = `${items.currentStashBaseUrl  }/rest/api/1.0${  prLink  }/activities?avatarSize=64`;
 				}
 
 				if(prLink) {
-					requests.push(jQuery.get(prLink)
-					.done(function(activityList){
+					requests.push(fetch(prLink)
+						.then(res => res.json())
+						.then(function(activityList){
 						// get comments after PR was updated
-						jQuery.each(activityList.values, function(index, activity){
-							jQuery.extend(activity, { pullrequest: pr });
-							activities.push(activity);
-						});
-					}));
+							activities = activityList.values.map(function(activity){
+								return Object.assign(activity, { pullrequest: pr });
+							});
+						})
+						// make sure that this promise is always resolved, for `Promise.all` later
+						.catch(err => { console.error(`Request to ${  prLink  } failed`, err)})
+					)
 				}
 			});
 
-			jQuery.when.apply(jQuery, requests).always(function(){
+			// All these requests are always resolved thanks to the `catch` above
+			Promise.all(requests).then(function(){
 				// send retrieved data to page script
 				items.tabList.forEach(function(tabId, index){
 					if (tabId) {
-						chrome.tabs.sendMessage(tabId, { action: "ActivitiesRetrieved", activities: activities, desktopNotification: index === 0 });
+						chrome.tabs.sendMessage(tabId, { action: "ActivitiesRetrieved", activities, desktopNotification: index === 0 });
 					}
 				});
 			});
@@ -220,7 +199,7 @@ function retrieveActivities() {
 }
 
 // periodically check activities if background notification enabled
-extensionStorage.loadBackgroundState(function(response) {
+extensionStorage.loadBackgroundState().then(function(response) {
 	if(typeof response === 'undefined' || response && response.toString() === extensionStorage.backgroundStates.enable.toString()) {
 		chrome.alarms.onAlarm.addListener(retrieveActivities);
 		chrome.alarms.create("retrievedActivitiesAlarm", {periodInMinutes: 1.0} );
@@ -228,20 +207,20 @@ extensionStorage.loadBackgroundState(function(response) {
 });
 
 // update detected bitbucket url each time tabs are opened/closed/updated
-chrome.tabs.onRemoved.addListener(function(tabId) {
+chrome.tabs.onRemoved.addListener(function() {
 	pingAllExistingTabs();
 });
 
-chrome.tabs.onCreated.addListener(function(tabId) {
+chrome.tabs.onCreated.addListener(function() {
 	pingAllExistingTabs();
 });
-chrome.tabs.onUpdated.addListener(function(tabId) {
+chrome.tabs.onUpdated.addListener(function() {
 	pingAllExistingTabs();
 });
 function pingAllExistingTabs() {
 	tempTabList = [];
 	chrome.tabs.query({}, function(tabs){
-		tabs.forEach(function(tab, index){
+		tabs.forEach(function(tab){
 			if (tab && tab.id) {
 				chrome.tabs.sendMessage(tab.id, { action: "ping" });
 			}
@@ -251,9 +230,9 @@ function pingAllExistingTabs() {
 
 
 // Click on extension icon
-chrome.browserAction.onClicked.addListener(function(tab) {
+chrome.browserAction.onClicked.addListener(function() {
 	chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
-		chrome.tabs.create({'url': items.currentStashBaseUrl + '/'}, function(tab) {});
+		chrome.tabs.create({'url': `${items.currentStashBaseUrl}/`});
 	});
 });
 
