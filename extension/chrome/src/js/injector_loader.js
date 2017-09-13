@@ -55,7 +55,7 @@ function injectEngine(){
 
 		// css
 		injectCssFile('css/page_injection.css');
-	});
+	}, console.error.bind(console, "Loading failed"));
 }
 
 function injectBitbucketDetector() {
