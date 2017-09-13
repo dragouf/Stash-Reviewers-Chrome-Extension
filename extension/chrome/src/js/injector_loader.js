@@ -3,11 +3,11 @@ const extensionId = chrome.runtime.id || 'stashFF';
 
 function injectEngine(){
 	const manifest = chrome.runtime.getManifest();
-	createInlineScript("var stashRGEVersion = '" + manifest.version + "'; var chromeExtId='" + extensionId + "'; stashIcon='"+chrome.extension.getURL('img/stash128.png')+"';");
+	createInlineScript(`var stashRGEVersion = '${manifest.version}'; var chromeExtId='${extensionId}'; stashIcon='${chrome.extension.getURL('img/stash128.png')}';`);
 
 	const groupDef = extensionStorage.loadGroupsArray().then(function(data) {
 		if(data) {
-			createInlineScript("var jsonGroups = {groups: " + JSON.stringify(data) + "};");
+			createInlineScript(`var jsonGroups = {groups: ${JSON.stringify(data)}};`);
 		}
 		else {
 			console.warn("reviewers plugin: no data");
@@ -22,31 +22,31 @@ function injectEngine(){
 	});
 
 	const hipchatDef = extensionStorage.loadHipChatUsername().then(function(username){
-		createInlineScript("var hipchatUsername = '" + (username || '') + "';");
+		createInlineScript(`var hipchatUsername = '${username || ''}';`);
 	});
 
 	const templateDef = extensionStorage.loadTemplate().then(function(response) {
-		createInlineScript('var template = "' + response.join(',') + '";');
+		createInlineScript(`var template = "${response.join(',')}";`);
 	});
 
 	const notifStateDef = extensionStorage.loadNotificationState().then(function(response) {
 		const val = (!response || response.toString() === extensionStorage.notificationStates.enable.toString()) ? 1 : 0; // notificationStates.enable by default
-		createInlineScript('var notificationState = "' + val + '";');
+		createInlineScript(`var notificationState = "${val}";`);
 	});
 
 	const notifTypeDef = extensionStorage.loadNotificationType().then(function(response) {
 		const val = (!response || response.toString() === extensionStorage.notificationTypes.prAndMentioned.toString()) ? 0 : 1; // prAndMentioned by default
-		createInlineScript('var notificationType = "' + val + '";');
+		createInlineScript(`var notificationType = "${val}";`);
 	});
 
 	const repomapDef = extensionStorage.loadRepoMap().then(function(response) {
 		const val = response || [];
-		createInlineScript('var repoMapArray = ' + JSON.stringify(val) + ';');
+		createInlineScript(`var repoMapArray = ${JSON.stringify(val)};`);
 	});
 
 	const featuresDef = extensionStorage.loadFeatures().then(function(response) {
 		const val = response || {};
-		createInlineScript('var featuresData = ' + JSON.stringify(val) + ';');
+		createInlineScript(`var featuresData = ${JSON.stringify(val)};`);
 	});
 
 	Promise.all([groupDef, hipchatDef, templateDef, notifStateDef, notifTypeDef, repomapDef, featuresDef]).then(function(){
@@ -91,7 +91,7 @@ function attachListener() {
 			window.postMessage(data, '*');
 		}
 		else if(message && message.action === 'ping') {
-			chrome.runtime.sendMessage({ action: 'pong', url: getSiteBaseURl()  });
+			chrome.runtime.sendMessage({ action: 'pong', url: getSiteBaseURl()});
 		}
 	});
 
@@ -110,7 +110,7 @@ function attachListener() {
 function getSiteBaseURl() {
 	if(!isBitbucket)
 		return;
-	return location.protocol + '//' + location.host;
+	return `${location.protocol}//${location.host}`;
 }
 
 function createInlineScript(code) {
