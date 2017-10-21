@@ -71,7 +71,7 @@ just go to options panel and enable or disable features you want.
 ##### Configure reviewers groups
 A "Stash" icon will appear on the top right corner of chrome window. Click on it. It will ask you to add a json to describe which group you want to create with which reviewers.
 
-![GitHub Logo](/docs/configuration_resized.png)
+![Configuration](/docs/configuration_resized.png)
 
 Json format is as follow :
 
@@ -90,12 +90,20 @@ Json format is as follow :
 ##### Using centralized lists
 If you want to share one list between more users. You need to upload .json file so it is accessible by everyone. Then you just add URL to `URL to json` field. There can be more sources. All lists from files and from JSON field are merged together. Remote lists are reloaded on launch and every 6 hours.
 
-![GitHub Logo](/docs/add_urls.png)
+![Add Urls](/docs/add_urls.png)
 
 After that when you will go to pull request creation page or update page a dropdown will appear after reviewers list with a list of groups you defined.
 
-![GitHub Logo](/docs/add_group.png)
+![Add Group](/docs/add_group.png)
 
 **Note**: the extension will make a bitbucket server api request to find reviewers. It will simply send the string you added in the reviewers array as search term. Normally if you add email or username as recommanded API should return only one user. You can also enter a name but in this case if the API return more than one user, only the first one will be added.
 
+#### Using centralized template
+
+If you want to share template between more users. You need to upload template
+in text format on server accessible to everyone. Then just add URL in template
+tab to `Template URL` and save. After save, template is downloaded overwrites
+manual template stored. Remote template is reloaded on launch and every 6 hours.
+
+![Template Tab](/docs/configuration_template.png)
 

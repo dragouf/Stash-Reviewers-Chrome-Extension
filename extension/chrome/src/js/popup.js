@@ -61,6 +61,10 @@ document.addEventListener("DOMContentLoaded", function() {
 			$('#template_text').value = template.join('\n');
 		});
 
+		extensionStorage.loadTemplateUrl().then(function(templateUrl){
+			$('#template_url').value = templateUrl;
+		});
+
 		extensionStorage.loadRepoMap().then(function(repoMap){
 			if(Array.isArray(repoMap) && repoMap.length > 0) {
 				repoMap.forEach(createNewMapInputs);
@@ -191,8 +195,31 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	function saveTemplate() {
 		const templateEl = $('#template_text');
+		const templateUrlEl = $('#template_url');
+		if (templateUrlEl && templateUrlEl.value) {
+			const teamplateUrl = templateUrlEl.value
+			return extensionStorage.loadTemplateFromUrl(teamplateUrl)
+				.catch(error => {
+					console.error(error)
+					throw({msg: 'loading template failed'})
+				})
+				.then(template => {
+					const templateString = template.join('\n')
+					$('#template_text').value = templateString;
+					return Promise.all([
+						extensionStorage.saveTemplateUrl(teamplateUrl),
+						extensionStorage.saveTemplate(templateString)
+					])
+				})
+				.catch(error => {
+					throw({msg: error.msg || JSON.stringify(error).message})
+				})
+		}
 		if (templateEl) {
-			return extensionStorage.saveTemplate(templateEl.value)
+			return Promise.all([
+				extensionStorage.saveTemplateUrl(''),
+				extensionStorage.saveTemplate(templateEl.value)
+			])
 		}
 		return Promise.resolve()
 	}
