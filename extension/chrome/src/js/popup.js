@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	function bindAddFile() {
 		$('#bt_add_file').addEventListener('click', function() {
 			const nr = $$('.json_url').length + 1;
-			$('#json_urls').insertAdjacentHTML('beforeend', `<input class="form-control json_url" id="json_url_${ nr }" type="text"></input>`);
+			$('#json_urls').insertAdjacentHTML('beforeend', `<input class="form-control json_url" id="json_url_${ nr }" type="text">`);
 		});
 	}
 
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			if (items.length > 0) {
 				$('#json_url_1').remove();
 				items.forEach((url, index) => {
-					const input = `<input class="form-control json_url" id="json_url_${index + 1}" type="text" value="${url}"></input>`;
+					const input = `<input class="form-control json_url" id="json_url_${index + 1}" type="text" value="${url}">`;
 					$('#json_urls').insertAdjacentHTML('beforeend', input);
 				});
 			}
