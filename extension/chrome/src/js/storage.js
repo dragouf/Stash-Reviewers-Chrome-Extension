@@ -192,17 +192,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 
 	function loadTemplateUrl() {
 		return storagePromised.get()
-			.then(function(items) {
-				if (!items) {
-					return ''
-				}
-				const templateUrl = items[TEMPLATE_URL_KEY];
-				if (!templateUrl) {
-					return ''
-				} else {
-					return templateUrl;
-				}
-			});
+			.then(items => ((items && items[TEMPLATE_URL_KEY]) || ''));
 	}
 
 	function saveTemplateUrl(string) {

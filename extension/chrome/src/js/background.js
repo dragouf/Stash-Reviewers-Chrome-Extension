@@ -74,12 +74,9 @@ const reloadTemplate = function() {
 	extensionStorage.loadTemplateUrl()
 		.then(extensionStorage.loadTemplateFromUrl)
 		.then(template => {
-			if (!template) {
-				return
-			}
 			return extensionStorage.saveTemplate(template.join('\n'));
 		})
-		.then(() => console.info('Teamplate updated'))
+		.then(() => console.info('Template updated'))
 		.catch(error => {
 			console.error('Error loading template', error)
 		})
