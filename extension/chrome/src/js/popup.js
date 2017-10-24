@@ -153,7 +153,12 @@ document.addEventListener("DOMContentLoaded", function() {
 		newUrls.forEach(url => {
 			const p = new Promise((resolve, reject) => {
 				fetch(url)
-					.then((res) => res.json())
+					.then((res) => {
+						if (!res.ok) {
+							return reject({msg: 'Network response was not OK', e: {}})
+						}
+						return res.json()
+					})
 					.then((body) => {
 						if (!body) {
 							return reject({msg: 'Corrupt file', e: {}});
@@ -325,7 +330,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		mapIndex++;
 	}
 
-	function switchNavTab(el) { 
+	function switchNavTab(el) {
 		el.addEventListener("click", function(e) {
 			e.preventDefault();
 			// active class on tab LI

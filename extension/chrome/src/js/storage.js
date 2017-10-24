@@ -184,7 +184,12 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 			return Promise.resolve()
 		}
 		return fetch(url)
-			.then(res => res.text())
+			.then(res => {
+				if (!res.ok) {
+					return Promise.reject('Network response was not OK')
+				}
+				return res.text()
+			})
 			.then(data =>
 				data.replace("\r", '').split("\n"))
 			.catch(error => Promise.reject(`Error loading template ${error.toString()}`))
