@@ -99,7 +99,6 @@ After that when you will go to pull request creation page or update page a dropd
 **Note**: the extension will make a bitbucket server api request to find reviewers. It will simply send the string you added in the reviewers array as search term. Normally if you add email or username as recommanded API should return only one user. You can also enter a name but in this case if the API return more than one user, only the first one will be added.
 
 #### Using centralized template
-
 If you want to share template between more users. You need to upload template
 in text format on server accessible to everyone. Then just add URL in template
 tab to `Template URL` and save. After save, template is downloaded overwrites
@@ -107,3 +106,17 @@ manual template stored. Remote template is reloaded on launch and every 6 hours.
 
 ![Template Tab](/docs/configuration_template.png)
 
+### Development troubleshooting
+Firefox in development mode logs **Error: The storage API will not work with a temporary addon ID. Please add an explicit addon ID to your manifest. For more information see https://bugzil.la/1323228.**
+
+How to fix: add a temporary key to your `manifest.json`:
+
+```js
+{
+	"applications": {
+		"gecko": {
+			"id": "dev@example.com"
+		}
+	},
+	"manifest_version": 2,
+```

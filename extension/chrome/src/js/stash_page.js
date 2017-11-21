@@ -1,7 +1,7 @@
 /* eslint-env amd */
 /* globals bitbucket, aui, WRM, AJS, template */
 
-(function() {
+;(function() {
 	// bitbucket page must have require function
 	if(typeof window.define === 'undefined' || typeof window.require === 'undefined' || typeof window.bitbucket === 'undefined')
 		return;
@@ -1996,7 +1996,7 @@
 		}
 	});
 
-	define('bitbucket-plugin/init', [ 'jquery' ], extensionInit);
+	require([ 'jquery' ], extensionInit);
 
 	function extensionInit(jQuery) {
 		let pageState;

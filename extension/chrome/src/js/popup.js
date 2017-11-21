@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 
 	function displayErrorLabel(error) {
-		$('#optionErrorAlert').innerHTML = `Error: ${error.msg}`;
+		$('#optionErrorAlert').textContent = `Error: ${error.msg}`;
 		$('#optionErrorAlert').classList.remove('hidden');
 	}
 
