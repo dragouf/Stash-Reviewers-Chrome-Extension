@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	function bindAddFile() {
 		$('#bt_add_file').addEventListener('click', function() {
 			const nr = $$('.json_url').length + 1;
-			$('#json_urls').insertAdjacentHTML('beforeend', `<input class="form-control json_url" id="json_url_${ nr }" type="text"></input>`);
+			$('#json_urls').insertAdjacentHTML('beforeend', `<input class="form-control json_url" id="json_url_${ nr }" type="text">`);
 		});
 	}
 
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			if (items.length > 0) {
 				$('#json_url_1').remove();
 				items.forEach((url, index) => {
-					const input = `<input class="form-control json_url" id="json_url_${index + 1}" type="text" value="${url}"></input>`;
+					const input = `<input class="form-control json_url" id="json_url_${index + 1}" type="text" value="${url}">`;
 					$('#json_urls').insertAdjacentHTML('beforeend', input);
 				});
 			}
@@ -59,6 +59,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
 		extensionStorage.loadTemplate().then(function(template){
 			$('#template_text').value = template.join('\n');
+		});
+
+		extensionStorage.loadTemplateUrl().then(function(templateUrl){
+			$('#template_url').value = templateUrl;
 		});
 
 		extensionStorage.loadRepoMap().then(function(repoMap){
@@ -149,7 +153,12 @@ document.addEventListener("DOMContentLoaded", function() {
 		newUrls.forEach(url => {
 			const p = new Promise((resolve, reject) => {
 				fetch(url)
-					.then((res) => res.json())
+					.then((res) => {
+						if (!res.ok) {
+							return reject({msg: 'Network response was not OK', e: {}})
+						}
+						return res.json()
+					})
 					.then((body) => {
 						if (!body) {
 							return reject({msg: 'Corrupt file', e: {}});
@@ -191,8 +200,31 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	function saveTemplate() {
 		const templateEl = $('#template_text');
+		const templateUrlEl = $('#template_url');
+		if (templateUrlEl && templateUrlEl.value) {
+			const teamplateUrl = templateUrlEl.value
+			return extensionStorage.loadTemplateFromUrl(teamplateUrl)
+				.catch(error => {
+					console.error(error)
+					throw({msg: 'loading template failed'})
+				})
+				.then(template => {
+					const templateString = template.join('\n')
+					$('#template_text').value = templateString;
+					return Promise.all([
+						extensionStorage.saveTemplateUrl(teamplateUrl),
+						extensionStorage.saveTemplate(templateString)
+					])
+				})
+				.catch(error => {
+					throw({msg: error.msg || JSON.stringify(error).message})
+				})
+		}
 		if (templateEl) {
-			return extensionStorage.saveTemplate(templateEl.value)
+			return Promise.all([
+				extensionStorage.saveTemplateUrl(''),
+				extensionStorage.saveTemplate(templateEl.value)
+			])
 		}
 		return Promise.resolve()
 	}
@@ -298,7 +330,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		mapIndex++;
 	}
 
-	function switchNavTab(el) { 
+	function switchNavTab(el) {
 		el.addEventListener("click", function(e) {
 			e.preventDefault();
 			// active class on tab LI

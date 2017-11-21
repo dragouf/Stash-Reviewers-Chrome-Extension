@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "Bitbucket Server Extension",
 	"description": "Allow to add group of reviewers for pull request in bitbucket server + other features",
-	"version": "2.2.11",
+	"version": "2.2.12",
 	"permissions": [
 		"storage",
 		"alarms",

@@ -6,6 +6,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 	const REVIEWERS_URL_KEY = 'stashplugin.reviewers_url';
 	const HIPCHAT_KEY = 'stashplugin.hipchat';
 	const TEMPLATE_KEY = 'stashplugin.template';
+	const TEMPLATE_URL_KEY = 'stashplugin.template_url';
 	const BACKGROUNDSTATE_KEY = 'stashplugin.backgroundstate';
 	const NOTIFSTATE_KEY = 'stashplugin.notifstate';
 	const NOTIFTYPE_KEY = 'stashplugin.notiftype';
@@ -63,7 +64,7 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 			})
 		}
 	}
-	
+
 	/**
 		@method
 		@memberof storage
@@ -159,6 +160,10 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 				if (!items) {
 					return loadDefaultTemplate()
 				}
+				const templateUrl = items[TEMPLATE_URL_KEY];
+				if (templateUrl) {
+					return loadTemplateFromUrl(templateUrl)
+				}
 				const template = items[TEMPLATE_KEY];
 				if (!template) {
 					return loadDefaultTemplate()
@@ -167,9 +172,37 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 				}
 			});
 	}
+
 	function saveTemplate(string) {
 		const data = {};
 		data[TEMPLATE_KEY] = string.split('\n');
+		return storagePromised.set(data);
+	}
+
+	function loadTemplateFromUrl(url) {
+		if (!url) {
+			return Promise.resolve()
+		}
+		return fetch(url)
+			.then(res => {
+				if (!res.ok) {
+					return Promise.reject('Network response was not OK')
+				}
+				return res.text()
+			})
+			.then(data =>
+				data.replace("\r", '').split("\n"))
+			.catch(error => Promise.reject(`Error loading template ${error.toString()}`))
+	}
+
+	function loadTemplateUrl() {
+		return storagePromised.get()
+			.then(items => ((items && items[TEMPLATE_URL_KEY]) || ''));
+	}
+
+	function saveTemplateUrl(string) {
+		const data = {};
+		data[TEMPLATE_URL_KEY] = string;
 		return storagePromised.set(data);
 	}
 
@@ -256,6 +289,9 @@ const extensionStorage = (function() { // eslint-disable-line no-unused-vars
 		loadUrl,
 		loadTemplate,
 		saveTemplate,
+		loadTemplateFromUrl,
+		loadTemplateUrl,
+		saveTemplateUrl,
 		loadHipChatUsername,
 		saveHipChatUsername,
 		loadBackgroundState,

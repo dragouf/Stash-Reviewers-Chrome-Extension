@@ -70,6 +70,23 @@ const reloadLists = function() {
 	}).catch(console.error);
 };
 
+const reloadTemplate = function() {
+	extensionStorage.loadTemplateUrl()
+		.then(extensionStorage.loadTemplateFromUrl)
+		.then(template => {
+			return extensionStorage.saveTemplate(template.join('\n'));
+		})
+		.then(() => console.info('Template updated'))
+		.catch(error => {
+			console.error('Error loading template', error)
+		})
+}
+
+const realoadAll = function() {
+	reloadLists();
+	reloadTemplate();
+}
+
 let tempTabList = [];
 const extensionCommunicationCallback = function(request, sender, callback) {
 	if (request.action == "xhttp") {
@@ -236,5 +253,5 @@ chrome.browserAction.onClicked.addListener(function() {
 	});
 });
 
-setInterval(reloadLists, REVIEWERS_LIST_REFRESH);
-reloadLists();
+setInterval(realoadAll, REVIEWERS_LIST_REFRESH);
+realoadAll();
