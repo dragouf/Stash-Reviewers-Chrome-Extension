@@ -98,4 +98,18 @@ After that when you will go to pull request creation page or update page a dropd
 
 **Note**: the extension will make a bitbucket server api request to find reviewers. It will simply send the string you added in the reviewers array as search term. Normally if you add email or username as recommanded API should return only one user. You can also enter a name but in this case if the API return more than one user, only the first one will be added.
 
+### Development troubleshooting
 
+Firefox in development mode logs **Error: The storage API will not work with a temporary addon ID. Please add an explicit addon ID to your manifest. For more information see https://bugzil.la/1323228.**
+
+How to fix: add a temporary key to your `manifest.json`:
+
+```js
+{
+	"applications": {
+		"gecko": {
+			"id": "dev@example.com"
+		}
+	},
+	"manifest_version": 2,
+```
