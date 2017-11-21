@@ -53,7 +53,7 @@ OR from the code source of this repository:
 - From there choose the extension/chrome/src folder of this repository.
 
 #### Firefox (webextensions)
-you can find this module on mozilla addons website here: https://addons.mozilla.org/en-US/firefox/addon/bitbucket-server-extension/
+you can find this module on mozilla addons website here: https://addons.mozilla.org/en-US/firefox/addon/bitbucket-server-reviewers/
 
 OR from this repository:
 
