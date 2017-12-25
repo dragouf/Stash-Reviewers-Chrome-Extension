@@ -53,15 +53,7 @@ OR from the code source of this repository:
 - From there choose the extension/chrome/src folder of this repository.
 
 #### Firefox (webextensions)
-you can find this module on mozilla addons website here: https://addons.mozilla.org/en-US/firefox/addon/bitbucket-server-reviewers/
-
-OR from this repository:
-
-- download last .xpi (according to version number) from extension/firefox/dist/ 
-- go to extensions panel and click on the tools icon on the right next to the search field and select : Install add-on from file.
-- then browse extension/firefox/dist and select the xpi file.
-
-Note: if ff version is greater than 41 you will have to change xpinstall.signatures.required value to false in about:config page.
+you can find this module on mozilla addons website here: https://addons.mozilla.org/en-US/firefox/addon/bitbucket-server/
 
 ### Configuration
 
