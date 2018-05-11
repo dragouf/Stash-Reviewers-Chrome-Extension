@@ -7,7 +7,7 @@
 		return;
 
 	// workaround to fix missing firefox onMessageExternal
-	if(typeof window.chrome === 'undefined') {
+	if(!window.chrome || !window.chrome.runtime || typeof(window.chrome.runtime.sendMessage) !== 'function') {
 		window.communication = {
 			runtime : {
 				sendMessage(extId, msg, callback) {
