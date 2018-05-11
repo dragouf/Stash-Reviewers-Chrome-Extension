@@ -2129,7 +2129,7 @@
 							// replace jira link
 							prDetailsPage.replaceJiraLink();
 							// Reviewers groups (edit page)
-							AJS.bind("show.dialog", function() {
+							AJS.dialog2.on("show", function() {
 								if(window.featuresData.prtemplate == 1)
 									prCreateUtil.injectTemplateButton(template);
 								if(window.featuresData.reviewersgroup == 1)
