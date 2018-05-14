@@ -2129,12 +2129,15 @@
 							// replace jira link
 							prDetailsPage.replaceJiraLink();
 							// Reviewers groups (edit page)
-							AJS.dialog2.on("show", function() {
+							AJS.bind("show.dialog", inject);
+							AJS.dialog2.on("show", inject);
+
+							function inject() {
 								if(window.featuresData.prtemplate == 1)
 									prCreateUtil.injectTemplateButton(template);
 								if(window.featuresData.reviewersgroup == 1)
 									prCreateUtil.injectReviewersDropdown(jsonGroups);
-							});
+							}
 						});
 					}
 				});
