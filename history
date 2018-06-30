@@ -1,4 +1,13 @@
+2.2.14
+===================
+- bugfix #49: extension does not work in new chrome
+- feature: add support for newer bitbucket dialog
+
 2.2.13
+=======
+- bugfix #45: empty PR dropdown
+
+2.2.12
 ===================
 - feature: add support for centralized template
 - remove jquery dependency to publish firefox plugin
