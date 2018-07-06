@@ -1468,7 +1468,9 @@
 					url: 'https://raw.githubusercontent.com/dragouf/Stash-Reviewers-Chrome-Extension/master/version'
 				}, function(data) {
 					if(!data) {
-						data.response = 'cant.reach.github';
+						data = {
+							response: 'cant.reach.github'
+						};
 					}
 					else if ((data.response || { response: '' }).length > 10) {
 						// it's not version file we retrieved
@@ -2032,12 +2034,16 @@
 
 		// improve PR page
 		try {
-			WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:pull-request-table').then(function(){
-				require(['bitbucket-plugin/pullrequest-list-modifier'], function(prListModifier) {
-					prListModifier.redefinePullRequestTable();
-					loadPrRequirement.resolve();
+				if (window.location.pathname.split('/').pop() === 'pull-requests') {
+					WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:pull-request-table').then(function(){
+						require(['bitbucket-plugin/pullrequest-list-modifier'], function(prListModifier) {
+							prListModifier.redefinePullRequestTable();
+							loadPrRequirement.resolve();
+						});
 				});
-			});
+			} else {
+				loadPrRequirement.resolve();
+			}
 		}
 		catch (_) {
 			loadPrRequirement.resolve();
@@ -2094,7 +2100,7 @@
 						// PR Filter
 						try {
 							// are we on the pull request list page ? raise exception if not
-							require('bitbucket/internal/feature/pull-request/pull-request-table');
+							require('bitbucket/internal/feature/pull-request/table/pull-request-table');
 
 							// load missing resources
 							const selectorRes = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:searchable-multi-selector');

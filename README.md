@@ -21,10 +21,10 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian B
     * Highlight disappear when you visit the related PR page
     * Highlight state is save on the localStorage
     * Note: there is 2 kind of highlight: strong blue is when you see it for the first time (open panel for the first time), light blue is when activity was already there when you opened panel previously.
-* Add filter to the PR list 
+* Add filter to the PR list
     * filter by: Author, Reviewers, Participants (people who participate to the PR even if they are not reviewers), Approvers (PR approved by specific reviewers), Direction, Branch
-    * Note: each filter is a AND per PR and not a OR. 
-    * It mean that you can add only one Author or you will get no result (since there is only one author by PR). 
+    * Note: each filter is a AND per PR and not a OR.
+    * It mean that you can add only one Author or you will get no result (since there is only one author by PR).
     * And ALL reviewers/participants/approvers must exist in the PR or it won't be display
 * Add highlighted header to outdated file in pull request details page instead of the small sticker on the right to improve readability
 * Add clickable branch text (origin and target) in the pull request details page to go to the corresponding repository easily
@@ -36,7 +36,7 @@ This chrome/firefox extension allow to define groups of reviewers in Atlassian B
 * Check for new version
 * Settings
     * user can choose features to enable/disable inside extension option
-    * user can choose to receive desktop notification only for comments on his PR, mention or answer. 
+    * user can choose to receive desktop notification only for comments on his PR, mention or answer.
     * user can map a repository name to a specific name to match his remote name in git
 
 ### Installation
@@ -47,17 +47,18 @@ you can find this extension on chrome webstore here: https://chrome.google.com/w
 OR from the code source of this repository:
 
 - clone this repository
-- Go to chrome settings->extensions (extension manager) 
+- Go to chrome settings->extensions (extension manager)
 - Check the "Developer Mode" checkbox
 - Click on "Load unpacked extension" button.
 - From there choose the extension/chrome/src folder of this repository.
 
 #### Firefox (webextensions)
-you can find this module on mozilla addons website here: https://addons.mozilla.org/en-US/firefox/addon/bitbucket-server-reviewers/
+
+you can find this module on mozilla addons website here: https://addons.mozilla.org/en-US/firefox/addon/bitbucket-server-extension/
 
 OR from this repository:
 
-- download last .xpi (according to version number) from extension/firefox/dist/ 
+- download last .xpi (according to version number) from extension/firefox/dist/
 - go to extensions panel and click on the tools icon on the right next to the search field and select : Install add-on from file.
 - then browse extension/firefox/dist and select the xpi file.
 
@@ -76,13 +77,13 @@ A "Stash" icon will appear on the top right corner of chrome window. Click on it
 Json format is as follow :
 
 ```
-{ "groups": [ { 
-    "groupName":"first group name", 
-    "reviewers": ["first reviewer name or email"] 
+{ "groups": [ {
+    "groupName":"first group name",
+    "reviewers": ["first reviewer name or email"]
   },
-  { 
-    "groupName":"second group name", 
-    "reviewers": ["first reviewer name or email", "second reviewer name or email"] 
+  {
+    "groupName":"second group name",
+    "reviewers": ["first reviewer name or email", "second reviewer name or email"]
   } ] }
 ```
 
@@ -105,8 +106,8 @@ tab to `Template URL` and save. After save, template is downloaded overwrites
 manual template stored. Remote template is reloaded on launch and every 6 hours.
 
 ![Template Tab](/docs/configuration_template.png)
-
 ### Development troubleshooting
+
 Firefox in development mode logs **Error: The storage API will not work with a temporary addon ID. Please add an explicit addon ID to your manifest. For more information see https://bugzil.la/1323228.**
 
 How to fix: add a temporary key to your `manifest.json`:
