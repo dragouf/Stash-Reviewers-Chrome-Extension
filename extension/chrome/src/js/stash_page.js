@@ -7,7 +7,7 @@
 		return;
 
 	// workaround to fix missing firefox onMessageExternal
-	if(typeof window.chrome === 'undefined') {
+	if(!window.chrome || !window.chrome.runtime || typeof(window.chrome.runtime.sendMessage) !== 'function') {
 		window.communication = {
 			runtime : {
 				sendMessage(extId, msg, callback) {
@@ -2129,12 +2129,15 @@
 							// replace jira link
 							prDetailsPage.replaceJiraLink();
 							// Reviewers groups (edit page)
-							AJS.bind("show.dialog", function() {
+							AJS.bind("show.dialog", inject);
+							AJS.dialog2.on("show", inject);
+
+							function inject() {
 								if(window.featuresData.prtemplate == 1)
 									prCreateUtil.injectTemplateButton(template);
 								if(window.featuresData.reviewersgroup == 1)
 									prCreateUtil.injectReviewersDropdown(jsonGroups);
-							});
+							}
 						});
 					}
 				});
