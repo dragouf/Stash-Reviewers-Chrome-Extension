@@ -2101,14 +2101,14 @@
 						try {
 							// Are we on the pull request list page ? raise exception if not
 							try {
-								require('bitbucket/internal/feature/pull-request/table/pull-request-table');
-							} catch(e1) {
-								// Attempt to load legacy pull request list page
 								try {
+									require('bitbucket/internal/feature/pull-request/table/pull-request-table');
+								} catch(e1) {
+									// Attempt to load legacy pull request list page
 									require('bitbucket/internal/feature/pull-request/pull-request-table');
-								} catch(e2) {
-									throw "Could not find resource 'pull-request-table'"
 								}
+							} catch(e2) {
+								throw "Could not find resource 'pull-request-table'"
 							}
 
 							// Load missing resources
