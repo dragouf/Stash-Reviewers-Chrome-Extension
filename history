@@ -1,3 +1,7 @@
+2.2.15
+===================
+- legacy support
+
 2.2.14
 ===================
 - bugfix #49: extension does not work in new chrome
