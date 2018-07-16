@@ -2034,12 +2034,12 @@
 
 		// improve PR page
 		try {
-				if (window.location.pathname.split('/').pop() === 'pull-requests') {
-					WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:pull-request-table').then(function(){
-						require(['bitbucket-plugin/pullrequest-list-modifier'], function(prListModifier) {
-							prListModifier.redefinePullRequestTable();
-							loadPrRequirement.resolve();
-						});
+			if (window.location.pathname.split('/').pop() === 'pull-requests') {
+				WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:pull-request-table').then(function(){
+					require(['bitbucket-plugin/pullrequest-list-modifier'], function(prListModifier) {
+						prListModifier.redefinePullRequestTable();
+						loadPrRequirement.resolve();
+					});
 				});
 			} else {
 				loadPrRequirement.resolve();
@@ -2099,10 +2099,19 @@
 
 						// PR Filter
 						try {
-							// are we on the pull request list page ? raise exception if not
-							require('bitbucket/internal/feature/pull-request/table/pull-request-table');
+							// Are we on the pull request list page ? raise exception if not
+							try {
+								try {
+									require('bitbucket/internal/feature/pull-request/table/pull-request-table');
+								} catch(e1) {
+									// Attempt to load legacy pull request list page
+									require('bitbucket/internal/feature/pull-request/pull-request-table');
+								}
+							} catch(e2) {
+								throw "Could not find resource 'pull-request-table'"
+							}
 
-							// load missing resources
+							// Load missing resources
 							const selectorRes = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:searchable-multi-selector');
 							const userRes = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:user-multi-selector');
 							const branchSelector = WRM.require("wr!" + 'com.atlassian.bitbucket.server.bitbucket-web:repository-branch-selector');
@@ -2114,7 +2123,7 @@
 								});
 							});
 						}
-						catch(e) { console.warn('not able to load plugin PR filter table', e) }
+						catch(e) { console.warn('not able to load plugin PR filter table.', e) }
 					}
 					else if (pullRequest) {
 						require(['bitbucket-plugin/pullrequest-details-page', 'bitbucket-plugin/pullrequest-create-page'], function(prDetailsPage, prCreateUtil){
