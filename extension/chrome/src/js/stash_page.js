@@ -1546,8 +1546,7 @@
 			//redefined filter builder to include new parameters
 			PullRequestsTable.prototype.buildUrl = function (start, limit) {
 				const self = this;
-				let builder = self.getPullRequestsUrlBuilder()
-					.withParams({
+				let builder = self.pullRequestsNavBuilder().withParams({
 						start,
 						limit,
 						avatarSize: bitbucket.internal.widget.avatarSizeInPx({ size: 'medium' }),
@@ -1769,8 +1768,8 @@
 			}
 			jQuery('.spinner').show();
 
-			function getPullRequestsUrlBuilder(state) {
-				return nav.rest().currentRepo().allPullRequests().withParams({ state });
+			function getPullRequestsUrlBuilder() {
+				return nav.rest().currentRepo().allPullRequests();
 			}
 
 			// recreate table to control it
@@ -1784,7 +1783,7 @@
 			const $authorFilterOrigin = jQuery('#s2id_pr-author-filter');
 			const authorData = $authorFilterOrigin.length > 0 ? $authorFilterOrigin.data('select2').data() : null;
 
-			const order = /*state.toLowerCase() === 'open' ? 'oldest' :*/ 'newest';
+			const order = 'newest';
 
 			const notFoundMsg = AJS.messages.info({
 				title:"No Results",
@@ -1802,8 +1801,9 @@
 			// add container for new
 			jQuery('#pull-requests-content').empty();
 			jQuery('#pull-requests-content').append('<div id="pull-requests-table-container-filtered"></div>');
+			jQuery('#pull-requests-table-container-filtered').append(bitbucket.internal.feature.pullRequest.pullRequestTable({}, {}))
 
-			const pullRequestTable = new PullRequestsTable(state, order, getPullRequestsUrlBuilder, {
+			const pullRequestTable = new PullRequestsTable(getPullRequestsUrlBuilder, {
 				noneFoundMessageHtml: notFoundMsg,
 				initialData: fakeResult,
 				paginationContext: 'pull-request-table-filtered',
@@ -1815,6 +1815,8 @@
 
 
 			// add missing properties
+			pullRequestTable.prState = state;
+			pullRequestTable.prOrder = order;
 			pullRequestTable.prAuthors = author && authorData ? [authorData._stash] : [];
 			pullRequestTable.prReviewers = reviewing ? [pageState.getCurrentUser()] : [];
 			pullRequestTable.prParticipants = [];
@@ -1843,6 +1845,7 @@
 				'<option value="OPEN">Open</option>',
 				'<option value="MERGED">Merged</option>',
 				'<option value="DECLINED">Declined</option>',
+				'<option value="ALL">All</option>',
 				'</select>'].join('\n'));
 			$stateSelect.val(pullRequestTable.prState || 'OPEN');
 			$form.append($stateSelect);
