@@ -28,7 +28,7 @@
 				"js/storage.js",
 				"js/injector_loader.js"
 			],
-			"matches": ["<all_urls>"]
+			"matches": ["*://*.bitbucket.org/*", "*://*.atlassian.com/*"]
 		}
 	],
 	"background": {
