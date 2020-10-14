@@ -255,3 +255,61 @@ chrome.browserAction.onClicked.addListener(function() {
 
 setInterval(realoadAll, REVIEWERS_LIST_REFRESH);
 realoadAll();
+
+
+
+
+/* Code for handling user-defined hosts.
+** We keep a list of regular expression for each user-defined-host.
+** Then, when a tab is navigated, we match its URL against the list of regular expression
+** If there is a match, the content scripts files are injected in the tab....
+*/
+var listsOfUserDefinedHostsRegexp = {};
+
+function tabsOnCreatedListener(tabId, changeInfo, tab) {
+	if (changeInfo && changeInfo.status == 'complete')  {
+		for (regex in listsOfUserDefinedHostsRegexp) {
+			if (listsOfUserDefinedHostsRegexp[regex].test(tab.url)) {
+				// Inject the content here
+				chrome.tabs.executeScript(tabId, {
+					allFrames: true, file: "js/storage.js"
+				});
+				chrome.tabs.executeScript(tabId, {
+					allFrames: true, file: "js/injector_loader.js"
+				});
+				break;
+			}
+		}
+	}
+}
+
+function handleUserDefinedHosts() {
+	chrome.storage.sync.get('user_defined_hosts', userhosts => {
+		let uhosts = userhosts.user_defined_hosts || [];
+		if (uhosts.length > 0) {
+			// 
+			for (let host of uhosts) {
+				if (!(host in listsOfUserDefinedHostsRegexp)) {
+					listsOfUserDefinedHostsRegexp[host] = formatHosts(host)
+				}
+			}
+		}
+	});
+}
+
+
+function formatHosts(host) {
+	if (host == '<all_urls>')
+		host = ':*://*/*'
+	host = host.replace(/\./g, '\\.');
+	host = host.replace(/\//g, '\\\/');
+	host = host.replace(/\*/g, '.*');
+	host = host.replace(":\\/\\/.*\\.", ":\/\/(.+\\.)?")
+
+	host = "^" + host + "$"
+	return new RegExp(host)
+}
+
+handleUserDefinedHosts();
+chrome.tabs.onUpdated.addListener(tabsOnCreatedListener);
+

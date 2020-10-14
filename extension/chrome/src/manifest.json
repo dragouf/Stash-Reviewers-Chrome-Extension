@@ -19,7 +19,8 @@
 		"default_icon": {
 			"19": "img/stash48.png",
 			"38": "img/stash48.png"
-		}
+		},
+		"default_popup": "userhosts.html"
 	},
 	"content_scripts": [
 		{
@@ -28,7 +29,7 @@
 				"js/storage.js",
 				"js/injector_loader.js"
 			],
-			"matches": ["<all_urls>"]
+			"matches": ["*://*.bitbucket.org/*", "*://*.atlassian.com/*"]
 		}
 	],
 	"background": {
