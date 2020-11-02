@@ -174,7 +174,7 @@ function retrieveActivities() {
 
 		Promise.all([reviewersPromised, authorPromised]).then(function([reviewersResult, authorResult]) {
 			if (reviewersResult.errors) { throw reviewersResult.errors }
-            if (authorResult.errors) { throw authorResult.errors }
+			if (authorResult.errors) { throw authorResult.errors }
 			const allPR = reviewersResult.values.concat(authorResult.values);
 			let activities;
 			const requests = [];
@@ -250,11 +250,11 @@ function pingAllExistingTabs() {
 chrome.browserAction.onClicked.addListener(handleExtensionClick);
 
 function handleExtensionClick() {
-    chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
-        if (items.currentStashBaseUrl) {
-            chrome.tabs.create({'url': `${items.currentStashBaseUrl}/`});
-        }
-    });
+	chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
+		if (items.currentStashBaseUrl) {
+			chrome.tabs.create({'url': `${items.currentStashBaseUrl}/`});
+		}
+	});
 }
 
 setInterval(realoadAll, REVIEWERS_LIST_REFRESH);
@@ -292,7 +292,7 @@ function handleUserDefinedHosts() {
 		let uhosts = userhosts.user_defined_hosts || [];
 		if (uhosts.length > 0) {
 			//
-            for (let host of uhosts) {
+			for (let host of uhosts) {
 				if (!(host in listsOfUserDefinedHostsRegexp)) {
 					listsOfUserDefinedHostsRegexp[host] = formatHosts(host)
 				}
