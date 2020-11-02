@@ -2,16 +2,10 @@ document.getElementById('save_user_hosts').addEventListener('click', (event) => 
 
 	let hostsTextarea = document.getElementById('user_defined_hosts');
 	let hosts = hostsTextarea.value.
-		replace(/,/g, ' ').
-		replace(/;/g, ' ').
-		replace(/\t+/g, ' ').
-		replace(/\r+/g, ' ').
-		replace(/\n+/g, ' ').
+		replace(/[,;\r\n\t]+/g, ' ').
 		trim().
 		split(' ').
-		filter(host => {
-			return !!host; // This removes empty hosts
-		});
+		filter(Boolean);
 
 	if (hosts.length > 0) {
 		chrome.storage.sync.get('user_defined_hosts', oldhosts => {
