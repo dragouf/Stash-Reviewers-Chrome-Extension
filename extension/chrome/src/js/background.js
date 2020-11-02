@@ -74,7 +74,7 @@ const reloadTemplate = function() {
 	extensionStorage.loadTemplateUrl()
 		.then(extensionStorage.loadTemplateFromUrl)
 		.then(template => {
-			return extensionStorage.saveTemplate(template.join('\n'));
+			return template && extensionStorage.saveTemplate(template.join('\n'));
 		})
 		.then(() => console.info('Template updated'))
 		.catch(error => {
@@ -174,8 +174,8 @@ function retrieveActivities() {
 
 		Promise.all([reviewersPromised, authorPromised]).then(function([reviewersResult, authorResult]) {
 			if (reviewersResult.errors) { throw reviewersResult.errors }
-			if (authorResult.errors) { throw authorResult.errors }
-			const allPR = reviewersResult.concat(authorResult)
+            if (authorResult.errors) { throw authorResult.errors }
+			const allPR = reviewersResult.values.concat(authorResult.values);
 			let activities;
 			const requests = [];
 			// loop through PRs and request activities
@@ -247,11 +247,15 @@ function pingAllExistingTabs() {
 
 
 // Click on extension icon
-chrome.browserAction.onClicked.addListener(function() {
-	chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
-		chrome.tabs.create({'url': `${items.currentStashBaseUrl}/`});
-	});
-});
+chrome.browserAction.onClicked.addListener(handleExtensionClick);
+
+function handleExtensionClick() {
+    chrome.storage.local.get(['currentStashBaseUrl'], function(items) {
+        if (items.currentStashBaseUrl) {
+            chrome.tabs.create({'url': `${items.currentStashBaseUrl}/`});
+        }
+    });
+}
 
 setInterval(realoadAll, REVIEWERS_LIST_REFRESH);
 realoadAll();
@@ -287,8 +291,8 @@ function handleUserDefinedHosts() {
 	chrome.storage.sync.get('user_defined_hosts', userhosts => {
 		let uhosts = userhosts.user_defined_hosts || [];
 		if (uhosts.length > 0) {
-			// 
-			for (let host of uhosts) {
+			//
+            for (let host of uhosts) {
 				if (!(host in listsOfUserDefinedHostsRegexp)) {
 					listsOfUserDefinedHostsRegexp[host] = formatHosts(host)
 				}

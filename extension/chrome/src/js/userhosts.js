@@ -1,27 +1,35 @@
 document.getElementById('save_user_hosts').addEventListener('click', (event) => {
-	
-	let hostsButton = document.getElementById('user_defined_hosts'),
-		hosts = hostsButton.value.
+
+    let hostsTextarea = document.getElementById('user_defined_hosts');
+    let hosts = hostsTextarea.value.
 		replace(/,/g, ' ').
 		replace(/;/g, ' ').
-		replace(/\r/g, ' ').
-		replace(/\t/g, ' ').
-		replace(/\n/g, ' ').
-		split(' ');
+		replace(/\t+/g, ' ').
+		replace(/\r+/g, ' ').
+        replace(/\n+/g, ' ').
+        trim().
+        split(' ').
+        filter(host => {
+            return !!host; // This removes empty hosts
+        });
 
-	let fhosts = [];
-
-	for(let host of hosts){
-		if (host != "") {
-			fhosts.push(host)
-		}
-	}
-	hosts = fhosts
 	if (hosts.length > 0) {
 		chrome.storage.sync.get('user_defined_hosts', oldhosts => {
-			chrome.storage.sync.set({'user_defined_hosts': (oldhosts.user_defined_hosts || []).concat(hosts)})
-			chrome.extension.getBackgroundPage().handleUserDefinedHosts()
+            let uniqueHosts = [...new Set(hosts)];
+            chrome.storage.sync.set({'user_defined_hosts': uniqueHosts});
+            populateTextArea();
+			chrome.extension.getBackgroundPage().handleUserDefinedHosts();
 		});
-		hostsButton.value = ''	
 	}
-})
+});
+
+populateTextArea();
+chrome.extension.getBackgroundPage().handleExtensionClick();
+
+function populateTextArea() {
+    let hostsTextarea = document.getElementById('user_defined_hosts');
+    chrome.storage.sync.get('user_defined_hosts', oldhost => {
+        hostsTextarea.value = [...new Set(oldhost.user_defined_hosts)].join("\r\n");
+    });
+}
+
